@@ -1,9 +1,38 @@
 cmake_minimum_required(VERSION 3.15)
 project(BlockFall)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
-add_executable(BlockFall source/main.cpp)
+file(GLOB_RECURSE PROJECT_SOURCES
+    source/*.cpp
+    source/AssetManagers/*.cpp
+    source/Config/*.cpp
+    source/Input/*.cpp
+    source/Entities/*.cpp
+    source/Game/*.cpp
+)
+
+file(GLOB_RECURSE PROJECT_HEADERS
+    source/*.h
+    source/AssetManagers/*.h
+    source/Config/*.h
+    source/Input/*.h
+    source/Entities/*.h
+    source/Game/*.h
+)
+
+add_executable(BlockFall ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+
+target_include_directories(BlockFall PRIVATE
+    ${CMAKE_SOURCE_DIR}/source/AssetManagers
+    ${CMAKE_SOURCE_DIR}/source/Config
+    ${CMAKE_SOURCE_DIR}/source/Input
+    ${CMAKE_SOURCE_DIR}/source/Entities
+    ${CMAKE_SOURCE_DIR}/source/Game
+)
+
 
 # ---------------------------------------------------------
 # Create a default config.json if missing
@@ -143,4 +172,13 @@ add_custom_command(TARGET BlockFall POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/config.json"
         $<TARGET_FILE_DIR:BlockFall>
+)
+
+# ---------------------------------------------------------
+# Copy assets folder after build
+# ---------------------------------------------------------
+add_custom_command(TARGET BlockFall POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/assets"
+        $<TARGET_FILE_DIR:BlockFall>/assets
 )
