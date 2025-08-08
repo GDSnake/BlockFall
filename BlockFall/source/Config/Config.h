@@ -10,6 +10,7 @@ struct ConfigData {
     int height = 600;
     bool fullscreen = false;
     bool hasError = false;
+    std::string bgmPath = "";
 };
 
 inline std::string getConfigFilePath(const char* path) {
@@ -54,6 +55,7 @@ public:
         cfg.width = data["window"]["width"];
         cfg.height = data["window"]["height"];
         cfg.fullscreen = data["window"]["fullscreen"];
+        cfg.bgmPath = data["sound"]["bgm"];
         _data = cfg;
     }
 private:

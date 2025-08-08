@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "AudioManager.h"
 #include "../Config/Config.h"
 
 Game::Game()
@@ -36,6 +37,9 @@ bool Game::init()
     _isRunning = true;
 
     //_currentScene = std::make_unique<GameScene>(_renderer);
+
+    // Initialize AudioManager
+    _audioManager = std::make_unique<AudioManager>(Config::getInstance().getConfigData().bgmPath);
 
     _lastTime = SDL_GetTicks();
     return true;

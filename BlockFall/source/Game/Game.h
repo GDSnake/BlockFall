@@ -2,6 +2,7 @@
 #include <SDL3/SDL.h>
 
 class Scene;
+class AudioManager;
 
 class Game
 {
@@ -23,6 +24,7 @@ private:
 	bool _isRunning = false;
 
 	//std::unique_ptr<Scene> _currentScene;
+	std::unique_ptr<AudioManager> _audioManager;
 
 	Uint64 _lastTime = 0;
 	float _deltaTime = 0.0f;
