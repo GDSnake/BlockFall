@@ -21,11 +21,11 @@ file(GLOB_RECURSE PROJECT_HEADERS
     source/Game/*.h
 )
 
-add_executable(BlockFall ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
-target_include_directories(BlockFall PRIVATE
+target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/source/AssetManagers
     ${CMAKE_SOURCE_DIR}/source/Config
     ${CMAKE_SOURCE_DIR}/source/Input
@@ -57,7 +57,7 @@ set(JSON_LOCAL_PATH "${CMAKE_SOURCE_DIR}/libs/JSON/include/nlohmann/json.hpp")
 
 if (EXISTS ${JSON_LOCAL_PATH})
     message(STATUS "Using local nlohmann/json.hpp")
-    target_include_directories(BlockFall PRIVATE ${CMAKE_SOURCE_DIR}/libs/JSON/include)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/JSON/include)
 else()
     message(STATUS "Downloading nlohmann/json ...")
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/libs/JSON)
@@ -69,7 +69,7 @@ else()
     )
     FetchContent_MakeAvailable(json)
     file(COPY ${json_SOURCE_DIR}/include DESTINATION ${CMAKE_SOURCE_DIR}/libs/JSON)
-    target_include_directories(BlockFall PRIVATE ${CMAKE_SOURCE_DIR}/libs/JSON/include)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/JSON/include)
 endif()
 
 # ---------------------------------------------------------
@@ -129,6 +129,68 @@ else()
 endif()
 
 # ---------------------------------------------------------
+# SDL3_mixer Setup (download if missing)
+# ---------------------------------------------------------
+ set(SDL3_MIXER_DIR "${CMAKE_SOURCE_DIR}/libs/SDL3")
+
+ if (EXISTS "${SDL3_MIXER_DIR}/include/SDL3/SDL_mixer.h")
+     message(STATUS "Using local SDL3_mixer at ${SDL2_MIXER_DIR}")
+ endif()
+# else()
+#     message(STATUS "Downloading SDL2_mixer precompiled binaries ...")
+#     file(MAKE_DIRECTORY ${SDL2_MIXER_DIR})
+
+
+#     if (WIN32)
+#         set(SDL2_MIXER_URL https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-devel-2.8.1-VC.zip)
+#     else()
+#         set(SDL2_MIXER_URL https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-2.8.1.tar.gz)
+#     endif()
+
+#     FetchContent_Declare(
+#         SDL2_mixer
+#         URL ${SDL2_MIXER_URL}
+#         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+#     )
+    
+#     set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
+
+#     FetchContent_Declare(
+#         SDL2_mixer
+#         URL ${SDL2_MIXER_URL}
+#         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+#     )
+#     FetchContent_MakeAvailable(SDL2_mixer)
+
+#     message(STATUS "SDL2_mixer downloaded to: ${sdl2_mixer_SOURCE_DIR}")
+
+#     # Recursively find include/SDL2/SDL_mixer.h
+#     file(GLOB_RECURSE MIXER_HEADER_PATH "${sdl2_mixer_SOURCE_DIR}/include/SDL_mixer.h")
+
+#     if (NOT MIXER_HEADER_PATH)
+#         message(FATAL_ERROR "SDL2_mixer extraction failed: include/SDL3/SDL_mixer.h not found.")
+#     endif()
+
+#     # Get directory that contains include
+#     get_filename_component(MIXER_INCLUDE_DIR "${MIXER_HEADER_PATH}" DIRECTORY)
+#     while(NOT "${MIXER_INCLUDE_DIR}" STREQUAL "${sdl2_mixer_SOURCE_DIR}")
+#         if (EXISTS "${MIXER_INCLUDE_DIR}/include/SDL3/SDL_mixer.h")
+#             break()
+#         endif()
+#         get_filename_component(MIXER_INCLUDE_DIR "${MIXER_INCLUDE_DIR}" DIRECTORY)
+#     endwhile()
+
+#     message(STATUS "Found SDL2_mixer extracted in: ${MIXER_INCLUDE_DIR}")
+
+# file(COPY "${MIXER_INCLUDE_DIR}/include/SDL_mixer.h" DESTINATION "${SDL3_DIR}/include/SDL3")    if (EXISTS "${MIXER_INCLUDE_DIR}/lib")
+#         file(COPY "${MIXER_INCLUDE_DIR}/lib" DESTINATION "${SDL2_MIXER_DIR}")
+#     endif()
+#     if (EXISTS "${MIXER_INCLUDE_DIR}/bin")
+#         file(COPY "${MIXER_INCLUDE_DIR}/bin" DESTINATION "${SDL2_MIXER_DIR}")
+#     endif()
+# endif()
+
+# ---------------------------------------------------------
 # SDL3 Linking
 # ---------------------------------------------------------
 if (WIN32)
@@ -142,8 +204,8 @@ if (WIN32)
 
     set(SDL3_LIB_DIR "${SDL3_DIR}/lib/${ARCH_DIR}")
 
-    target_link_directories(BlockFall PRIVATE ${SDL3_LIB_DIR})
-    target_link_libraries(BlockFall PRIVATE SDL3)
+    target_link_directories(${PROJECT_NAME} PRIVATE ${SDL3_LIB_DIR})
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3)
 
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(SDL_DLL "SDL3d.dll")
@@ -155,30 +217,42 @@ if (WIN32)
         set(SDL_DLL "SDL3.dll")
     endif()
 
-    add_custom_command(TARGET BlockFall POST_BUILD
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "${SDL3_LIB_DIR}/${SDL_DLL}"
-            $<TARGET_FILE_DIR:BlockFall>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
     )
 else()
     find_package(SDL3 REQUIRED CONFIG)
-    target_link_libraries(BlockFall PRIVATE SDL3::SDL3)
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
 endif()
+
+set(SDL3_MIXER_LIB_DIR "${SDL3_DIR}/lib/${ARCH_DIR}")
+
+
+target_include_directories(BlockFall PRIVATE ${SDL3_MIXER_DIR}/include)
+target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_mixer)
+
+add_custom_command(TARGET BlockFall POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${SDL3_MIXER_LIB_DIR}/SDL3_mixer.dll"
+        $<TARGET_FILE_DIR:BlockFall>
+)
 
 # ---------------------------------------------------------
 # Copy config.json after build
 # ---------------------------------------------------------
-add_custom_command(TARGET BlockFall POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/config.json"
-        $<TARGET_FILE_DIR:BlockFall>
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
 
 # ---------------------------------------------------------
 # Copy assets folder after build
 # ---------------------------------------------------------
-add_custom_command(TARGET BlockFall POST_BUILD
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/assets"
-        $<TARGET_FILE_DIR:BlockFall>/assets
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets
 )
