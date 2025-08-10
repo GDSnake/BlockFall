@@ -11,6 +11,8 @@ struct ConfigData {
     bool fullscreen = false;
     bool hasError = false;
     std::string bgmPath = "";
+    std::string logoPath = "";
+    std::string blocksFolder = "";
 };
 
 inline std::string getConfigFilePath(const char* path) {
@@ -56,6 +58,8 @@ public:
         cfg.height = data["window"]["height"];
         cfg.fullscreen = data["window"]["fullscreen"];
         cfg.bgmPath = data["sound"]["bgm"];
+        cfg.logoPath = data["images"]["logo"];
+        cfg.blocksFolder = data["images"]["blocksFolder"];
         _data = cfg;
     }
 private:

@@ -7,5 +7,9 @@
   },
   "sound": {
     "bgm": "./assets/Sound/BGM.mp3"
+  },
+  "images": {
+    "logo": "../assets/Sprites/logo.png",
+    "blocksFolder": "../assets/Sprites/Blocks"
   }
 }

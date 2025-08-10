@@ -1,5 +1,5 @@
 #include <memory>
-#include <SDL3/SDL.h>
+#include <SDL3/SDL_stdinc.h>
 
 class Scene;
 class AudioManager;
@@ -17,10 +17,7 @@ public:
 private:
 	void handleEvents();
 	void update(float dt);
-	void render();
 
-	SDL_Window* _window = nullptr;
-	SDL_Renderer* _renderer = nullptr;
 	bool _isRunning = false;
 
 	//std::unique_ptr<Scene> _currentScene;
