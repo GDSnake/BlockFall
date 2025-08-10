@@ -28,6 +28,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/source/AssetManagers
     ${CMAKE_SOURCE_DIR}/source/Config
+    ${CMAKE_SOURCE_DIR}/source/Core
     ${CMAKE_SOURCE_DIR}/source/Input
     ${CMAKE_SOURCE_DIR}/source/Entities
     ${CMAKE_SOURCE_DIR}/source/Game
@@ -126,6 +127,63 @@ else()
     if (EXISTS "${SDL3_COPY_DIR}/bin")
         file(COPY "${SDL3_COPY_DIR}/bin" DESTINATION "${SDL3_DIR}")
     endif()
+endif()
+
+# ---------------------------------------------------------
+# SDL3_image Setup (download if missing)
+# ---------------------------------------------------------
+
+if (WIN32)
+    set(SDL3_IMAGE_URL https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-devel-3.2.4-VC.zip)
+else()
+    set(SDL3_IMAGE_URL https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz)
+endif()
+
+set(SDL3_IMAGE_DIR "${CMAKE_SOURCE_DIR}/libs/SDL3_image")
+
+if (EXISTS "${SDL3_IMAGE_DIR}/include/SDL3/SDL_image.h")
+    message(STATUS "Using local SDL3_image at ${SDL3_IMAGE_DIR}")
+else()
+    message(STATUS "Downloading SDL3_image precompiled binaries ...")
+
+    FetchContent_Declare(
+        SDL3_image
+        URL ${SDL3_IMAGE_URL}
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    )
+    FetchContent_Populate(SDL3_image)
+
+    # Copy includes and libs into project libs folder
+    file(MAKE_DIRECTORY ${SDL3_IMAGE_DIR})
+    file(COPY "${sdl3_image_SOURCE_DIR}/include" DESTINATION "${SDL3_IMAGE_DIR}")
+    if (EXISTS "${sdl3_image_SOURCE_DIR}/lib")
+        file(COPY "${sdl3_image_SOURCE_DIR}/lib" DESTINATION "${SDL3_IMAGE_DIR}")
+    endif()
+    if (EXISTS "${sdl3_image_SOURCE_DIR}/bin")
+        file(COPY "${sdl3_image_SOURCE_DIR}/bin" DESTINATION "${SDL3_IMAGE_DIR}")
+    endif()
+endif()
+
+# Include & link SDL3_image
+target_include_directories(${PROJECT_NAME} PRIVATE ${SDL3_IMAGE_DIR}/include)
+
+if (WIN32)
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SDL3_IMAGE_LIB_DIR "${SDL3_IMAGE_DIR}/lib/x64")
+    else()
+        set(SDL3_IMAGE_LIB_DIR "${SDL3_IMAGE_DIR}/lib/x86")
+    endif()
+
+    target_link_directories(${PROJECT_NAME} PRIVATE ${SDL3_IMAGE_LIB_DIR})
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_image)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL3_IMAGE_LIB_DIR}/SDL3_image.dll"
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_image)
 endif()
 
 # ---------------------------------------------------------
