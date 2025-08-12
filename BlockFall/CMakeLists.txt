@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 project(BlockFall)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -34,7 +37,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/source/Game
 )
 
+target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
+if (WIN32)
+	target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE /UUNICODE /U_UNICODE)
+endif()
 # ---------------------------------------------------------
 # Create a default config.json if missing
 # ---------------------------------------------------------
