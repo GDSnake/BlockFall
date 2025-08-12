@@ -6,12 +6,14 @@
 class Block
 {
 public:
-    using TexturePtr = std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)>;
     Block() = delete;
     Block(const std::string& filePath);
 
     ~Block();
-protected:
-    SDL_Rect _sourceRect;
-    TexturePtr _sprite;
+
+    std::shared_ptr<SDL_Texture> getSprite() const;
+    const SDL_FRect& getSourceRect() const;
+private:
+    SDL_FRect _sourceRect;
+    std::shared_ptr<SDL_Texture> _sprite;
 };

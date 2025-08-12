@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <memory>
 #include <SDL3/SDL_render.h>
 
 struct SDL_Window;
@@ -7,6 +7,8 @@ struct SDL_Renderer;
 struct SDL_Surface;
 struct SDL_Texture;
 struct SDL_Rect;
+class Scene;
+class Block;
 
 /*Renderer Class
 *Holds all information dealing with graphics for the game
@@ -20,21 +22,10 @@ public:
 		return instance;
 	}
 
-	/*SDL_Surface* loadImage
-	* Loads and returns image surface.
-	*/
-	SDL_Surface* loadImage(const std::string& filePath); // Move to sprite manager
+	void drawBlock(std::shared_ptr<Block> block, const SDL_FRect& destinationRectange);
 
-	/*void blitSurface
-	* Draws a texture to a certain part of the screen
-	*/
-	void blitSurface(SDL_Texture* source, const SDL_FRect* sourceRectangle, const SDL_FRect* destinationRectangle);
-
-	/*void draw
-	* Renders everything to the screen
-	*/
-	void draw();
-
+	void present();
+	//void drawBoard();
 	/* void clear
 	* Clears the screen
 	*/
@@ -51,6 +42,11 @@ public:
 private:
 	Renderer();
 	~Renderer();
+
+	/*void blitSurface
+    * Draws a texture to a certain part of the screen
+    */
+	void blitSurface(SDL_Texture* source, const SDL_FRect* sourceRectangle, const SDL_FRect* destinationRectangle);
 
 	SDL_Window* _window = nullptr;
 	SDL_Renderer* _renderer = nullptr;

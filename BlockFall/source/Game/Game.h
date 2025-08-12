@@ -1,13 +1,14 @@
+#pragma once
+
 #include <memory>
 #include <SDL3/SDL_stdinc.h>
-
-class Scene;
-class AudioManager;
+#include "Scenes/GameScene.h"
+#include "AudioManager.h"
 
 class Game
 {
 public:
-	Game();
+	Game() = default;
 	~Game();
 
 	bool init();
@@ -22,7 +23,9 @@ private:
 
 	//std::unique_ptr<Scene> _currentScene;
 	std::unique_ptr<AudioManager> _audioManager;
+	//std::unique_ptr<SpriteManager> _spriteManager;
 
 	Uint64 _lastTime = 0;
 	float _deltaTime = 0.0f;
+	std::unique_ptr<GameScene> _scene;
 };

@@ -4,13 +4,9 @@
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_timer.h>
 
-#include "AudioManager.h"
+#include "SpriteManager.h"
 #include "Renderer.h"
-#include "../Config/Config.h"
-
-Game::Game()
-{
-}
+#include "Config.h"
 
 Game::~Game()
 {
@@ -24,11 +20,12 @@ bool Game::init()
         SDL_Log("SDL Init Error: %s \n",SDL_GetError());
         return false;
     }
-    Renderer::getInstance();
+    _scene = std::make_unique<GameScene>();
     _isRunning = true;
+    
 
     // Initialize AudioManager
-    _audioManager = std::make_unique<AudioManager>(Config::getInstance().getConfigData().bgmPath);
+    _audioManager = std::make_unique<AudioManager>(Config::getInstance().getConfigData().bgmPath); // Maybe also be a Singleton
 
     _lastTime = SDL_GetTicks();
     return true;
@@ -44,7 +41,7 @@ void Game::run()
 
         handleEvents();
         update(_deltaTime);
-        Renderer::getInstance().draw();
+        _scene->render();
     }
 }
 
@@ -63,8 +60,8 @@ void Game::handleEvents()
         if (event.type == SDL_EVENT_QUIT) {
             _isRunning = false;
         }
-        //if (_currentScene)
-            //_currentScene->handleEvent(event);
+        //if (_scene)
+            //_scene->handleEvents(event);
     }
 }
 

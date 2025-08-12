@@ -4,6 +4,13 @@
 
 using json = nlohmann::json;
 
+namespace ConfigHelpers
+{
+    static std::string getFullPath(const std::string& filePath) {
+        return (std::filesystem::path(RESOURCES_PATH) / filePath).string();
+    }
+}
+
 struct ConfigData {
     std::string title = "";
     int width = 800;
