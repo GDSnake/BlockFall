@@ -41,7 +41,6 @@ void Game::run()
 
         handleEvents();
         update(_deltaTime);
-        _scene->render();
     }
 }
 
@@ -67,5 +66,6 @@ void Game::handleEvents()
 
 void Game::update(float dt)
 {
+    _scene->update(dt);
 }
 

@@ -45,22 +45,61 @@ void Renderer::blitSurface(SDL_Texture* texture, const SDL_FRect* sourceRectangl
 
 }
 
+void Renderer::drawPiece(std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin)
+{
+    for (int i = 0; i < pieceBlocks.max_size(); ++i)
+    {
+        if (!pieceBlocks[i])
+        {
+            continue;
+        }
+        float xx = ((i%4) * squareSize) + origin.x + paddingBetweenBlocks;
+        float yy = ((i/4) * squareSize) + +origin.y + paddingBetweenBlocks;
+        SDL_FRect destinationRectange {xx, yy ,squareSize, squareSize};
+        
+
+        drawBlock(pieceBlocks[i], destinationRectange);
+    }
+}
+
 void Renderer::drawBlock(std::shared_ptr<Block> block, const SDL_FRect& destinationRectange)
 {
-    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
 
-    //if (_currentScene)
-        //_currentScene->render();
     // Test Code
-    //SDL_Surface* tempSurface = SpriteManagerHelpers::loadImage(std::string(ConfigHelpers::getFullPath(Config::getInstance().getConfigData().blocksFolder) + "/BlockYellow.png"));
-    //SDL_Texture* sprite = SDL_CreateTextureFromSurface(getRenderer(), tempSurface);
-    if (!block.get()) {
+    if (!block) {
         std::cout << "Error: Unable to load image\n";
     }
     
-    blitSurface(block.get()->getSprite().get(), &block.get()->getSourceRect(), &destinationRectange);
+    blitSurface(block->getSprite().get(), &block->getSourceRect(), &destinationRectange);
     // End Test
-    //SDL_DestroyTexture(sprite);
+}
+
+void Renderer::drawBoard()
+{
+
+
+    static SDL_FRect lineArray[30];
+
+    for (int i = 0; i < 30; ++i)
+    {
+        float thickness = 5;
+        SDL_FRect rect;
+        if (i < 10)
+        {
+            rect = { (i * 25.0f)+50, 50, thickness, 480 };
+        }
+        else
+        {
+            rect = { 50.0f, ((i-10) * 25.0f) + 50, 225, thickness };
+        }
+        lineArray[i] = rect;
+    }
+
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_RenderFillRects(_renderer, lineArray, 30);
+    SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
+
 }
 
 void Renderer::present()

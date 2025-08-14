@@ -1,18 +1,24 @@
 #pragma once
-#include <string>
+
 #include <vector>
 
-#include "Block.h"
 #include "Piece.h"
 
-constexpr int rows = 20;
-constexpr int columns = 10;
+static constexpr size_t rows = 20;
+static constexpr size_t columns = 10;
 
 constexpr size_t boardSize = rows * columns;
 
 struct Board
 {
-private:
-    std::array<Block, boardSize> _board;
+    inline void updateBoard(const std::vector<std::tuple<int, std::shared_ptr<Block>>>& updateBlocks)
+    {
+        for (auto blockTuple : updateBlocks)
+        {
+            _board[std::get<0>(blockTuple)] = std::get<1>(blockTuple);
+        }
+    }
+
+    std::array<std::shared_ptr<Block>, boardSize> _board;
 };
 

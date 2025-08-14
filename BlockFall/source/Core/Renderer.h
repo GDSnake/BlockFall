@@ -2,6 +2,8 @@
 #include <memory>
 #include <SDL3/SDL_render.h>
 
+#include "Piece.h"
+
 struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Surface;
@@ -22,10 +24,12 @@ public:
 		return instance;
 	}
 
+	void drawPiece(std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
 	void drawBlock(std::shared_ptr<Block> block, const SDL_FRect& destinationRectange);
+	void drawBoard();
 
 	void present();
-	//void drawBoard();
+	
 	/* void clear
 	* Clears the screen
 	*/

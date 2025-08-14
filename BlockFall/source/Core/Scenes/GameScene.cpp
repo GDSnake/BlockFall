@@ -1,7 +1,7 @@
 #include "GameScene.h"
 
-#include "Block.h"
 #include "Renderer.h"
+#include "Piece.h"
 #include "SpriteManager.h"
 
 GameScene::GameScene()
@@ -23,24 +23,28 @@ void GameScene::handleInput()
 {
 }
 
-void GameScene::update(float deltaTime)
+void GameScene::update(float dt)
 {
+    render();
 }
 
 void GameScene::render()
 {
     Renderer::getInstance().clear();
-    for (int i = 0; i < static_cast<int>(BlockTypes::Total); ++i)
+    for (int i = 0; i < (static_cast<int>(PieceShapes::Total)*2); ++i)
     {
-        auto block = SpriteManager::getInstance().getBlock(static_cast<BlockTypes>(i));
         //Test Block
-        float first = i < 4 ? (float)i * 192.0 : (float)(i-4) * 192.0;
-        float second = (i / 4) * 192.0;
-
-        SDL_FRect destination = {first, second, 192, 192};
-        Renderer::getInstance().drawBlock(block, destination);
+        Piece piece = Piece(static_cast<PieceShapes>(i% static_cast<int>(PieceShapes::Total)));
+        auto pieceBlocks = piece.getPiece();
+        float squareSize = 23.0f;
+        float padding = 2.0f;
+        float initialPadding = 50.0f;
+        float yy = 0 + initialPadding * i;
+        SDL_FPoint origin = {50.0f,yy};
+        Renderer::getInstance().drawPiece(pieceBlocks, squareSize,padding,origin);
         //End Test Block
     }
+    //Renderer::getInstance().drawBoard();
     Renderer::getInstance().present();
 }
 
