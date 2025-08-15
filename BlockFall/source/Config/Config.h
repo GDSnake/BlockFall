@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -17,6 +18,7 @@ struct ConfigData {
     int height = 600;
     bool fullscreen = false;
     bool hasError = false;
+    bool drawGrid = false;
     std::string bgmPath = "";
     std::string logoPath = "";
     std::string blocksFolder = "";
@@ -52,7 +54,7 @@ public:
         std::ifstream file(filePath);
         if (!file)
         {
-            std::cerr << "Cannot load Config File." << std::endl;
+            std::cerr << "Cannot load Config File.\n";
             ConfigData errorConfig;
             errorConfig.hasError = true;
             _data = errorConfig;
@@ -67,6 +69,7 @@ public:
         cfg.bgmPath = data["sound"]["bgm"];
         cfg.logoPath = data["images"]["logo"];
         cfg.blocksFolder = data["images"]["blocksFolder"];
+        cfg.drawGrid = data["game"]["drawGrid"];
         _data = cfg;
     }
 private:

@@ -9,7 +9,7 @@ public:
     Block() = delete;
     Block(const std::string& filePath);
 
-    ~Block();
+    ~Block() = default;
 
     std::shared_ptr<SDL_Texture> getSprite() const;
     const SDL_FRect& getSourceRect() const;

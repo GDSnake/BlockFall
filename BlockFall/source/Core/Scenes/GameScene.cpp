@@ -1,13 +1,10 @@
 #include "GameScene.h"
 
+#include "Config.h"
 #include "Renderer.h"
 #include "Piece.h"
 #include "SpriteManager.h"
 
-GameScene::GameScene()
-{
-    
-}
 
 GameScene::~GameScene()
 {
@@ -17,6 +14,8 @@ void GameScene::init()
 {
     SpriteManager::getInstance();
     Renderer::getInstance();
+    _board = std::make_unique<Board>();
+    _board->updateBoardDimensions();
 }
 
 void GameScene::handleInput()
@@ -31,6 +30,8 @@ void GameScene::update(float dt)
 void GameScene::render()
 {
     Renderer::getInstance().clear();
+    SDL_SetRenderDrawColor(Renderer::getInstance().getRenderer(), 255, 255, 255, 255);
+
     for (int i = 0; i < (static_cast<int>(PieceShapes::Total)*2); ++i)
     {
         //Test Block
@@ -44,8 +45,10 @@ void GameScene::render()
         Renderer::getInstance().drawPiece(pieceBlocks, squareSize,padding,origin);
         //End Test Block
     }
-    //Renderer::getInstance().drawBoard();
-    Renderer::getInstance().present();
+    if (_board) {
+        Renderer::getInstance().drawBoard(*_board);
+    }
+        Renderer::getInstance().present();
 }
 
 void GameScene::cleanup()

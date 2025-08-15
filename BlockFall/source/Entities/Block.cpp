@@ -9,15 +9,12 @@ Block::Block(const std::string& filePath) : _sprite(nullptr, SDL_DestroyTexture)
     _sourceRect = {0,0,192,192};
     SDL_Surface* tempSurface = IMG_Load(filePath.c_str());
     auto texture = SDL_CreateTextureFromSurface(Renderer::getInstance().getRenderer(), tempSurface);
+    SDL_DestroySurface(tempSurface);
     if (!texture)
     {
         throw std::runtime_error(std::string("Error loading the texture %s", SDL_GetError()));
     }
-    _sprite.reset(texture);
-}
-
-Block::~Block()
-{
+    _sprite = std::shared_ptr<SDL_Texture>(texture, SDL_DestroyTexture);
 }
 
 std::shared_ptr<SDL_Texture> Block::getSprite() const

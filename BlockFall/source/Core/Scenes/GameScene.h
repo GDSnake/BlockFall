@@ -1,11 +1,13 @@
 #pragma once
-#include "Scene.h"
+#include <memory>
 
+#include "Scene.h"
+#include "Board.h"
 
 class GameScene : public Scene
 {
 public:
-    GameScene();
+    GameScene() = default;
     ~GameScene() override;
 
 
@@ -18,4 +20,6 @@ public:
 
 private:
     void render() override;
+
+    std::unique_ptr<Board> _board;
 };

@@ -21,6 +21,7 @@ bool Game::init()
         return false;
     }
     _scene = std::make_unique<GameScene>();
+    _scene->init();
     _isRunning = true;
     
 

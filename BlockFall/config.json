@@ -11,5 +11,8 @@
   "images": {
     "logo": "Sprites/logo.png",
     "blocksFolder": "Sprites/Blocks"
+  },
+  "game":{
+    "drawGrid": true
   }
 }

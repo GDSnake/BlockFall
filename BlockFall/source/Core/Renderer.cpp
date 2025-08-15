@@ -4,6 +4,7 @@
 #include <SDL3/SDL3_image/SDL_image.h>
 
 #include "Block.h"
+#include "Board.h"
 #include "Config.h"
 #include "SpriteManager.h"
 
@@ -75,29 +76,50 @@ void Renderer::drawBlock(std::shared_ptr<Block> block, const SDL_FRect& destinat
     // End Test
 }
 
-void Renderer::drawBoard()
+
+void Renderer::drawBoard(const Board& board)
 {
 
-
-    static SDL_FRect lineArray[30];
-
-    for (int i = 0; i < 30; ++i)
-    {
-        float thickness = 5;
-        SDL_FRect rect;
-        if (i < 10)
+    uint8_t columnsPlusBorder = BoardConsts::s_columns + 1;
+    uint8_t rowsPlusBorder = BoardConsts::s_rows + 1;
+    uint8_t totalLines = columnsPlusBorder + rowsPlusBorder;
+    static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1)> lineArray;
+    static bool initialized = false;
+    SDL_FPoint origin = board.getBoardOrigin();
+    if (!initialized) {
+        float cellSize = board.getCellSize();
+        for (uint8_t i = 0; i < totalLines; ++i)
         {
-            rect = { (i * 25.0f)+50, 50, thickness, 480 };
+            SDL_FRect rect;
+            if (i < BoardConsts::s_columns + 1)
+            {
+                rect = {
+                    .x = (static_cast<float>(i) * cellSize) + origin.x,
+                    .y = origin.y,
+                    .w = BoardConsts::s_lineThickness,
+                    .h = board.getBoardHeight()
+                };
+            }
+            else
+            {
+                rect = {
+                    .x = origin.x,
+                    .y = ((static_cast<float>(i) - static_cast<float>(columnsPlusBorder)) * cellSize) + origin.y,
+                    .w = board.getBoardWidth(),
+                    .h = BoardConsts::s_lineThickness
+                };
+            }
+            lineArray[i] = rect;
         }
-        else
-        {
-            rect = { 50.0f, ((i-10) * 25.0f) + 50, 225, thickness };
-        }
-        lineArray[i] = rect;
+        initialized = true;
     }
 
-    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderFillRects(_renderer, lineArray, 30);
+    if (Config::getInstance().getConfigData().drawGrid)
+    {
+        SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_RenderFillRects(_renderer, lineArray.data(), totalLines);
+    }
+    //Draw board->arrayBlocks
     SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
 
 }
