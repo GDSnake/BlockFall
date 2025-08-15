@@ -39,6 +39,7 @@ struct Board
     inline float getCellSize() const { return _cellSize; }
     inline float getBoardWidth() const { return BoardConsts::s_columns * (_cellSize + BoardConsts::s_lineThickness) - _cellSize;}
     inline float getBoardHeight() const { return BoardConsts::s_rows * (_cellSize + BoardConsts::s_lineThickness) - _cellSize * 2 - BoardConsts::s_lineThickness; }
+    inline SDL_FPoint getSpawnPoint() { return {(_boardTopLeftOrigin.x + getBoardWidth() * 0.5f) - (_cellSize*2) - BoardConsts::s_lineThickness , _boardTopLeftOrigin.y + _cellSize - BoardConsts::s_lineThickness}; }
 
 private:
     inline void updateCellSize()
