@@ -16,8 +16,8 @@ void GameScene::init()
 {
     SpriteManager::getInstance();
     Renderer::getInstance();
-    _board = std::make_unique<Board>();
-    _board->updateBoardDimensions();
+    _gameField = std::make_unique<GameField>();
+    _gameField->board->updateBoardDimensions();
 }
 
 void GameScene::handleInput()
@@ -32,7 +32,9 @@ void GameScene::update(float dt)
         std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
         PieceShapes randomShape = static_cast<PieceShapes>(dist(gen));
         _currentPiece = std::make_unique<Piece>(randomShape);
-        _currentPiecePosition = _board->getSpawnPoint();
+        _currentPiecePosition = _gameField->board->getSpawnPoint();
+        randomShape = static_cast<PieceShapes>(dist(gen));
+        _previewNextPiece = std::make_unique<Piece>(randomShape);
         _pieceFalling = true;
     }
     render();
@@ -59,11 +61,12 @@ void GameScene::render()
 
     auto pieceBlocks = _currentPiece->getPiece();
 
-    Renderer::getInstance().drawPiece(pieceBlocks, _board->getCellSize(), BoardConsts::s_lineThickness, _currentPiecePosition);
+    Renderer::getInstance().drawPiece(pieceBlocks, _gameField->board->getCellSize(), BoardConsts::s_lineThickness, _currentPiecePosition);
+    Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getPiece(), _gameField->previewWindowSize, BoardConsts::s_lineThickness, _gameField->previewZoneOrigin);
 
 
-    if (_board) {
-        Renderer::getInstance().drawBoard(*_board);
+    if (_gameField->board) {
+        Renderer::getInstance().drawBoard(*_gameField->board);
     }
         Renderer::getInstance().present();
 }

@@ -46,7 +46,7 @@ void Renderer::blitSurface(SDL_Texture* texture, const SDL_FRect* sourceRectangl
 
 }
 
-void Renderer::drawPiece(std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin)
+void Renderer::drawPiece(const std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin)
 {
     for (int i = 0; i < pieceBlocks.max_size(); ++i)
     {
@@ -54,25 +54,23 @@ void Renderer::drawPiece(std::array<std::shared_ptr<Block>, PieceConsts::maxPiec
         {
             continue;
         }
-        float xx = ((i%4) * squareSize) + origin.x + paddingBetweenBlocks;
-        float yy = ((i/4) * squareSize) + +origin.y + paddingBetweenBlocks;
-        SDL_FRect destinationRectange {xx, yy ,squareSize, squareSize};
+        float xx = ((static_cast<float>(i%4)) * squareSize) + origin.x + paddingBetweenBlocks;
+        float yy = ((static_cast<float>(i/4)) * squareSize) + +origin.y + paddingBetweenBlocks;
+        SDL_FRect destinationRectangle {xx, yy ,squareSize, squareSize};
         
 
-        drawBlock(pieceBlocks[i], destinationRectange);
+        drawBlock(pieceBlocks[i], destinationRectangle);
     }
 }
 
-void Renderer::drawBlock(std::shared_ptr<Block> block, const SDL_FRect& destinationRectange)
+void Renderer::drawBlock(std::shared_ptr<Block> block, const SDL_FRect& destinationRectangle)
 {
-    SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
-
     // Test Code
     if (!block) {
         std::cout << "Error: Unable to load image\n";
     }
     
-    blitSurface(block->getSprite().get(), &block->getSourceRect(), &destinationRectange);
+    blitSurface(block->getSprite().get(), &block->getSourceRect(), &destinationRectangle);
     // End Test
 }
 
@@ -120,8 +118,21 @@ void Renderer::drawBoard(const Board& board)
         SDL_RenderFillRects(_renderer, lineArray.data(), totalLines);
     }
     //Draw board->arrayBlocks
-    SDL_SetRenderDrawColor(_renderer, 255, 255, 255, 255);
+    SDL_SetRenderDrawColor(_renderer, 100, 82, 86, SDL_ALPHA_OPAQUE);
 
+}
+
+void Renderer::drawPreviewWindow(const std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float windowSize, float paddingBetweenBlocks, SDL_FPoint origin)
+{
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+    SDL_FRect rect = {
+        .x =origin.x,
+        .y = origin.y,
+        .w = windowSize,
+        .h =windowSize
+        };
+    SDL_RenderRect(_renderer, &rect);
+    drawPiece(pieceBlocks, windowSize * 0.2f, paddingBetweenBlocks, SDL_FPoint (origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
 }
 
 void Renderer::present()

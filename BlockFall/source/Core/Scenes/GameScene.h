@@ -3,7 +3,7 @@
 #include <random>
 
 #include "Scene.h"
-#include "Board.h"
+#include "GameField.h"
 
 class GameScene : public Scene
 {
@@ -22,8 +22,9 @@ public:
 private:
     void render() override;
 
-    std::unique_ptr<Board> _board;
+    std::unique_ptr<GameField> _gameField;
     std::unique_ptr<Piece> _currentPiece;
+    std::unique_ptr<Piece> _previewNextPiece;
     SDL_FPoint _currentPiecePosition;
     bool _pieceFalling = false;
     std::random_device _rd;

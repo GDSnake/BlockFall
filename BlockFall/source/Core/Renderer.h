@@ -25,10 +25,10 @@ public:
 		return instance;
 	}
 
-	void drawPiece(std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
-	void drawBlock(std::shared_ptr<Block> block, const SDL_FRect& destinationRectange);
+	void drawPiece(const std::array<std::shared_ptr<Block>, 8> pieceBlocks, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
+	void drawBlock(const std::shared_ptr<Block> block, const SDL_FRect& destinationRectangle);
 	void drawBoard(const Board& board);
-
+	void drawPreviewWindow(const std::array<std::shared_ptr<Block>, 8> pieceBlocks, float windowSize, float paddingBetweenBlocks, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
 	void present();
 	
 	/* void clear
