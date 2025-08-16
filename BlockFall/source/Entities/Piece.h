@@ -1,14 +1,15 @@
 #pragma once
 #include <array>
 #include <memory>
+#include <SDL3/SDL_rect.h>
 
 class Block;
 
 namespace PieceConsts
 {
     static constexpr int maxPieceArea = 8; // Biggest area is the I shape since spawns flat
-                                           //  | | | | |
                                            //  |X|X|X|X|
+                                           //  | | | | |
 }
 
 
@@ -32,6 +33,7 @@ public:
     ~Piece();
 
     std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> getPiece();
+    SDL_Point getPieceArea() const;
 private:
     void createI();
     void createJ();
@@ -40,5 +42,7 @@ private:
     void createS();
     void createZ();
     void createT();
+
     std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> _pieceBlocks;
+    SDL_Point _area;
 };

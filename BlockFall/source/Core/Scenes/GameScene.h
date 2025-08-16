@@ -25,7 +25,9 @@ private:
     std::unique_ptr<GameField> _gameField;
     std::unique_ptr<Piece> _currentPiece;
     std::unique_ptr<Piece> _previewNextPiece;
-    SDL_FPoint _currentPiecePosition;
+    SDL_Point _currentPiecePosition;
+    int currentLevel = 0;
+    float _currentPieceTimeToDrop;
     bool _pieceFalling = false;
     std::random_device _rd;
 };

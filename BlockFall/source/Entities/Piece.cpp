@@ -31,14 +31,15 @@ Piece::Piece(PieceShapes shape)
     }
 }
 
-//  | | | | |
 //  |X|X|X|X|
+//  | | | | |
 void Piece::createI()
 {
-    for (int i = 4; i < PieceConsts::maxPieceArea; ++i)
+    for (int i = 0; i < PieceConsts::maxPieceArea * 0.5f; ++i)
     {
         _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Cyan);
     }
+    _area = { 4, 1};
 }
 
 //  |X| | | |
@@ -50,6 +51,7 @@ void Piece::createJ()
     {
         _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Blue);
     }
+    _area = {3, 2};
 }
 
 //  | | |X| |
@@ -61,6 +63,7 @@ void Piece::createL()
     {
         _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Orange);
     }
+    _area = { 3, 2 };
 }
 
 //  |X|X| | |
@@ -75,6 +78,7 @@ void Piece::createO()
     {
         _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Yellow);
     }
+    _area = { 2, 2 };
 }
 
 //  | |X|X| |
@@ -89,6 +93,7 @@ void Piece::createS()
     {
         _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Green);
     }
+    _area = { 3, 2 };
 }
 
 //  |X|X| | |
@@ -103,6 +108,7 @@ void Piece::createZ()
     {
         _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Red);
     }
+    _area = { 3, 2 };
 }
 
 //  | |X| | |
@@ -114,6 +120,7 @@ void Piece::createT()
     {
         _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Purple);
     }
+    _area = { 3, 2 };
 }
 
 Piece::~Piece()
@@ -123,4 +130,9 @@ Piece::~Piece()
 std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> Piece::getPiece()
 {
     return _pieceBlocks;
+}
+
+SDL_Point Piece::getPieceArea() const
+{
+    return _area;
 }

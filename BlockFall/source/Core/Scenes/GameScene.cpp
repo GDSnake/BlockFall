@@ -30,13 +30,42 @@ void GameScene::update(float dt)
     {
         std::mt19937 gen(_rd());
         std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
+
+        if (_previewNextPiece)
+        {
+            _currentPiece = std::move(_previewNextPiece);
+        }
+        else
+        {
+            // First run: generate initial piece
+            PieceShapes randomShape = static_cast<PieceShapes>(dist(gen));
+            _currentPiece = std::make_unique<Piece>(randomShape);
+        }
         PieceShapes randomShape = static_cast<PieceShapes>(dist(gen));
-        _currentPiece = std::make_unique<Piece>(randomShape);
-        _currentPiecePosition = _gameField->board->getSpawnPoint();
-        randomShape = static_cast<PieceShapes>(dist(gen));
         _previewNextPiece = std::make_unique<Piece>(randomShape);
+
+        _currentPiecePosition = BoardConsts::s_spawnGridPosition;
         _pieceFalling = true;
+        _currentPieceTimeToDrop = 0.0f;
     }
+    else
+    {
+        _currentPieceTimeToDrop += dt;
+    }
+
+    if (_currentPieceTimeToDrop >= Config::getInstance().getConfigData().speedLevels[currentLevel])
+    {
+        if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
+        {
+            _currentPiecePosition.y += 1;
+            _currentPieceTimeToDrop = 0.0f;
+        }
+        else
+        {
+            _pieceFalling = false;
+        }
+    }
+
     render();
 }
 
@@ -61,7 +90,7 @@ void GameScene::render()
 
     auto pieceBlocks = _currentPiece->getPiece();
 
-    Renderer::getInstance().drawPiece(pieceBlocks, _gameField->board->getCellSize(), BoardConsts::s_lineThickness, _currentPiecePosition);
+    Renderer::getInstance().drawPiece(pieceBlocks, _gameField->board->getCellSize(), BoardConsts::s_lineThickness, _gameField->board->convertGridPointToPixel(_currentPiecePosition));
     Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getPiece(), _gameField->previewWindowSize, BoardConsts::s_lineThickness, _gameField->previewZoneOrigin);
 
 

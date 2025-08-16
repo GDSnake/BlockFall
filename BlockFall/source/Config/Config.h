@@ -4,7 +4,7 @@
 #include <fstream>
 
 using json = nlohmann::json;
-
+constexpr int speedLevelsNumber = 21;
 namespace ConfigHelpers
 {
     static std::string getFullPath(const std::string& filePath) {
@@ -22,6 +22,7 @@ struct ConfigData {
     std::string bgmPath = "";
     std::string logoPath = "";
     std::string blocksFolder = "";
+    std::array<float, speedLevelsNumber> speedLevels;
 };
 
 inline std::string getConfigFilePath(const char* path) {
@@ -70,6 +71,11 @@ public:
         cfg.logoPath = data["images"]["logo"];
         cfg.blocksFolder = data["images"]["blocksFolder"];
         cfg.drawGrid = data["game"]["drawGrid"];
+        auto arr = data["blockFallSpeedLevel"];
+        for (size_t i = 0; i < arr.size(); ++i) 
+        {
+            cfg.speedLevels[i] = arr[i].get<float>();
+        }
         _data = cfg;
     }
 private:
