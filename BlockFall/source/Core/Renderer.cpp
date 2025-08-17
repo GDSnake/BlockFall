@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
 #include <SDL3/SDL_render.h>
-#include <SDL3/SDL3_image/SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 
 #include "Block.h"
 #include "Board.h"

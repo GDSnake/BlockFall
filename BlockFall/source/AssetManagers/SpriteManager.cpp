@@ -2,7 +2,7 @@
 #include "Config.h"
 #include "Block.h"
 
-#include <SDL3/SDL3_image/SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 
 
 SDL_Surface* SpriteManagerHelpers::loadImage(const std::string& filePath)

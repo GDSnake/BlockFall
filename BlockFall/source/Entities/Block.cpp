@@ -2,7 +2,7 @@
 #include "Renderer.h"
 
 #include <stdexcept>
-#include <SDL3/SDL3_image/SDL_image.h>
+#include <SDL3_image/SDL_image.h>
 
 Block::Block(const std::string& filePath) : _sprite(nullptr, SDL_DestroyTexture)
 {
