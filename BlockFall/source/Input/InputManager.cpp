@@ -3,25 +3,9 @@
 #include <print>
 #include <ranges>
 
-void InputManager::processInput(const SDL_Event& event)
+void InputManager::handleEvent(const SDL_Event& event)
 {
-    for (auto& state : _keyStates | std::views::values)
-    {
-        std::println("Key: State: {}\n", (int)state);
-
-        if (state == KeyState::Pressed) state = KeyState::Held;
-        else if (state == KeyState::Released) state = KeyState::None;
-    }
-    for (auto& state : _mouseStates | std::views::values)
-    {
-        if (state == KeyState::Pressed) state = KeyState::Held;
-        else if (state == KeyState::Released) state = KeyState::None;
-    }
-    std::println("Event type: {}\n", event.type);
-
-
-    switch (event.type)
-    {
+    switch (event.type) {
     case SDL_EVENT_KEY_DOWN:
     case SDL_EVENT_KEY_UP:
         updateKeyState(event.key.scancode, event.key.down);
@@ -36,8 +20,35 @@ void InputManager::processInput(const SDL_Event& event)
         _mouseX = static_cast<int>(event.motion.x);
         _mouseY = static_cast<int>(event.motion.y);
         break;
+
+    case SDL_EVENT_QUIT:
+        _quit = true;
+        break;
     }
-    
+}
+
+void InputManager::update(float deltaTime)
+{
+    // Transition Pressed -> Held, Released -> None
+    for (auto& state : _keyStates | std::views::values) {
+        if (state == KeyState::Pressed) state = KeyState::Held;
+        else if (state == KeyState::Released) state = KeyState::None;
+    }
+    for (auto& state : _mouseStates | std::views::values) {
+        if (state == KeyState::Pressed) state = KeyState::Held;
+        else if (state == KeyState::Released) state = KeyState::None;
+    }
+
+    // advance DAS/ARR timers
+    for (auto& [key, data] : _keyCooldowns) {
+        auto state = _keyStates[key];
+        if (state == KeyState::Held) {
+            data.dasTimer += deltaTime;
+            if (data.dasTriggered) {
+                data.arrTimer += deltaTime;
+            }
+        }
+    }
 }
 
 bool InputManager::isKeyPressed(SDL_Scancode key) const
@@ -76,59 +87,37 @@ bool InputManager::isMouseButtonReleased(Uint8 button) const
     return it != _mouseStates.end() && it->second == KeyState::Released;
 }
 
-bool InputManager::keyActionIfNotOnCooldown(SDL_Scancode key, float das, float arr, float deltaTime)
+bool InputManager::keyActionIfNotOnCooldown(SDL_Scancode key, float das, float arr)
 {
-    auto& state = _keyStates[key];
+        auto& state = _keyStates[key];
     auto& data = _keyCooldowns[key];
 
     if (state == KeyState::Pressed) {
-        std::println("Key {} pressed" , (int)key);
-        // Reset on fresh press
         data.dasTimer = 0.0f;
         data.arrTimer = 0.0f;
         data.dasTriggered = false;
-        return true; // immediate move on first press
+        return true; // first press
     }
 
     if (state == KeyState::Held) {
-        std::println("Key {} held", (int)key);
-
-        data.dasTimer += deltaTime;
-
-        if (!data.dasTriggered) {
-            std::println("DAS triggered");
-
-            if (data.dasTimer >= das) {
-                data.dasTriggered = true;
-                data.arrTimer = 0.0f;
-                return true; // first repeat after DAS
-            }
+        if (!data.dasTriggered && data.dasTimer >= das) {
+            data.dasTriggered = true;
+            data.arrTimer = 0.0f;
+            return true; // first repeat
         }
-        else {
-            std::println("ARR triggered");
-
-            data.arrTimer += deltaTime;
-            if (data.arrTimer >= arr) {
-                data.arrTimer = 0.0f;
-                return true; // repeat every ARR
-            }
+        if (data.dasTriggered && data.arrTimer >= arr) {
+            data.arrTimer = 0.0f;
+            return true; // continuous repeat
         }
     }
 
     if (state == KeyState::Released || state == KeyState::None) {
-        std::println("Key {} released", (int)key);
-        // reset tracking
         data.dasTimer = 0.0f;
         data.arrTimer = 0.0f;
         data.dasTriggered = false;
     }
 
     return false;
-}
-
-bool InputManager::shouldQuit() const
-{
-    return isKeyPressed(SDL_SCANCODE_ESCAPE) || isKeyHeld(SDL_SCANCODE_ESCAPE);
 }
 
 void InputManager::updateKeyState(SDL_Scancode key, bool down)

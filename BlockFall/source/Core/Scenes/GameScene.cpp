@@ -25,21 +25,21 @@ void GameScene::handleInput(const float dt)
 {
     const float das = _gameField->das;
     const float arr = _gameField->arr;
-    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_A, das, arr, dt))
+    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
     {
         if (_currentPiecePosition.x > 0)
         {
             _currentPiecePosition.x -= 1;
         }
     }
-    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_D, das, arr, dt))
+    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_D, das, arr))
     {
         if (_currentPiecePosition.x < BoardConsts::s_columns - _currentPiece->getPieceArea().x)
         {
             _currentPiecePosition.x += 1;
         }
     }
-    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_S, das, arr, dt))
+    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_S, das, arr))
     {
         if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
         {
@@ -50,6 +50,8 @@ void GameScene::handleInput(const float dt)
 
 void GameScene::update(const float dt)
 {
+    handleInput(dt);
+    _input->update(dt);
     if (!_pieceFalling)
     {
         std::mt19937 gen(_rd());
@@ -74,7 +76,6 @@ void GameScene::update(const float dt)
     }
     else
     {
-        handleInput(dt);
         _currentPieceTimeToDrop += dt;
     }
 
@@ -97,7 +98,7 @@ void GameScene::update(const float dt)
 
 void GameScene::handleEvents(const SDL_Event& event)
 {
-    _input->processInput(event);
+    _input->handleEvent(event);
 }
 
 bool GameScene::shouldQuit() const
