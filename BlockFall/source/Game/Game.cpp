@@ -42,6 +42,10 @@ void Game::run()
 
         handleEvents();
         update(_deltaTime);
+        if (_scene->shouldQuit())
+        {
+            _isRunning = false;
+        }
     }
 }
 
@@ -60,8 +64,9 @@ void Game::handleEvents()
         if (event.type == SDL_EVENT_QUIT) {
             _isRunning = false;
         }
-        //if (_scene)
-            //_scene->handleEvents(event);
+        if (_scene) {
+            _scene->handleEvents(event);
+        }
     }
 }
 

@@ -10,12 +10,13 @@
   },
   "images": {
     "logo": "Sprites/logo.png",
-    "blocksFolder": "Sprites/Blocks"
+    "blocks_folder": "Sprites/Blocks"
   },
   "game":{
-    "drawGrid": true
+    "draw_grid": true
   },
-  "blockFallSpeedLevel" : [
+  "game_physics" : {
+    "block_fall_speed_level" : [
     0.88733, 
     0.82036, 
     0.75339, 
@@ -37,5 +38,8 @@
     0.6697,  
     0.6697,  
     0.5023   
-  ]
+  ],
+  "das" : 0.26787,
+  "arr" : 0.10045
+  }
 }

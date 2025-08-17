@@ -23,6 +23,8 @@ struct ConfigData {
     std::string logoPath = "";
     std::string blocksFolder = "";
     std::array<float, speedLevelsNumber> speedLevels;
+    float das = 0.2f;
+    float arr = 0.1f;
 };
 
 inline std::string getConfigFilePath(const char* path) {
@@ -69,12 +71,14 @@ public:
         cfg.fullscreen = data["window"]["fullscreen"];
         cfg.bgmPath = data["sound"]["bgm"];
         cfg.logoPath = data["images"]["logo"];
-        cfg.blocksFolder = data["images"]["blocksFolder"];
-        cfg.drawGrid = data["game"]["drawGrid"];
-        auto arr = data["blockFallSpeedLevel"];
-        for (size_t i = 0; i < arr.size(); ++i) 
+        cfg.blocksFolder = data["images"]["blocks_folder"];
+        cfg.drawGrid = data["game"]["draw_grid"];
+        auto array = data["game_physics"]["block_fall_speed_level"];
+        cfg.das = data["game_physics"]["das"];
+        cfg.arr = data["game_physics"]["arr"];
+        for (size_t i = 0; i < array.size(); ++i) 
         {
-            cfg.speedLevels[i] = arr[i].get<float>();
+            cfg.speedLevels[i] = array[i].get<float>();
         }
         _data = cfg;
     }

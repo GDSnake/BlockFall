@@ -18,13 +18,37 @@ void GameScene::init()
     Renderer::getInstance();
     _gameField = std::make_unique<GameField>();
     _gameField->board->updateBoardDimensions();
+    _input = std::make_unique<InputManager>();
 }
 
-void GameScene::handleInput()
+void GameScene::handleInput(const float dt)
 {
+    const float das = _gameField->das;
+    const float arr = _gameField->arr;
+    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_A, das, arr, dt))
+    {
+        if (_currentPiecePosition.x > 0)
+        {
+            _currentPiecePosition.x -= 1;
+        }
+    }
+    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_D, das, arr, dt))
+    {
+        if (_currentPiecePosition.x < BoardConsts::s_columns - _currentPiece->getPieceArea().x)
+        {
+            _currentPiecePosition.x += 1;
+        }
+    }
+    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_S, das, arr, dt))
+    {
+        if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
+        {
+            //_currentPiecePosition.y += 1;
+        }
+    }
 }
 
-void GameScene::update(float dt)
+void GameScene::update(const float dt)
 {
     if (!_pieceFalling)
     {
@@ -50,6 +74,7 @@ void GameScene::update(float dt)
     }
     else
     {
+        handleInput(dt);
         _currentPieceTimeToDrop += dt;
     }
 
@@ -63,31 +88,27 @@ void GameScene::update(float dt)
         else
         {
             _pieceFalling = false;
+            //_gameField->board->updateBoard();
         }
     }
 
     render();
 }
 
+void GameScene::handleEvents(const SDL_Event& event)
+{
+    _input->processInput(event);
+}
+
+bool GameScene::shouldQuit() const
+{
+    return _input->shouldQuit();
+}
+
 void GameScene::render()
 {
     Renderer::getInstance().clear();
     SDL_SetRenderDrawColor(Renderer::getInstance().getRenderer(), 255, 255, 255, 255);
-
-    /*for (int i = 0; i < (static_cast<int>(PieceShapes::Total)*2); ++i)
-    {
-        //Test Block
-        Piece piece = Piece(static_cast<PieceShapes>(i % static_cast<int>(PieceShapes::Total)));
-        auto pieceBlocks = piece.getPiece();
-        float squareSize = 23.0f;
-        float padding = 2.0f;
-        float initialPadding = 50.0f;
-        float yy = 0 + initialPadding * i;
-        SDL_FPoint origin = {50.0f,yy};
-        Renderer::getInstance().drawPiece(pieceBlocks, squareSize,padding,origin);
-        //End Test Block
-    }*/
-
     auto pieceBlocks = _currentPiece->getPiece();
 
     Renderer::getInstance().drawPiece(pieceBlocks, _gameField->board->getCellSize(), BoardConsts::s_lineThickness, _gameField->board->convertGridPointToPixel(_currentPiecePosition));
@@ -98,6 +119,11 @@ void GameScene::render()
         Renderer::getInstance().drawBoard(*_gameField->board);
     }
         Renderer::getInstance().present();
+}
+
+void GameScene::calculateBoardOccupiedCells()
+{
+
 }
 
 void GameScene::cleanup()
