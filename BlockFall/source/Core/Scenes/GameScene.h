@@ -6,6 +6,15 @@
 #include "GameField.h"
 #include "InputManager.h"
 
+enum class GameState : uint8_t
+{
+    Starting = 0,
+    Falling,
+    SoftDrop,
+    Spawning,
+    Clearing,
+    GameOver
+};
 
 class GameScene : public Scene
 {
@@ -20,14 +29,17 @@ public:
     void cleanup() override;
 
     inline std::string getName() const override { return "GameScene"; }
-    void handleEvents(const SDL_Event& event);
+    void handleEvents(const SDL_Event& event) const;
     bool shouldQuit() const;
 
 private:
     void render() override;
 
     void calculateBoardOccupiedCells();
+    bool canSoftDrop() const;
+    bool canSelectNewPiece() const;
 
+    GameState _gameState;
     std::unique_ptr<GameField> _gameField;
     std::unique_ptr<Piece> _currentPiece;
     std::unique_ptr<Piece> _previewNextPiece;
@@ -35,6 +47,7 @@ private:
     SDL_Point _currentPiecePosition;
     int currentLevel = 0;
     float _currentPieceTimeToDrop;
-    bool _pieceFalling = false;
+    bool _lockedSoftDrop = false;
+    bool _movingHorizontally = false;
     std::random_device _rd;
 };

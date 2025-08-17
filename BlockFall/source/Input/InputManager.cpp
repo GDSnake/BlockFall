@@ -87,9 +87,9 @@ bool InputManager::isMouseButtonReleased(Uint8 button) const
     return it != _mouseStates.end() && it->second == KeyState::Released;
 }
 
-bool InputManager::keyActionIfNotOnCooldown(SDL_Scancode key, float das, float arr)
+bool InputManager::horizontalMovementIfNotOnCooldown(SDL_Scancode key, float das, float arr)
 {
-        auto& state = _keyStates[key];
+    auto& state = _keyStates[key];
     auto& data = _keyCooldowns[key];
 
     if (state == KeyState::Pressed) {
@@ -118,6 +118,12 @@ bool InputManager::keyActionIfNotOnCooldown(SDL_Scancode key, float das, float a
     }
 
     return false;
+}
+
+bool InputManager::isSoftDropping(SDL_Scancode key)
+{
+    auto& state = _keyStates[key];
+    return state == KeyState::Pressed || state == KeyState::Held;
 }
 
 void InputManager::updateKeyState(SDL_Scancode key, bool down)

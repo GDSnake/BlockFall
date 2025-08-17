@@ -14,37 +14,53 @@ GameScene::~GameScene()
 
 void GameScene::init()
 {
+    _gameState = GameState::Starting;
     SpriteManager::getInstance();
     Renderer::getInstance();
     _gameField = std::make_unique<GameField>();
     _gameField->board->updateBoardDimensions();
     _input = std::make_unique<InputManager>();
+
 }
 
 void GameScene::handleInput(const float dt)
 {
     const float das = _gameField->das;
     const float arr = _gameField->arr;
-    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
+
+    bool movingRight = false, movingLeft = false;
+    if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
     {
         if (_currentPiecePosition.x > 0)
         {
+            movingLeft = true;
             _currentPiecePosition.x -= 1;
         }
     }
-    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_D, das, arr))
+    if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_D, das, arr))
     {
         if (_currentPiecePosition.x < BoardConsts::s_columns - _currentPiece->getPieceArea().x)
         {
+            movingRight = true;
             _currentPiecePosition.x += 1;
         }
     }
-    if (_input->keyActionIfNotOnCooldown(SDL_SCANCODE_S, das, arr))
+    _movingHorizontally = movingLeft || movingRight;
+
+
+    if (_input->isSoftDropping(SDL_SCANCODE_S))
     {
-        if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
+        if (canSoftDrop() && _currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
         {
-            //_currentPiecePosition.y += 1;
+            _currentPiecePosition.y += 1;
+            _gameState = GameState::SoftDrop;
+            _currentPieceTimeToDrop = 0.0f;
         }
+    }
+    else if (_gameState != GameState::Starting && _gameState != GameState::Spawning)
+    {
+        _gameState = GameState::Falling;
+        _lockedSoftDrop = false;
     }
 }
 
@@ -52,7 +68,7 @@ void GameScene::update(const float dt)
 {
     handleInput(dt);
     _input->update(dt);
-    if (!_pieceFalling)
+    if (canSelectNewPiece())
     {
         std::mt19937 gen(_rd());
         std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
@@ -71,32 +87,52 @@ void GameScene::update(const float dt)
         _previewNextPiece = std::make_unique<Piece>(randomShape);
 
         _currentPiecePosition = BoardConsts::s_spawnGridPosition;
-        _pieceFalling = true;
         _currentPieceTimeToDrop = 0.0f;
+        _gameState = GameState::Falling;
     }
     else
     {
         _currentPieceTimeToDrop += dt;
     }
 
-    if (_currentPieceTimeToDrop >= Config::getInstance().getConfigData().speedLevels[currentLevel])
+    if (_gameState == GameState::SoftDrop)
     {
-        if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
+        if (_currentPieceTimeToDrop >= Config::getInstance().getConfigData().softDrop)
         {
-            _currentPiecePosition.y += 1;
-            _currentPieceTimeToDrop = 0.0f;
+            if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
+            {
+                _currentPiecePosition.y += 1;
+                _currentPieceTimeToDrop = 0.0f;
+            }
+            else
+            {
+                _gameState = GameState::Spawning;
+                _lockedSoftDrop = true;
+                //_gameField->board->updateBoard();
+            }
         }
-        else
+
+    }
+    else if (_gameState == GameState::Falling){
+        if (_currentPieceTimeToDrop >= Config::getInstance().getConfigData().speedLevels[currentLevel])
         {
-            _pieceFalling = false;
-            //_gameField->board->updateBoard();
+            if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
+            {
+                _currentPiecePosition.y += 1;
+                _currentPieceTimeToDrop = 0.0f;
+            }
+            else
+            {
+                _gameState = GameState::Spawning;
+                //_gameField->board->updateBoard();
+            }
         }
     }
 
     render();
 }
 
-void GameScene::handleEvents(const SDL_Event& event)
+void GameScene::handleEvents(const SDL_Event& event) const
 {
     _input->handleEvent(event);
 }
@@ -125,6 +161,16 @@ void GameScene::render()
 void GameScene::calculateBoardOccupiedCells()
 {
 
+}
+
+bool GameScene::canSoftDrop() const
+{
+    return !_movingHorizontally && !_lockedSoftDrop && _gameState != GameState::SoftDrop && _gameState != GameState::Starting;
+}
+
+bool GameScene::canSelectNewPiece() const
+{
+    return _gameState == GameState::Starting || _gameState == GameState::Spawning;
 }
 
 void GameScene::cleanup()

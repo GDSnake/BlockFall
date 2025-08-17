@@ -23,8 +23,20 @@ struct ConfigData {
     std::string logoPath = "";
     std::string blocksFolder = "";
     std::array<float, speedLevelsNumber> speedLevels;
+    //Delayed Auto Shift
     float das = 0.2f;
+    //Auto Repeat Rate
     float arr = 0.1f;
+    //Spawn delay
+    float are = 0.03f;
+    float lineClear = 1.5f;
+    float softDrop = 0.05f;
+
+    //extra rules flags
+    //Super Rotation System
+    bool srs = false;
+    bool softDropWhileMovingHorizontal = false;
+    bool hardDrop = false;
 };
 
 inline std::string getConfigFilePath(const char* path) {
@@ -76,6 +88,14 @@ public:
         auto array = data["game_physics"]["block_fall_speed_level"];
         cfg.das = data["game_physics"]["das"];
         cfg.arr = data["game_physics"]["arr"];
+        cfg.are = data["game_physics"]["are"];
+        cfg.lineClear = data["game_physics"]["clear_line"];
+        cfg.softDrop = data["game_physics"]["soft_drop"];
+
+        cfg.srs = data["game_physics"]["enabled_rules"]["srs"];
+        cfg.softDropWhileMovingHorizontal = data["game_physics"]["enabled_rules"]["soft_drop_while_moving_horizontal"];
+        cfg.hardDrop = data["game_physics"]["enabled_rules"]["hard_drop"];
+
         for (size_t i = 0; i < array.size(); ++i) 
         {
             cfg.speedLevels[i] = array[i].get<float>();

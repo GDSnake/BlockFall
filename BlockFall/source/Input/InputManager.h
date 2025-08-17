@@ -13,9 +13,13 @@ enum class KeyState {
 
 
 struct KeyCooldownData {
+    // DAS/ARR variables
     float dasTimer = 0.0f;
     float arrTimer = 0.0f;
     bool dasTriggered = false;
+
+    // Soft Drop
+    float softDrop = 0.0f;
 };
 
 class InputManager {
@@ -31,7 +35,8 @@ public:
     bool isMouseButtonHeld(Uint8 button) const;
     bool isMouseButtonReleased(Uint8 button) const;
 
-    bool keyActionIfNotOnCooldown(SDL_Scancode key, float das, float arr);
+    bool horizontalMovementIfNotOnCooldown(SDL_Scancode key, float das, float arr);
+    bool isSoftDropping(SDL_Scancode key);
 
     bool shouldQuit() const { return _quit; }
 
