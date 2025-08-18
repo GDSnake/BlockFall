@@ -1,6 +1,6 @@
 #pragma once
-#include <array>
 #include <memory>
+#include <span>
 #include <SDL3/SDL_rect.h>
 
 #include "InputManager.h"
@@ -10,6 +10,8 @@ class Block;
 namespace PieceConsts
 {
     static constexpr int numBlocks = 4; // all Pieces use 4 blocks
+    static constexpr int rotationsNumber_I_S_Z = 2;
+    static constexpr int rotationsNumber_J_L_T = 4;
 }
 
 
@@ -32,7 +34,7 @@ public:
     Piece(PieceShapes shape);
     ~Piece();
 
-    std::array<SDL_Point, PieceConsts::numBlocks> getBlocksCoord();
+    std::span<SDL_Point> getBlocksCoord();
     SDL_Point getPieceArea() const;
 
     // Rotation
@@ -50,9 +52,17 @@ private:
     void createZ();
     void createT();
 
-    std::array<SDL_Point, PieceConsts::numBlocks> _blocksCoord;
+    void createRotationI();
+    void createRotationJ();
+    void createRotationL();
+    void createRotationS();
+    void createRotationZ();
+    void createRotationT();
+
+    std::vector<SDL_Point> _blocksCoord;
     SDL_Point _pivot;   // pivot for rotation
     SDL_Point _area;
+    int _currentRotationIndex;
     std::shared_ptr<Block> _block;
     PieceShapes _shape;
 };

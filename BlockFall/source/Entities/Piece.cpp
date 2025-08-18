@@ -3,6 +3,7 @@
 
 Piece::Piece(PieceShapes shape)
 {
+    _currentRotationIndex = 0;
     switch (shape)
     {
     case PieceShapes::I_shape:
@@ -40,7 +41,7 @@ std::shared_ptr<Block> Piece::getBlock() const
 
 void Piece::createI()
 {
-    _blocksCoord = { SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{3,0} };
+    createRotationI();
     _pivot = { 1,0 }; // 2nd block is pivot
     _area = { 4,1 };
     _shape = PieceShapes::I_shape;
@@ -51,7 +52,7 @@ void Piece::createI()
 //  |X|X|X|
 void Piece::createJ()
 {
-    _blocksCoord = { SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1} };
+    createRotationJ();
     _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::J_shape;
@@ -62,7 +63,7 @@ void Piece::createJ()
 //  |X|X|X|
 void Piece::createL()
 {
-    _blocksCoord = { SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1} };
+    createRotationL();
     _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::L_shape;
@@ -73,6 +74,7 @@ void Piece::createL()
 //  |X|X|
 void Piece::createO()
 {
+    _blocksCoord.reserve(PieceConsts::numBlocks);
     _blocksCoord = { SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1} };
     _pivot = { 0,0 }; // irrelevant for square
     _area = { 2,2 };
@@ -84,7 +86,7 @@ void Piece::createO()
 //  |X|X| |
 void Piece::createS()
 {
-    _blocksCoord = { SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1} };
+    createRotationS();
     _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::S_shape;
@@ -95,7 +97,7 @@ void Piece::createS()
 //  | |X|X|
 void Piece::createZ()
 {
-    _blocksCoord = { SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1} };
+    createRotationZ();
     _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::Z_shape;
@@ -106,7 +108,7 @@ void Piece::createZ()
 //  |X|X|X|
 void Piece::createT()
 {
-    _blocksCoord = { SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1} };
+    createRotationT();
     _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::T_shape;
@@ -117,9 +119,10 @@ Piece::~Piece()
 {
 }
 
-std::array<SDL_Point, PieceConsts::numBlocks> Piece::getBlocksCoord()
+std::span<SDL_Point> Piece::getBlocksCoord()
 {
-    return _blocksCoord;
+    int start = _currentRotationIndex * 4;
+    return std::span<SDL_Point>(_blocksCoord).subspan(start, PieceConsts::numBlocks);
 }
 
 SDL_Point Piece::getPieceArea() const
@@ -129,34 +132,138 @@ SDL_Point Piece::getPieceArea() const
 
 void Piece::rotateCW()
 {
-    if (_shape == PieceShapes::O_shape) return; // square doesn't rotate
+    int numberOfRotations = 1;
+    switch (_shape)
+    {
+    case PieceShapes::I_shape:
+    case PieceShapes::S_shape:
+    case PieceShapes::Z_shape:
+        numberOfRotations = PieceConsts::rotationsNumber_I_S_Z;
+        break;
 
-    for (auto& cell : _blocksCoord) {
-        int relX = cell.x - _pivot.x;
-        int relY = cell.y - _pivot.y;
+    case PieceShapes::J_shape:
+    case PieceShapes::L_shape:
+    case PieceShapes::T_shape:
+        numberOfRotations = PieceConsts::rotationsNumber_J_L_T;
+        break;
 
-        // 90o clockwise
-        int rotatedX = relY;
-        int rotatedY = -relX;
+    case PieceShapes::O_shape:
+        numberOfRotations = 1; // no rotation
+        break;
 
-        cell.x = rotatedX + _pivot.x;
-        cell.y = rotatedY + _pivot.y;
+    default:
+        break;
     }
+    std::swap(_area.x, _area.y);
+    _currentRotationIndex = (_currentRotationIndex + 1) % numberOfRotations;
 }
 
 void Piece::rotateCCW()
 {
-    if (_shape == PieceShapes::O_shape) return;
+    int numberOfRotations = 1;
+    switch (_shape)
+    {
+    case PieceShapes::I_shape:
+    case PieceShapes::S_shape:
+    case PieceShapes::Z_shape:
+        numberOfRotations = PieceConsts::rotationsNumber_I_S_Z;
+        break;
 
-    for (auto& cell : _blocksCoord) {
-        int relX = cell.x - _pivot.x;
-        int relY = cell.y - _pivot.y;
+    case PieceShapes::J_shape:
+    case PieceShapes::L_shape:
+    case PieceShapes::T_shape:
+        numberOfRotations = PieceConsts::rotationsNumber_J_L_T;
+        break;
 
-        // 90o counter-clockwise
-        int rotatedX = -relY;
-        int rotatedY = relX;
+    case PieceShapes::O_shape:
+        numberOfRotations = 1; // no rotation
+        break;
 
-        cell.x = rotatedX + _pivot.x;
-        cell.y = rotatedY + _pivot.y;
+    default:
+        break;
     }
+    std::swap(_area.x, _area.y); 
+    _currentRotationIndex = (_currentRotationIndex + (numberOfRotations - 1)) % numberOfRotations;
+}
+
+void Piece::createRotationI()
+{
+    _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_I_S_Z);
+    _blocksCoord = {
+        // horizontal
+        SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{3,1},
+        // vertical
+        SDL_Point{2,0}, SDL_Point{2,1}, SDL_Point{2,2}, SDL_Point{2,3}
+    };
+}
+
+void Piece::createRotationJ()
+{
+    _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_J_L_T);
+
+    _blocksCoord = {
+        // up
+         SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
+        // right
+        SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{1,1}, SDL_Point{1,2},
+        // down
+        SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{2,2},
+        // left
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{0,2}, SDL_Point{1,2}
+    };
+}
+
+void Piece::createRotationL()
+{
+    _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_J_L_T);
+
+    _blocksCoord = {
+        // up
+        SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
+        // right
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{2,2},
+        // down
+        SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{0,2},
+        // left
+        SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}
+    };
+}
+
+void Piece::createRotationS()
+{
+    _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_I_S_Z);
+
+    _blocksCoord = {
+        // horizontal
+        SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1},
+        // vertical
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{2,2}
+    };
+}
+
+void Piece::createRotationZ()
+{
+    _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_I_S_Z);
+
+    _blocksCoord = {
+        // horizontal
+        SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1},
+        // vertical
+        SDL_Point{2,0}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{1,2}
+    };
+}
+
+void Piece::createRotationT()
+{
+    _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_J_L_T);
+    _blocksCoord = {
+        // up
+        SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
+        // right
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{1,2},
+        // down
+        SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{1,2},
+        // left
+        SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{1,2}
+    };
 }

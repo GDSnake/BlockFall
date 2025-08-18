@@ -29,6 +29,11 @@ void GameScene::handleInput(const float dt)
     const float arr = _gameField->arr;
 
     bool movingRight = false, movingLeft = false;
+
+    if (_input->isKeyPressed(SDL_SCANCODE_N))
+    {
+        _currentPiece->rotateCW();
+    }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
     {
         if (_currentPiecePosition.x > 0)
