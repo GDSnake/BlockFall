@@ -32,107 +32,131 @@ Piece::Piece(PieceShapes shape)
 }
 
 //  |X|X|X|X|
-//  | | | | |
+
+std::shared_ptr<Block> Piece::getBlock() const
+{
+    return _block;
+}
+
 void Piece::createI()
 {
-    for (int i = 0; i < PieceConsts::maxPieceArea * 0.5f; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Cyan);
-    }
-    _area = { 4, 1};
+    _blocksCoord = { SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{3,0} };
+    _pivot = { 1,0 }; // 2nd block is pivot
+    _area = { 4,1 };
+    _shape = PieceShapes::I_shape;
+    _block = SpriteManager::getInstance().getBlock(BlockTypes::Cyan);
 }
 
-//  |X| | | |
-//  |X|X|X| |
+//  |X| | |
+//  |X|X|X|
 void Piece::createJ()
 {
-    _pieceBlocks[0] = SpriteManager::getInstance().getBlock(BlockTypes::Blue);
-    for (int i = 4; i < PieceConsts::maxPieceArea - 1; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Blue);
-    }
-    _area = {3, 2};
+    _blocksCoord = { SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1} };
+    _pivot = { 1,1 };
+    _area = { 3,2 };
+    _shape = PieceShapes::J_shape;
+    _block = SpriteManager::getInstance().getBlock(BlockTypes::Blue);
 }
 
-//  | | |X| |
-//  |X|X|X| |
+//  | | |X|
+//  |X|X|X|
 void Piece::createL()
 {
-    _pieceBlocks[2] = SpriteManager::getInstance().getBlock(BlockTypes::Orange);
-    for (int i = 4; i < PieceConsts::maxPieceArea - 1; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Orange);
-    }
-    _area = { 3, 2 };
+    _blocksCoord = { SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1} };
+    _pivot = { 1,1 };
+    _area = { 3,2 };
+    _shape = PieceShapes::L_shape;
+    _block = SpriteManager::getInstance().getBlock(BlockTypes::Orange);
 }
 
-//  |X|X| | |
-//  |X|X| | |
+//  |X|X|
+//  |X|X|
 void Piece::createO()
 {
-    for (int i = 0; i < 2; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Yellow);
-    }
-    for (int i = 4; i < 6; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Yellow);
-    }
-    _area = { 2, 2 };
+    _blocksCoord = { SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1} };
+    _pivot = { 0,0 }; // irrelevant for square
+    _area = { 2,2 };
+    _shape = PieceShapes::O_shape;
+    _block = SpriteManager::getInstance().getBlock(BlockTypes::Yellow);
 }
 
-//  | |X|X| |
-//  |X|X| | |
+//  | |X|X|
+//  |X|X| |
 void Piece::createS()
 {
-    for (int i = 1; i < 3; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Green);
-    }
-    for (int i = 4; i < 6; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Green);
-    }
-    _area = { 3, 2 };
+    _blocksCoord = { SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1} };
+    _pivot = { 1,1 };
+    _area = { 3,2 };
+    _shape = PieceShapes::S_shape;
+    _block = SpriteManager::getInstance().getBlock(BlockTypes::Green);
 }
 
-//  |X|X| | |
-//  | |X|X| |
+//  |X|X| |
+//  | |X|X|
 void Piece::createZ()
 {
-    for (int i = 0; i < 2; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Red);
-    }
-    for (int i = 5; i < PieceConsts::maxPieceArea - 1; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Red);
-    }
-    _area = { 3, 2 };
+    _blocksCoord = { SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1} };
+    _pivot = { 1,1 };
+    _area = { 3,2 };
+    _shape = PieceShapes::Z_shape;
+    _block = SpriteManager::getInstance().getBlock(BlockTypes::Red);
 }
 
-//  | |X| | |
-//  |X|X|X| |
+//  | |X| |
+//  |X|X|X|
 void Piece::createT()
 {
-    _pieceBlocks[1] = SpriteManager::getInstance().getBlock(BlockTypes::Purple);
-    for (int i = 4; i < PieceConsts::maxPieceArea - 1; ++i)
-    {
-        _pieceBlocks[i] = SpriteManager::getInstance().getBlock(BlockTypes::Purple);
-    }
-    _area = { 3, 2 };
+    _blocksCoord = { SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1} };
+    _pivot = { 1,1 };
+    _area = { 3,2 };
+    _shape = PieceShapes::T_shape;
+    _block = SpriteManager::getInstance().getBlock(BlockTypes::Purple);
 }
 
 Piece::~Piece()
 {
 }
 
-std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> Piece::getPiece()
+std::array<SDL_Point, PieceConsts::numBlocks> Piece::getBlocksCoord()
 {
-    return _pieceBlocks;
+    return _blocksCoord;
 }
 
 SDL_Point Piece::getPieceArea() const
 {
     return _area;
+}
+
+void Piece::rotateCW()
+{
+    if (_shape == PieceShapes::O_shape) return; // square doesn't rotate
+
+    for (auto& cell : _blocksCoord) {
+        int relX = cell.x - _pivot.x;
+        int relY = cell.y - _pivot.y;
+
+        // 90o clockwise
+        int rotatedX = relY;
+        int rotatedY = -relX;
+
+        cell.x = rotatedX + _pivot.x;
+        cell.y = rotatedY + _pivot.y;
+    }
+}
+
+void Piece::rotateCCW()
+{
+    if (_shape == PieceShapes::O_shape) return;
+
+    for (auto& cell : _blocksCoord) {
+        int relX = cell.x - _pivot.x;
+        int relY = cell.y - _pivot.y;
+
+        // 90o counter-clockwise
+        int rotatedX = -relY;
+        int rotatedY = relX;
+
+        cell.x = rotatedX + _pivot.x;
+        cell.y = rotatedY + _pivot.y;
+    }
 }

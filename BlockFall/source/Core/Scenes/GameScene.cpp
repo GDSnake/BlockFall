@@ -84,7 +84,7 @@ void GameScene::update(const float dt)
             _currentPiece = std::make_unique<Piece>(randomShape);
         }
         PieceShapes randomShape = static_cast<PieceShapes>(dist(gen));
-        _previewNextPiece = std::make_unique<Piece>(randomShape);
+        _previewNextPiece = std::make_shared<Piece>(randomShape);
 
         _currentPiecePosition = BoardConsts::s_spawnGridPosition;
         _currentPieceTimeToDrop = 0.0f;
@@ -146,10 +146,10 @@ void GameScene::render()
 {
     Renderer::getInstance().clear();
     SDL_SetRenderDrawColor(Renderer::getInstance().getRenderer(), 255, 255, 255, 255);
-    auto pieceBlocks = _currentPiece->getPiece();
+    auto pieceBlocksCoord = _currentPiece->getBlocksCoord();
 
-    Renderer::getInstance().drawPiece(pieceBlocks, _gameField->board->getCellSize(), BoardConsts::s_lineThickness, _gameField->board->convertGridPointToPixel(_currentPiecePosition));
-    Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getPiece(), _gameField->previewWindowSize, BoardConsts::s_lineThickness, _gameField->previewZoneOrigin);
+    Renderer::getInstance().drawPiece(pieceBlocksCoord, _currentPiece, _gameField->board->getCellSize(), BoardConsts::s_lineThickness, _gameField->board->convertGridPointToPixel(_currentPiecePosition));
+    Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), _previewNextPiece, _gameField->previewWindowSize, BoardConsts::s_lineThickness, _gameField->previewZoneOrigin);
 
 
     if (_gameField->board) {

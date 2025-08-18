@@ -41,8 +41,8 @@ private:
 
     GameState _gameState;
     std::unique_ptr<GameField> _gameField;
-    std::unique_ptr<Piece> _currentPiece;
-    std::unique_ptr<Piece> _previewNextPiece;
+    std::shared_ptr<Piece> _currentPiece;
+    std::shared_ptr<Piece> _previewNextPiece;
     std::unique_ptr<InputManager> _input;
     SDL_Point _currentPiecePosition;
     int currentLevel = 0;

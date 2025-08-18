@@ -46,20 +46,16 @@ void Renderer::blitSurface(SDL_Texture* texture, const SDL_FRect* sourceRectangl
 
 }
 
-void Renderer::drawPiece(const std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin)
+void Renderer::drawPiece(const std::array<SDL_Point, PieceConsts::numBlocks>& pieceBlocksCoord, std::shared_ptr<Piece> piece, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin)
 {
-    for (int i = 0; i < pieceBlocks.max_size(); ++i)
+    for (const auto& coord : pieceBlocksCoord)
     {
-        if (!pieceBlocks[i])
-        {
-            continue;
-        }
-        float xx = ((static_cast<float>(i%4)) * squareSize) + origin.x + paddingBetweenBlocks;
-        float yy = ((static_cast<float>(i/4)) * squareSize) + +origin.y + paddingBetweenBlocks;
+        float xx = (static_cast<float>(coord.x) * squareSize) + origin.x + paddingBetweenBlocks;
+        float yy = (static_cast<float>(coord.y) * squareSize) + +origin.y + paddingBetweenBlocks;
         SDL_FRect destinationRectangle {xx, yy ,squareSize, squareSize};
         
 
-        drawBlock(pieceBlocks[i], destinationRectangle);
+        drawBlock(piece->getBlock(), destinationRectangle);
     }
 }
 
@@ -122,7 +118,7 @@ void Renderer::drawBoard(const Board& board)
 
 }
 
-void Renderer::drawPreviewWindow(const std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> pieceBlocks, float windowSize, float paddingBetweenBlocks, SDL_FPoint origin)
+void Renderer::drawPreviewWindow(const std::array<SDL_Point, PieceConsts::numBlocks>& pieceBlocksCoord, std::shared_ptr<Piece> piece, float windowSize, float paddingBetweenBlocks, SDL_FPoint origin)
 {
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_FRect rect = {
@@ -132,7 +128,7 @@ void Renderer::drawPreviewWindow(const std::array<std::shared_ptr<Block>, PieceC
         .h =windowSize
         };
     SDL_RenderRect(_renderer, &rect);
-    drawPiece(pieceBlocks, windowSize * 0.2f, paddingBetweenBlocks, SDL_FPoint (origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
+    drawPiece(pieceBlocksCoord, piece, windowSize * 0.2f, paddingBetweenBlocks, SDL_FPoint (origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
 }
 
 void Renderer::present()

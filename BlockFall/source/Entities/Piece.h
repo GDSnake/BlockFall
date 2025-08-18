@@ -3,13 +3,13 @@
 #include <memory>
 #include <SDL3/SDL_rect.h>
 
+#include "InputManager.h"
+
 class Block;
 
 namespace PieceConsts
 {
-    static constexpr int maxPieceArea = 8; // Biggest area is the I shape since spawns flat
-                                           //  |X|X|X|X|
-                                           //  | | | | |
+    static constexpr int numBlocks = 4; // all Pieces use 4 blocks
 }
 
 
@@ -32,8 +32,15 @@ public:
     Piece(PieceShapes shape);
     ~Piece();
 
-    std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> getPiece();
+    std::array<SDL_Point, PieceConsts::numBlocks> getBlocksCoord();
     SDL_Point getPieceArea() const;
+
+    // Rotation
+    void rotateCW();   // clockwise
+    void rotateCCW();  // counter-clockwise
+
+    PieceShapes getShape() const { return _shape; }
+    std::shared_ptr<Block> getBlock() const;
 private:
     void createI();
     void createJ();
@@ -43,6 +50,9 @@ private:
     void createZ();
     void createT();
 
-    std::array<std::shared_ptr<Block>, PieceConsts::maxPieceArea> _pieceBlocks;
+    std::array<SDL_Point, PieceConsts::numBlocks> _blocksCoord;
+    SDL_Point _pivot;   // pivot for rotation
     SDL_Point _area;
+    std::shared_ptr<Block> _block;
+    PieceShapes _shape;
 };
