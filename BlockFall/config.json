@@ -10,7 +10,7 @@
   },
   "images": {
     "logo": "Sprites/logo.png",
-    "blocks_folder": "Sprites/Blocks"
+    "blocks_folder": "Sprites/Blocks/Default"
   },
   "game":{
     "draw_grid": true
