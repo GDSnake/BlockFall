@@ -18,12 +18,10 @@ void GameScene::init()
     _currentPieceData = std::make_shared<PieceData>();
     SpriteManager::getInstance();
     Renderer::getInstance();
-    _gameField = std::make_unique<GameField>();
-    _gameField->board->updateBoardDimensions();
+    _gameField = GameField();
+    _gameField.board->updateBoardDimensions();
     _input = std::make_unique<InputManager>();
     _gen = std::mt19937(_rd());
-
-
 }
 
 void GameScene::handleInput(const float dt)
@@ -58,8 +56,8 @@ void GameScene::handleInput(const float dt)
 
 #endif // DEBUG_BUILD
 
-    const float das = _gameField->das;
-    const float arr = _gameField->arr;
+    const float das = _gameField.das;
+    const float arr = _gameField.arr;
 
     bool movingRight = false, movingLeft = false;
 
@@ -68,7 +66,7 @@ void GameScene::handleInput(const float dt)
         int oldRotation = _currentPieceData->piece->getRotationIndex();
         _currentPieceData->piece->rotateCW();
     
-        if (!isValidRotation(_currentPieceData->piece, _currentPieceData->position))
+        if (!isValidRotation(*_currentPieceData->piece, _currentPieceData->position))
         {
             // revert
             _currentPieceData->piece->setRotationIndex(oldRotation);
@@ -192,25 +190,25 @@ void GameScene::render()
     SDL_SetRenderDrawColor(Renderer::getInstance().getRenderer(), 255, 255, 255, 255);
     auto pieceBlocksCoord = _currentPieceData->piece->getBlocksCoord();
 
-    Renderer::getInstance().drawPiece(pieceBlocksCoord, _currentPieceData->piece, _gameField->board->getCellSize(), _gameField->board->convertGridPointToPixel(_currentPieceData->position));
-    Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), _previewNextPiece, _gameField->previewWindowSize, _gameField->previewZoneOrigin);
+    Renderer::getInstance().drawPiece(pieceBlocksCoord, *_currentPieceData->piece, _gameField.board->getCellSize(), _gameField.board->convertGridPointToPixel(_currentPieceData->position));
+    Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), *_previewNextPiece, _gameField.previewWindowSize, _gameField.previewZoneOrigin);
 
 
-    if (_gameField->board) {
-        Renderer::getInstance().drawBoard(_gameField->board);
+    if (_gameField.board) {
+        Renderer::getInstance().drawBoard(*_gameField.board);
     }
         Renderer::getInstance().present();
 }
 
-void GameScene::savePieceOnBoard()
+void GameScene::savePieceOnBoard() const
 {
-    _gameField->board->savePieceOnBoard(_currentPieceData);
+    _gameField.board->savePieceOnBoard(*_currentPieceData);
 
 }
 
-bool GameScene::isValidRotation(const std::shared_ptr<Piece>& piece, const SDL_Point& pos) const
+bool GameScene::isValidRotation(Piece& piece, const SDL_Point& pos) const
 {
-    auto coords = piece->getBlocksCoord();
+    const auto coords = piece.getBlocksCoord();
     for (const auto& block : coords)
     {
         int x = pos.x + block.x;

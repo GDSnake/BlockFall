@@ -38,13 +38,13 @@ public:
 private:
     void render() override;
 
-    void savePieceOnBoard();
-    bool isValidRotation(const std::shared_ptr<Piece>& piece, const SDL_Point& position) const;
+    void savePieceOnBoard() const;
+    bool isValidRotation(Piece& piece, const SDL_Point& position) const;
     bool canSoftDrop() const;
     bool canSelectNewPiece() const;
 
     GameState _gameState;
-    std::unique_ptr<GameField> _gameField;
+    GameField _gameField;
     std::shared_ptr<PieceData> _currentPieceData;
     std::shared_ptr<Piece> _previewNextPiece;
     std::unique_ptr<InputManager> _input;

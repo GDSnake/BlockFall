@@ -45,27 +45,27 @@ void Renderer::blitSurface(SDL_Texture* texture, const SDL_FRect* sourceRectangl
 
 }
 
-void Renderer::drawBoardContents(const std::shared_ptr<Board>& board)
+void Renderer::drawBoardContents(const Board& board)
 {
-    if (board->isEmpty())
+    if (board.isEmpty())
     {
         return;
     }
-    const auto& boardBlocks = board->getBoardContent();
+    const auto& boardBlocks = board.getBoardContent();
     for (uint64_t i = 0; i < boardBlocks.size(); ++i)
     {
         if (!boardBlocks[i]) {
             continue; // Skip empty blocks
         }
-        const float xx = ((static_cast<float>((i+1) % BoardConsts::s_columns)) * board->getCellSize()) + board->getBoardOrigin().x;
-        const float yy = ((static_cast<float>(i / BoardConsts::s_columns)) * board->getCellSize()) + board->getBoardOrigin().y;
+        const float xx = ((static_cast<float>((i+1) % BoardConsts::s_columns)) * board.getCellSize()) + board.getBoardOrigin().x;
+        const float yy = ((static_cast<float>(i / BoardConsts::s_columns)) * board.getCellSize()) + board.getBoardOrigin().y;
 
-        SDL_FRect destinationRectangle{ xx, yy ,board->getCellSize(), board->getCellSize() };
-        drawBlock(boardBlocks[i], destinationRectangle);
+        SDL_FRect destinationRectangle{ xx, yy ,board.getCellSize(), board.getCellSize() };
+        drawBlock(*boardBlocks[i], destinationRectangle);
     }
 }
 
-void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float squareSize, SDL_FPoint origin)
+void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin)
 {
     for (const auto& coord : pieceBlocksCoord)
     {
@@ -74,22 +74,16 @@ void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<
         SDL_FRect destinationRectangle {xx, yy ,squareSize, squareSize};
         
 
-        drawBlock(piece->getBlock(), destinationRectangle);
+        drawBlock(*piece.getBlock(), destinationRectangle);
     }
 }
 
-void Renderer::drawBlock(const std::shared_ptr<Block>& block, const SDL_FRect& destinationRectangle)
+void Renderer::drawBlock(const Block& block, const SDL_FRect& destinationRectangle)
 {
-    // Test Code
-    if (!block) {
-        std::cout << "Error: Unable to load image\n";
-    }
-    
-    blitSurface(block->getSprite().get(), &block->getSourceRect(), &destinationRectangle);
-    // End Test
+    blitSurface(block.getSprite().get(), &block.getSourceRect(), &destinationRectangle);
 }
 
-void Renderer::drawBoard(const std::shared_ptr<Board>& board)
+void Renderer::drawBoard(const Board& board)
 {
     static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1) > lineArray; // +1 for the border lines
     static bool initializedLineArray = false; // Initialize only once the lineArray
@@ -97,9 +91,9 @@ void Renderer::drawBoard(const std::shared_ptr<Board>& board)
     uint8_t columnsPlusBorder = BoardConsts::s_columns + 1;
     uint8_t rowsPlusBorder = BoardConsts::s_rows + 1;
     uint8_t totalLines = columnsPlusBorder + rowsPlusBorder;
-    SDL_FPoint origin = board->getBoardOrigin();
+    SDL_FPoint origin = board.getBoardOrigin();
     if (!initializedLineArray) {
-        float cellSize = board->getCellSize();
+        float cellSize = board.getCellSize();
         for (uint8_t i = 0; i < totalLines; ++i)
         {
             SDL_FRect rect;
@@ -109,7 +103,7 @@ void Renderer::drawBoard(const std::shared_ptr<Board>& board)
                     .x = (static_cast<float>(i) * cellSize) + origin.x,
                     .y = origin.y,
                     .w = BoardConsts::s_lineThickness,
-                    .h = board->getBoardHeight()
+                    .h = board.getBoardHeight()
                 };
             }
             else
@@ -117,7 +111,7 @@ void Renderer::drawBoard(const std::shared_ptr<Board>& board)
                 rect = {
                     .x = origin.x,
                     .y = ((static_cast<float>(i) - static_cast<float>(columnsPlusBorder)) * cellSize) + origin.y,
-                    .w = board->getBoardWidth(),
+                    .w = board.getBoardWidth(),
                     .h = BoardConsts::s_lineThickness
                 };
             }
@@ -137,7 +131,7 @@ void Renderer::drawBoard(const std::shared_ptr<Board>& board)
 
 }
 
-void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float windowSize, SDL_FPoint origin)
+void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin)
 {
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_FRect rect = {

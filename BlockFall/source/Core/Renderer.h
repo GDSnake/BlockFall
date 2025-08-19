@@ -26,10 +26,10 @@ public:
 		return instance;
 	}
 
-	void drawPiece(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float squareSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
-	void drawBlock(const std::shared_ptr<Block>& block, const SDL_FRect& destinationRectangle);
-	void drawBoard(const std::shared_ptr<Board>& board);
-	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float windowSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
+	void drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
+	void drawBlock(const Block& block, const SDL_FRect& destinationRectangle);
+	void drawBoard(const Board& board);
+	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
 	void present();
 	
 	/* void clear
@@ -53,7 +53,7 @@ private:
     * Draws a texture to a certain part of the screen
     */
 	void blitSurface(SDL_Texture* source, const SDL_FRect* sourceRectangle, const SDL_FRect* destinationRectangle);
-	void drawBoardContents(const std::shared_ptr<Board>& board);
+	void drawBoardContents(const Board& board);
 
 	SDL_Window* _window = nullptr;
 	SDL_Renderer* _renderer = nullptr;

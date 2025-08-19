@@ -18,11 +18,11 @@ namespace BoardConsts
 
 struct Board
 {
-    inline void savePieceOnBoard(const std::shared_ptr<PieceData>& piece )
+    inline void savePieceOnBoard(const PieceData& piece )
     {
-        const SDL_Point& position = piece->position;
-        const auto& block = piece->piece->getBlock();
-        auto coordList = piece->piece->getBlocksCoord();
+        const SDL_Point& position = piece.position;
+        const auto& block = piece.piece->getBlock();
+        auto coordList = piece.piece->getBlocksCoord();
         for (auto& coord : coordList)
         {
             int index = ((position.y + coord.y) * BoardConsts::s_columns-1) + (position.x + coord.x);
