@@ -2,9 +2,10 @@
 #include <memory>
 #include <SDL3/SDL_render.h>
 
+#include "Board.h"
 #include "Piece.h"
 
-struct Board;
+
 struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Surface;
@@ -26,8 +27,8 @@ public:
 	}
 
 	void drawPiece(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float squareSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
-	void drawBlock(const std::shared_ptr<Block> block, const SDL_FRect& destinationRectangle);
-	void drawBoard(const Board& board);
+	void drawBlock(const std::shared_ptr<Block>& block, const SDL_FRect& destinationRectangle);
+	void drawBoard(const std::shared_ptr<Board>& board);
 	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float windowSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
 	void present();
 	
@@ -52,6 +53,7 @@ private:
     * Draws a texture to a certain part of the screen
     */
 	void blitSurface(SDL_Texture* source, const SDL_FRect* sourceRectangle, const SDL_FRect* destinationRectangle);
+	void drawBoardContents(const std::shared_ptr<Board>& board);
 
 	SDL_Window* _window = nullptr;
 	SDL_Renderer* _renderer = nullptr;

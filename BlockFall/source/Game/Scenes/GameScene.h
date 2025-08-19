@@ -6,6 +6,8 @@
 #include "GameField.h"
 #include "InputManager.h"
 
+#include "EntityStructures.h"
+
 enum class GameState : uint8_t
 {
     Starting = 0,
@@ -36,18 +38,17 @@ public:
 private:
     void render() override;
 
-    void calculateBoardOccupiedCells();
+    void savePieceOnBoard();
     bool isValidRotation(const std::shared_ptr<Piece>& piece, const SDL_Point& position) const;
     bool canSoftDrop() const;
     bool canSelectNewPiece() const;
 
     GameState _gameState;
     std::unique_ptr<GameField> _gameField;
-    std::shared_ptr<Piece> _currentPiece;
+    std::shared_ptr<PieceData> _currentPieceData;
     std::shared_ptr<Piece> _previewNextPiece;
     std::unique_ptr<InputManager> _input;
     const ConfigData& _configData = Config::getInstance().getConfigData();
-    SDL_Point _currentPiecePosition;
     int currentLevel = 0;
     float _currentPieceTimeToDrop;
     bool _lockedSoftDrop = false;

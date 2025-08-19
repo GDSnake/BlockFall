@@ -1,10 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <SDL3/SDL_rect.h>
 #include "Config.h"
 
-#include "Piece.h"
+#include "EntityStructures.h"
 
 namespace BoardConsts
 {
@@ -19,12 +18,19 @@ namespace BoardConsts
 
 struct Board
 {
-    inline void updateBoard(const std::vector<std::tuple<int, std::shared_ptr<Block>>>& updateBlocks)
+    inline void savePieceOnBoard(const std::shared_ptr<PieceData>& piece )
     {
-        for (auto blockTuple : updateBlocks)
+        const SDL_Point& position = piece->position;
+        const auto& block = piece->piece->getBlock();
+        auto coordList = piece->piece->getBlocksCoord();
+        for (auto& coord : coordList)
         {
-            _board[std::get<0>(blockTuple)] = std::get<1>(blockTuple);
+            int index = ((position.y + coord.y) * BoardConsts::s_columns-1) + (position.x + coord.x);
+            index = index > _boardContent.size() - 1 ? _boardContent.size() - 1 : index; // Prevent out of bounds
+
+            _boardContent[index] = block;
         }
+        _isEmpty = false;
     }
 
     inline void updateBoardDimensions()
@@ -35,7 +41,8 @@ struct Board
 
 
 
-    inline std::array<std::shared_ptr<Block>, BoardConsts::s_boardSize> getBoard() { return _board; }
+    inline std::array<std::shared_ptr<Block>, BoardConsts::s_boardSize> getBoardContent() const { return _boardContent; }
+    inline bool isEmpty() const { return _isEmpty; }
     inline SDL_FPoint getBoardOrigin() const { return _boardTopLeftOrigin; }
     inline float getCellSize() const { return _cellSize; }
     inline float getBoardWidth() const { return BoardConsts::s_columns * (_cellSize + BoardConsts::s_lineThickness) - _cellSize;}
@@ -50,9 +57,6 @@ private:
     {
         float windowHeight = static_cast<float>(Config::getInstance().getConfigData().height) * 0.7f;
         _cellSize = windowHeight / BoardConsts::s_rows;
-
-        
-
     }
 
     inline void updateBoardTopLeftOrigin()
@@ -62,7 +66,8 @@ private:
         _boardTopLeftOrigin = { (windowSize.x * 0.3f), (windowSize.y * 0.2f) };
     }
 
-    std::array<std::shared_ptr<Block>, BoardConsts::s_boardSize> _board;
+    std::array<std::shared_ptr<Block>, BoardConsts::s_boardSize> _boardContent;
+    bool _isEmpty = true;
     float _cellSize = 20.0f;
     SDL_FPoint _boardTopLeftOrigin = { 0.0f, 0.0f };
 
