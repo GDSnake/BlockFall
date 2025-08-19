@@ -20,11 +20,43 @@ void GameScene::init()
     _gameField = std::make_unique<GameField>();
     _gameField->board->updateBoardDimensions();
     _input = std::make_unique<InputManager>();
+    _gen = std::mt19937(_rd());
+
 
 }
 
 void GameScene::handleInput(const float dt)
 {
+#if DEBUG_BUILD
+
+    if (_input->isKeyPressed(SDL_SCANCODE_1))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::I_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_2))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::J_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_3))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::L_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_4))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::S_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_5))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::Z_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_6))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::T_shape);
+    }
+        
+
+#endif // DEBUG_BUILD
+
     const float das = _gameField->das;
     const float arr = _gameField->arr;
 
@@ -32,6 +64,7 @@ void GameScene::handleInput(const float dt)
 
     if (_input->isKeyPressed(SDL_SCANCODE_N))
     {
+
         _currentPiece->rotateCW();
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
@@ -75,7 +108,6 @@ void GameScene::update(const float dt)
     _input->update(dt);
     if (canSelectNewPiece())
     {
-        std::mt19937 gen(_rd());
         std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
 
         if (_previewNextPiece)
@@ -85,10 +117,10 @@ void GameScene::update(const float dt)
         else
         {
             // First run: generate initial piece
-            PieceShapes randomShape = static_cast<PieceShapes>(dist(gen));
-            _currentPiece = std::make_unique<Piece>(randomShape);
+            PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
+            _currentPiece = std::make_shared<Piece>(randomShape);
         }
-        PieceShapes randomShape = static_cast<PieceShapes>(dist(gen));
+        PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
         _previewNextPiece = std::make_shared<Piece>(randomShape);
 
         _currentPiecePosition = BoardConsts::s_spawnGridPosition;
@@ -102,7 +134,7 @@ void GameScene::update(const float dt)
 
     if (_gameState == GameState::SoftDrop)
     {
-        if (_currentPieceTimeToDrop >= Config::getInstance().getConfigData().softDrop)
+        if (_currentPieceTimeToDrop >= _configData.softDrop)
         {
             if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
             {
@@ -119,7 +151,7 @@ void GameScene::update(const float dt)
 
     }
     else if (_gameState == GameState::Falling){
-        if (_currentPieceTimeToDrop >= Config::getInstance().getConfigData().speedLevels[currentLevel])
+        if (_currentPieceTimeToDrop >= _configData.speedLevels[currentLevel])
         {
             if (_currentPiecePosition.y < BoardConsts::s_rows - _currentPiece->getPieceArea().y)
             {
@@ -153,8 +185,8 @@ void GameScene::render()
     SDL_SetRenderDrawColor(Renderer::getInstance().getRenderer(), 255, 255, 255, 255);
     auto pieceBlocksCoord = _currentPiece->getBlocksCoord();
 
-    Renderer::getInstance().drawPiece(pieceBlocksCoord, _currentPiece, _gameField->board->getCellSize(), BoardConsts::s_lineThickness, _gameField->board->convertGridPointToPixel(_currentPiecePosition));
-    Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), _previewNextPiece, _gameField->previewWindowSize, BoardConsts::s_lineThickness, _gameField->previewZoneOrigin);
+    Renderer::getInstance().drawPiece(pieceBlocksCoord, _currentPiece, _gameField->board->getCellSize(), _gameField->board->convertGridPointToPixel(_currentPiecePosition));
+    Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), _previewNextPiece, _gameField->previewWindowSize, _gameField->previewZoneOrigin);
 
 
     if (_gameField->board) {

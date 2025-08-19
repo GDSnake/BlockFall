@@ -44,10 +44,12 @@ private:
     std::shared_ptr<Piece> _currentPiece;
     std::shared_ptr<Piece> _previewNextPiece;
     std::unique_ptr<InputManager> _input;
+    const ConfigData& _configData = Config::getInstance().getConfigData();
     SDL_Point _currentPiecePosition;
     int currentLevel = 0;
     float _currentPieceTimeToDrop;
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;
     std::random_device _rd;
+    std::mt19937 _gen;
 };

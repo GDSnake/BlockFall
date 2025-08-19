@@ -46,12 +46,12 @@ void Renderer::blitSurface(SDL_Texture* texture, const SDL_FRect* sourceRectangl
 
 }
 
-void Renderer::drawPiece(const std::span<SDL_Point>& pieceBlocksCoord, std::shared_ptr<Piece> piece, float squareSize, float paddingBetweenBlocks, SDL_FPoint origin)
+void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float squareSize, SDL_FPoint origin)
 {
     for (const auto& coord : pieceBlocksCoord)
     {
-        float xx = (static_cast<float>(coord.x) * squareSize) + origin.x + paddingBetweenBlocks;
-        float yy = (static_cast<float>(coord.y) * squareSize) + +origin.y + paddingBetweenBlocks;
+        float xx = (static_cast<float>(coord.x) * squareSize) + origin.x + BoardConsts::s_lineThickness;
+        float yy = (static_cast<float>(coord.y) * squareSize) + +origin.y + BoardConsts::s_lineThickness;
         SDL_FRect destinationRectangle {xx, yy ,squareSize, squareSize};
         
 
@@ -118,7 +118,7 @@ void Renderer::drawBoard(const Board& board)
 
 }
 
-void Renderer::drawPreviewWindow(const std::span<SDL_Point>& pieceBlocksCoord, std::shared_ptr<Piece> piece, float windowSize, float paddingBetweenBlocks, SDL_FPoint origin)
+void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, std::shared_ptr<Piece> piece, float windowSize, SDL_FPoint origin)
 {
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_FRect rect = {
@@ -128,7 +128,7 @@ void Renderer::drawPreviewWindow(const std::span<SDL_Point>& pieceBlocksCoord, s
         .h =windowSize
         };
     SDL_RenderRect(_renderer, &rect);
-    drawPiece(pieceBlocksCoord, piece, windowSize * 0.2f, paddingBetweenBlocks, SDL_FPoint (origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
+    drawPiece(pieceBlocksCoord, piece, windowSize * 0.2f, SDL_FPoint (origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
 }
 
 void Renderer::present()

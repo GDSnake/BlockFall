@@ -191,9 +191,9 @@ void Piece::createRotationI()
     _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_I_S_Z);
     _blocksCoord = {
         // horizontal
-        SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{3,1},
+        SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{3,0},
         // vertical
-        SDL_Point{2,0}, SDL_Point{2,1}, SDL_Point{2,2}, SDL_Point{2,3}
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{1,3}
     };
 }
 
@@ -202,14 +202,14 @@ void Piece::createRotationJ()
     _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_J_L_T);
 
     _blocksCoord = {
-        // up
-         SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
-        // right
-        SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{1,1}, SDL_Point{1,2},
         // down
         SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{2,2},
         // left
-        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{0,2}, SDL_Point{1,2}
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{0,2}, SDL_Point{1,2},
+        // up
+         SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
+        // right
+        SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{1,1}, SDL_Point{1,2}
     };
 }
 
@@ -257,13 +257,13 @@ void Piece::createRotationT()
 {
     _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_J_L_T);
     _blocksCoord = {
-        // up
-        SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
-        // right
-        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{1,2},
         // down
         SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{1,2},
         // left
-        SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{1,2}
+        SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{1,2},
+        // up
+        SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
+        // right
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{1,2}
     };
 }
