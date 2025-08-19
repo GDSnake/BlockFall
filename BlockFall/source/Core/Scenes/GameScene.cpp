@@ -64,8 +64,14 @@ void GameScene::handleInput(const float dt)
 
     if (_input->isKeyPressed(SDL_SCANCODE_N))
     {
-
+        int oldRotation = _currentPiece->getRotationIndex();
         _currentPiece->rotateCW();
+    
+        if (!isValidRotation(_currentPiece, _currentPiecePosition))
+        {
+            // revert
+            _currentPiece->setRotationIndex(oldRotation);
+        }
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
     {
@@ -198,6 +204,30 @@ void GameScene::render()
 void GameScene::calculateBoardOccupiedCells()
 {
 
+}
+
+bool GameScene::isValidRotation(const std::shared_ptr<Piece>& piece, const SDL_Point& pos) const
+{
+    auto coords = piece->getBlocksCoord();
+    for (const auto& block : coords)
+    {
+        int x = pos.x + block.x;
+        int y = pos.y + block.y;
+
+        // Check board bounds
+        if (x < 0 || x >= BoardConsts::s_columns ||
+            y < 0 || y >= BoardConsts::s_rows)
+        {
+            return false;
+        }
+
+        // Check collisions with existing blocks on board
+        //if (_gameField->board->isCellOccupied(x, y))
+        //{
+        //    return false;
+        //}
+    }
+    return true;
 }
 
 bool GameScene::canSoftDrop() const

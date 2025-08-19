@@ -29,6 +29,7 @@ public:
     void cleanup() override;
 
     inline std::string getName() const override { return "GameScene"; }
+
     void handleEvents(const SDL_Event& event) const;
     bool shouldQuit() const;
 
@@ -36,6 +37,7 @@ private:
     void render() override;
 
     void calculateBoardOccupiedCells();
+    bool isValidRotation(const std::shared_ptr<Piece>& piece, const SDL_Point& position) const;
     bool canSoftDrop() const;
     bool canSelectNewPiece() const;
 

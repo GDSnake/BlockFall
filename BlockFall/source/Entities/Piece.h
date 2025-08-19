@@ -40,6 +40,8 @@ public:
     // Rotation
     void rotateCW();   // clockwise
     void rotateCCW();  // counter-clockwise
+    inline int getRotationIndex() const { return _currentRotationIndex; }
+    inline void setRotationIndex(int index) { _currentRotationIndex = index; }
 
     PieceShapes getShape() const { return _shape; }
     std::shared_ptr<Block> getBlock() const;

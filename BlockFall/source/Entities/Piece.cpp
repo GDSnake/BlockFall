@@ -218,14 +218,14 @@ void Piece::createRotationL()
     _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_J_L_T);
 
     _blocksCoord = {
-        // up
-        SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
-        // right
-        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{2,2},
         // down
         SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{0,2},
         // left
-        SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}
+        SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2},
+        // up
+        SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
+        // right
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{2,2}
     };
 }
 
