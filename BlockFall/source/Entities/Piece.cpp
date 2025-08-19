@@ -235,9 +235,9 @@ void Piece::createRotationS()
 
     _blocksCoord = {
         // horizontal
-        SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{0,2}, SDL_Point{1,2},
+         SDL_Point{0,2}, SDL_Point{1,2}, SDL_Point{1,1}, SDL_Point{2,1},
         // vertical
-        SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{1,2}
+        SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1} , SDL_Point{1,2},
     };
 }
 
