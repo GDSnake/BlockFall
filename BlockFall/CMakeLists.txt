@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.15)
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# MSVC runtime: static link for release/debug
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
 
 project(BlockFall)
 
@@ -63,6 +67,127 @@ endif()
 
 include(FetchContent)
 
+# ------------------------------
+# Windows: download and extract zips
+# ------------------------------
+if (WIN32)
+    include(ExternalProject)
+
+    set(SDL3_URL       "https://github.com/libsdl-org/SDL/releases/download/release-3.2.18/SDL3-devel-3.2.18-VC.zip")
+    set(SDL3_IMAGE_URL "https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-devel-3.2.4-VC.zip")
+    #set(SDL3_MIXER_URL "https://github.com/libsdl-org/SDL_mixer/releases/download/release-3.2.4/SDL3_mixer-devel-3.2.4-VC.zip")
+
+    set(LIBS_DIR "${CMAKE_BINARY_DIR}/libs")
+    file(MAKE_DIRECTORY ${LIBS_DIR})
+
+    # Helper to download & extract
+    function(download_and_extract name url)
+        set(outdir "${LIBS_DIR}/${name}")
+        if(NOT EXISTS ${outdir})
+            message(STATUS "Downloading ${name}...")
+            file(DOWNLOAD ${url} ${LIBS_DIR}/${name}.zip SHOW_PROGRESS)
+            execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${LIBS_DIR}/${name}.zip
+                    WORKING_DIRECTORY ${LIBS_DIR})
+        endif()
+    endfunction()
+
+    download_and_extract("SDL3"       ${SDL3_URL})
+    download_and_extract("SDL3_image" ${SDL3_IMAGE_URL})
+    #download_and_extract("SDL3_mixer" ${SDL3_MIXER_URL})
+
+    # Paths inside the extracted zips
+    set(SDL3_DIR       "${LIBS_DIR}/SDL3")
+    set(SDL3_IMAGE_DIR "${LIBS_DIR}/SDL3_image")
+    #set(SDL3_MIXER_DIR "${LIBS_DIR}/SDL3_mixer")
+
+    target_include_directories(${PROJECT_NAME} PRIVATE
+            ${SDL3_DIR}/include
+            ${SDL3_IMAGE_DIR}/include
+            ${SDL3_MIXER_DIR}/include
+    )
+
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            ${SDL3_DIR}/lib/x64/SDL3.lib
+            ${SDL3_IMAGE_DIR}/lib/x64/SDL3_image.lib
+            ${SDL3_MIXER_DIR}/lib/x64/SDL3_mixer.lib
+    )
+
+    # Copy DLLs
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${SDL3_DIR}/lib/x64/SDL3.dll
+            ${SDL3_IMAGE_DIR}/lib/x64/SDL3_image.dll
+            ${SDL3_MIXER_DIR}/lib/x64/SDL3_mixer.dll
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+
+    # ------------------------------
+    # macOS: Fetch from GitHub
+    # ------------------------------
+elseif(APPLE)
+    FetchContent_Declare(
+            SDL3
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-3.2.20
+    )
+    FetchContent_MakeAvailable(SDL3)
+
+    FetchContent_Declare(
+            SDL3_image
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+            GIT_TAG release-3.2.4
+    )
+    FetchContent_MakeAvailable(SDL3_image)
+
+    FetchContent_Declare(
+            SDL3_mixer
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+            GIT_TAG release-3.2.4
+    )
+    #FetchContent_MakeAvailable(SDL3_mixer)
+
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            SDL3::SDL3
+            SDL3_image::SDL3_image
+            SDL3_mixer::SDL3_mixer
+    )
+
+    # ------------------------------
+    # Linux: same as macOS
+    # ------------------------------
+else()
+    FetchContent_Declare(
+            SDL3
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+            GIT_TAG release-3.2.20
+    )
+    FetchContent_MakeAvailable(SDL3)
+
+    FetchContent_Declare(
+            SDL3_image
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_image.git
+            GIT_TAG release-3.2.4
+    )
+    FetchContent_MakeAvailable(SDL3_image)
+
+    FetchContent_Declare(
+            SDL3_mixer
+            GIT_REPOSITORY https://github.com/libsdl-org/SDL_mixer.git
+            GIT_TAG release-3.2.4
+    )
+    #FetchContent_MakeAvailable(SDL3_mixer)
+
+    target_link_libraries(${PROJECT_NAME}
+            PRIVATE
+            SDL3::SDL3
+            SDL3_image::SDL3_image
+            SDL3_mixer::SDL3_mixer
+    )
+endif()
+
+
 # ---------------------------------------------------------
 # JSON Setup (download if missing, otherwise use local)
 # ---------------------------------------------------------
@@ -85,229 +210,6 @@ else()
     target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/libs/JSON/include)
 endif()
 
-# ---------------------------------------------------------
-# SDL3 Setup (download if missing)
-# ---------------------------------------------------------
-set(SDL3_DIR "${CMAKE_SOURCE_DIR}/libs/SDL3")
-
-if (EXISTS "${SDL3_DIR}/include/SDL3/SDL.h")
-    message(STATUS "Using local SDL3 at ${SDL3_DIR}")
-else()
-    message(STATUS "Downloading SDL3 precompiled binaries ...")
-    file(MAKE_DIRECTORY ${SDL3_DIR})
-
-    if (WIN32)
-        set(SDL3_URL https://github.com/libsdl-org/SDL/releases/download/release-3.2.18/SDL3-devel-3.2.18-VC.zip)
-    else()
-        set(SDL3_URL https://github.com/libsdl-org/SDL/releases/download/release-3.2.18/SDL3-3.2.18.tar.gz)
-    endif()
-
-    set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
-    FetchContent_Declare(
-        SDL3
-        URL ${SDL3_URL}
-        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    )
-    FetchContent_Populate(SDL3)
-
-    message(STATUS "SDL3 downloaded to: ${sdl3_SOURCE_DIR}")
-    file(GLOB CONTENTS "${sdl3_SOURCE_DIR}/*")
-    message(STATUS "Contents: ${CONTENTS}")
-
-    set(SDL3_COPY_DIR "")
-    if (EXISTS "${sdl3_SOURCE_DIR}/include/SDL3/SDL.h")
-        set(SDL3_COPY_DIR "${sdl3_SOURCE_DIR}")
-    else()
-        foreach(child ${CONTENTS})
-            if (EXISTS "${child}/include/SDL3/SDL.h")
-                set(SDL3_COPY_DIR "${child}")
-                break()
-            endif()
-        endforeach()
-    endif()
-
-    if (SDL3_COPY_DIR STREQUAL "")
-        message(FATAL_ERROR "SDL3 extraction failed: include/SDL3/SDL.h not found.")
-    else()
-        message(STATUS "Found SDL3 extracted in: ${SDL3_COPY_DIR}")
-    endif()
-
-    file(COPY "${SDL3_COPY_DIR}/include" DESTINATION "${SDL3_DIR}")
-    if (EXISTS "${SDL3_COPY_DIR}/lib")
-        file(COPY "${SDL3_COPY_DIR}/lib" DESTINATION "${SDL3_DIR}")
-    endif()
-    if (EXISTS "${SDL3_COPY_DIR}/bin")
-        file(COPY "${SDL3_COPY_DIR}/bin" DESTINATION "${SDL3_DIR}")
-    endif()
-endif()
-
-# ---------------------------------------------------------
-# SDL3_image Setup (download if missing)
-# ---------------------------------------------------------
-
-if (WIN32)
-    set(SDL3_IMAGE_URL https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-devel-3.2.4-VC.zip)
-else()
-    set(SDL3_IMAGE_URL https://github.com/libsdl-org/SDL_image/releases/download/release-3.2.4/SDL3_image-3.2.4.tar.gz)
-endif()
-
-set(SDL3_IMAGE_DIR "${CMAKE_SOURCE_DIR}/libs/SDL3_image")
-
-if (EXISTS "${SDL3_IMAGE_DIR}/include/SDL3/SDL_image.h")
-    message(STATUS "Using local SDL3_image at ${SDL3_IMAGE_DIR}")
-else()
-    message(STATUS "Downloading SDL3_image precompiled binaries ...")
-
-    FetchContent_Declare(
-        SDL3_image
-        URL ${SDL3_IMAGE_URL}
-        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    )
-    FetchContent_Populate(SDL3_image)
-
-    # Copy includes and libs into project libs folder
-    file(MAKE_DIRECTORY ${SDL3_IMAGE_DIR})
-    file(COPY "${sdl3_image_SOURCE_DIR}/include" DESTINATION "${SDL3_IMAGE_DIR}")
-    if (EXISTS "${sdl3_image_SOURCE_DIR}/lib")
-        file(COPY "${sdl3_image_SOURCE_DIR}/lib" DESTINATION "${SDL3_IMAGE_DIR}")
-    endif()
-    if (EXISTS "${sdl3_image_SOURCE_DIR}/bin")
-        file(COPY "${sdl3_image_SOURCE_DIR}/bin" DESTINATION "${SDL3_IMAGE_DIR}")
-    endif()
-endif()
-
-# Include & link SDL3_image
-target_include_directories(${PROJECT_NAME} PRIVATE ${SDL3_IMAGE_DIR}/include)
-
-if (WIN32)
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(SDL3_IMAGE_LIB_DIR "${SDL3_IMAGE_DIR}/lib/x64")
-    else()
-        set(SDL3_IMAGE_LIB_DIR "${SDL3_IMAGE_DIR}/lib/x86")
-    endif()
-
-    target_link_directories(${PROJECT_NAME} PRIVATE ${SDL3_IMAGE_LIB_DIR})
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_image)
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL3_IMAGE_LIB_DIR}/SDL3_image.dll"
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    )
-else()
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_image)
-endif()
-
-# ---------------------------------------------------------
-# SDL3_mixer Setup (download if missing)
-# ---------------------------------------------------------
- set(SDL3_MIXER_DIR "${CMAKE_SOURCE_DIR}/libs/SDL3")
-
- if (EXISTS "${SDL3_MIXER_DIR}/include/SDL3/SDL_mixer.h")
-     message(STATUS "Using local SDL3_mixer at ${SDL2_MIXER_DIR}")
- endif()
-# else()
-#     message(STATUS "Downloading SDL2_mixer precompiled binaries ...")
-#     file(MAKE_DIRECTORY ${SDL2_MIXER_DIR})
-
-
-#     if (WIN32)
-#         set(SDL2_MIXER_URL https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-devel-2.8.1-VC.zip)
-#     else()
-#         set(SDL2_MIXER_URL https://github.com/libsdl-org/SDL_mixer/releases/download/release-2.8.1/SDL2_mixer-2.8.1.tar.gz)
-#     endif()
-
-#     FetchContent_Declare(
-#         SDL2_mixer
-#         URL ${SDL2_MIXER_URL}
-#         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-#     )
-    
-#     set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
-
-#     FetchContent_Declare(
-#         SDL2_mixer
-#         URL ${SDL2_MIXER_URL}
-#         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-#     )
-#     FetchContent_MakeAvailable(SDL2_mixer)
-
-#     message(STATUS "SDL2_mixer downloaded to: ${sdl2_mixer_SOURCE_DIR}")
-
-#     # Recursively find include/SDL2/SDL_mixer.h
-#     file(GLOB_RECURSE MIXER_HEADER_PATH "${sdl2_mixer_SOURCE_DIR}/include/SDL_mixer.h")
-
-#     if (NOT MIXER_HEADER_PATH)
-#         message(FATAL_ERROR "SDL2_mixer extraction failed: include/SDL3/SDL_mixer.h not found.")
-#     endif()
-
-#     # Get directory that contains include
-#     get_filename_component(MIXER_INCLUDE_DIR "${MIXER_HEADER_PATH}" DIRECTORY)
-#     while(NOT "${MIXER_INCLUDE_DIR}" STREQUAL "${sdl2_mixer_SOURCE_DIR}")
-#         if (EXISTS "${MIXER_INCLUDE_DIR}/include/SDL3/SDL_mixer.h")
-#             break()
-#         endif()
-#         get_filename_component(MIXER_INCLUDE_DIR "${MIXER_INCLUDE_DIR}" DIRECTORY)
-#     endwhile()
-
-#     message(STATUS "Found SDL2_mixer extracted in: ${MIXER_INCLUDE_DIR}")
-
-# file(COPY "${MIXER_INCLUDE_DIR}/include/SDL_mixer.h" DESTINATION "${SDL3_DIR}/include/SDL3")    if (EXISTS "${MIXER_INCLUDE_DIR}/lib")
-#         file(COPY "${MIXER_INCLUDE_DIR}/lib" DESTINATION "${SDL2_MIXER_DIR}")
-#     endif()
-#     if (EXISTS "${MIXER_INCLUDE_DIR}/bin")
-#         file(COPY "${MIXER_INCLUDE_DIR}/bin" DESTINATION "${SDL2_MIXER_DIR}")
-#     endif()
-# endif()
-
-# ---------------------------------------------------------
-# SDL3 Linking
-# ---------------------------------------------------------
-if (WIN32)
-    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-        set(ARCH_DIR "x64")
-    else()
-        set(ARCH_DIR "x86")
-    endif()
-
-    include_directories(${SDL3_DIR}/include)
-
-    set(SDL3_LIB_DIR "${SDL3_DIR}/lib/${ARCH_DIR}")
-
-    target_link_directories(${PROJECT_NAME} PRIVATE ${SDL3_LIB_DIR})
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3)
-
-    if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(SDL_DLL "SDL3d.dll")
-    else()
-        set(SDL_DLL "SDL3.dll")
-    endif()
-
-    if (NOT EXISTS "${SDL3_LIB_DIR}/${SDL_DLL}")
-        set(SDL_DLL "SDL3.dll")
-    endif()
-
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "${SDL3_LIB_DIR}/${SDL_DLL}"
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>
-    )
-else()
-    find_package(SDL3 REQUIRED CONFIG)
-    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3::SDL3)
-endif()
-
-set(SDL3_MIXER_LIB_DIR "${SDL3_DIR}/lib/${ARCH_DIR}")
-
-
-target_include_directories(BlockFall PRIVATE ${SDL3_MIXER_DIR}/include)
-target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_mixer)
-
-add_custom_command(TARGET BlockFall POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${SDL3_MIXER_LIB_DIR}/SDL3_mixer.dll"
-        $<TARGET_FILE_DIR:BlockFall>
-)
 
 # ---------------------------------------------------------
 # Copy config.json after build
