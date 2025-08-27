@@ -204,9 +204,9 @@ void Piece::createRotationI()
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
     _deltaOriginforEachRotation = {
         // horizontal
-        SDL_Point{0,0},
+        SDL_Point{-1,0},
         // vertical
-        SDL_Point{0,0},
+        SDL_Point{1,0},
     };
 }
 
@@ -245,11 +245,11 @@ void Piece::createRotationL()
         // down
         SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{0,2},
         // left
-        SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{1,2},SDL_Point{1,3},
+        SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{1,1},SDL_Point{1,2},
         // up
-        SDL_Point{2,1}, SDL_Point{0,2}, SDL_Point{1,2}, SDL_Point{2,2},
+        SDL_Point{2,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{2,1},
         // right
-        SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{1,3}, SDL_Point{2,3}
+        SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{2,2}
     };
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
     _deltaOriginforEachRotation = {
@@ -265,7 +265,7 @@ void Piece::createRotationL()
 
 }
 
-void Piece::createRotationS()
+void Piece::createRotationS() // Working good
 {
     _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_I_S_Z);
 
@@ -284,7 +284,7 @@ void Piece::createRotationS()
     };
 }
 
-void Piece::createRotationZ()
+void Piece::createRotationZ()// Working good
 {
     _blocksCoord.reserve(PieceConsts::numBlocks * PieceConsts::rotationsNumber_I_S_Z);
 
