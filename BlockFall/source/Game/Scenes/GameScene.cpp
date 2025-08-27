@@ -63,29 +63,34 @@ void GameScene::handleInput(const float dt)
 
     if (_input->isKeyPressed(SDL_SCANCODE_N))
     {
-        int oldRotation = _currentPieceData->piece->getRotationIndex();
         _currentPieceData->piece->rotateCW();
     
-        if (!isValidRotation(*_currentPieceData->piece, _currentPieceData->position))
+        if (!isValidRotation(*_currentPieceData->piece, _currentPieceData->renderingPosition))
         {
             // revert
-            _currentPieceData->piece->setRotationIndex(oldRotation);
+            _currentPieceData->piece->rotateCCW();
+        }
+        else
+        {
+            _currentPieceData->logicalPosition.x += _currentPieceData->piece->getCurrentDeltaOrigin().x;
         }
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
     {
-        if (_currentPieceData->position.x > 0)
+        if (_currentPieceData->logicalPosition.x > 0)
         {
             movingLeft = true;
-            _currentPieceData->position.x -= 1;
+            _currentPieceData->logicalPosition.x -= 1;
+            _currentPieceData->renderingPosition.x -= 1;
         }
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_D, das, arr))
     {
-        if (_currentPieceData->position.x < BoardConsts::s_columns - _currentPieceData->piece->getPieceArea().x)
+        if (_currentPieceData->logicalPosition.x < BoardConsts::s_columns - _currentPieceData->piece->getPieceArea().x)
         {
             movingRight = true;
-            _currentPieceData->position.x += 1;
+            _currentPieceData->logicalPosition.x += 1;
+            _currentPieceData->renderingPosition.x += 1;
         }
     }
     _movingHorizontally = movingLeft || movingRight;
@@ -93,9 +98,10 @@ void GameScene::handleInput(const float dt)
 
     if (_input->isSoftDropping(SDL_SCANCODE_S))
     {
-        if (canSoftDrop() && _currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+        if (canSoftDrop() && _currentPieceData->logicalPosition.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
         {
-            _currentPieceData->position.y += 1;
+            _currentPieceData->logicalPosition.y++;
+            _currentPieceData->renderingPosition.y++;
             _gameState = GameState::SoftDrop;
             _currentPieceTimeToDrop = 0.0f;
         }
@@ -128,7 +134,7 @@ void GameScene::update(const float dt)
         PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
         _previewNextPiece = std::make_shared<Piece>(randomShape);
 
-        _currentPieceData->position = BoardConsts::s_spawnGridPosition;
+        _currentPieceData->logicalPosition = _currentPieceData->renderingPosition = BoardConsts::s_spawnGridPosition;
         _currentPieceTimeToDrop = 0.0f;
         _gameState = GameState::Falling;
     }
@@ -141,9 +147,11 @@ void GameScene::update(const float dt)
     {
         if (_currentPieceTimeToDrop >= _configData.softDrop)
         {
-            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+            if (_currentPieceData->logicalPosition.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
-                _currentPieceData->position.y += 1;
+                _currentPieceData->logicalPosition.y++;
+                _currentPieceData->renderingPosition.y++;
+
                 _currentPieceTimeToDrop = 0.0f;
             }
             else
@@ -158,9 +166,10 @@ void GameScene::update(const float dt)
     else if (_gameState == GameState::Falling){
         if (_currentPieceTimeToDrop >= _configData.speedLevels[currentLevel])
         {
-            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+            if (_currentPieceData->logicalPosition.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
-                _currentPieceData->position.y += 1;
+                _currentPieceData->logicalPosition.y++;
+                _currentPieceData->renderingPosition.y++;
                 _currentPieceTimeToDrop = 0.0f;
             }
             else
@@ -191,6 +200,8 @@ void GameScene::render()
     auto pieceBlocksCoord = _currentPieceData->piece->getBlocksCoord();
 
     Renderer::getInstance().drawPiece(pieceBlocksCoord, *_currentPieceData->piece, _gameField.board->getCellSize(), _gameField.board->convertGridPointToPixel(_currentPieceData->position));
+
+    Renderer::getInstance().drawPiece(pieceBlocksCoord, *_currentPieceData->piece, _gameField.board->getCellSize(), _gameField.board->convertGridPointToPixel(_currentPieceData->renderingPosition));
     Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), *_previewNextPiece, _gameField.previewWindowSize, _gameField.previewZoneOrigin);
 
 

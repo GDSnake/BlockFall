@@ -35,6 +35,7 @@ public:
     ~Piece();
 
     std::span<SDL_Point> getBlocksCoord();
+    SDL_Point getCurrentDeltaOrigin() const;
     SDL_Point getPieceArea() const;
 
     // Rotation
@@ -62,6 +63,8 @@ private:
     void createRotationT();
 
     std::vector<SDL_Point> _blocksCoord;
+    std::vector<SDL_Point> _deltaOriginforEachRotation;
+
     SDL_Point _pivot;   // pivot for rotation
     SDL_Point _area;
     int _currentRotationIndex;

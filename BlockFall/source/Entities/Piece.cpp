@@ -125,6 +125,11 @@ std::span<SDL_Point> Piece::getBlocksCoord()
     return std::span<SDL_Point>(_blocksCoord).subspan(start, PieceConsts::numBlocks);
 }
 
+SDL_Point Piece::getCurrentDeltaOrigin() const
+{
+    return _deltaOriginforEachRotation[_currentRotationIndex];
+}
+
 SDL_Point Piece::getPieceArea() const
 {
     return _area;
@@ -195,6 +200,7 @@ void Piece::createRotationI()
         // vertical
         SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{1,3}
     };
+    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
 }
 
 void Piece::createRotationJ()
@@ -211,6 +217,8 @@ void Piece::createRotationJ()
         // right
         SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{1,1}, SDL_Point{1,2}
     };
+    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
+
 }
 
 void Piece::createRotationL()
@@ -227,6 +235,8 @@ void Piece::createRotationL()
         // right
         SDL_Point{1,1}, SDL_Point{1,2}, SDL_Point{1,3}, SDL_Point{2,3}
     };
+    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
+
 }
 
 void Piece::createRotationS()
@@ -239,6 +249,8 @@ void Piece::createRotationS()
         // vertical
         SDL_Point{0,0}, SDL_Point{0,1}, SDL_Point{1,1} , SDL_Point{1,2},
     };
+    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
+
 }
 
 void Piece::createRotationZ()
@@ -251,6 +263,7 @@ void Piece::createRotationZ()
         // vertical
         SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1}, SDL_Point{0,2}
     };
+    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
 }
 
 void Piece::createRotationT()
@@ -266,4 +279,17 @@ void Piece::createRotationT()
         // right
         SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1}, SDL_Point{1,2}
     };
+    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
+
+    _deltaOriginforEachRotation = {
+        // down
+        SDL_Point{-1,2},
+        // left
+        SDL_Point{0,2},
+        // up
+        SDL_Point{0,1},
+        // right
+        SDL_Point{1,2}
+    };
+    
 }
