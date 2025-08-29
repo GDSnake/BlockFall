@@ -73,6 +73,7 @@ void GameScene::handleInput(const float dt)
         else
         {
             _currentPieceData->logicalPosition.x += _currentPieceData->piece->getCurrentDeltaOrigin().x;
+            _currentPieceData->logicalPosition.y += _currentPieceData->piece->getCurrentDeltaOrigin().y;
         }
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
@@ -135,6 +136,7 @@ void GameScene::update(const float dt)
         _previewNextPiece = std::make_shared<Piece>(randomShape);
 
         _currentPieceData->logicalPosition = _currentPieceData->renderingPosition = BoardConsts::s_spawnGridPosition;
+        _currentPieceData->logicalPosition.y += -_currentPieceData->piece->getDeltaY();
         _currentPieceTimeToDrop = 0.0f;
         _gameState = GameState::Falling;
     }

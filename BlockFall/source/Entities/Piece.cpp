@@ -42,7 +42,6 @@ std::shared_ptr<Block> Piece::getBlock() const
 void Piece::createI()
 {
     createRotationI();
-    _pivot = { 1,0 }; // 2nd block is pivot
     _area = { 4,1 };
     _shape = PieceShapes::I_shape;
     _block = SpriteManager::getInstance().getBlock(BlockTypes::Cyan);
@@ -53,7 +52,6 @@ void Piece::createI()
 void Piece::createJ()
 {
     createRotationJ();
-    _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::J_shape;
     _block = SpriteManager::getInstance().getBlock(BlockTypes::Blue);
@@ -64,7 +62,6 @@ void Piece::createJ()
 void Piece::createL()
 {
     createRotationL();
-    _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::L_shape;
     _block = SpriteManager::getInstance().getBlock(BlockTypes::Orange);
@@ -77,7 +74,6 @@ void Piece::createO()
     _blocksCoord.reserve(PieceConsts::numBlocks);
     _blocksCoord = { SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{0,1}, SDL_Point{1,1} };
     _deltaOriginforEachRotation = { SDL_Point{0,0} }; // no rotation
-    _pivot = { 0,0 }; // irrelevant for square
     _area = { 2,2 };
     _shape = PieceShapes::O_shape;
     _block = SpriteManager::getInstance().getBlock(BlockTypes::Yellow);
@@ -88,7 +84,6 @@ void Piece::createO()
 void Piece::createS()
 {
     createRotationS();
-    _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::S_shape;
     _block = SpriteManager::getInstance().getBlock(BlockTypes::Green);
@@ -99,7 +94,6 @@ void Piece::createS()
 void Piece::createZ()
 {
     createRotationZ();
-    _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::Z_shape;
     _block = SpriteManager::getInstance().getBlock(BlockTypes::Red);
@@ -110,7 +104,6 @@ void Piece::createZ()
 void Piece::createT()
 {
     createRotationT();
-    _pivot = { 1,1 };
     _area = { 3,2 };
     _shape = PieceShapes::T_shape;
     _block = SpriteManager::getInstance().getBlock(BlockTypes::Purple);
@@ -204,10 +197,11 @@ void Piece::createRotationI()
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
     _deltaOriginforEachRotation = {
         // horizontal
-        SDL_Point{-1,0},
+        SDL_Point{-1,2},
         // vertical
-        SDL_Point{1,0},
+        SDL_Point{1,-2},
     };
+    _deltaY = -2;
 }
 
 void Piece::createRotationJ() // Working good
@@ -227,14 +221,15 @@ void Piece::createRotationJ() // Working good
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
     _deltaOriginforEachRotation = {
         // down
-        SDL_Point{-1,0},
+        SDL_Point{-1,1},
         // left
-        SDL_Point{0,0},
+        SDL_Point{0,-1},
         // up
         SDL_Point{0,0},
         // right
         SDL_Point{1,0}
     };
+    _deltaY = -1;
 }
 
 void Piece::createRotationL() // Working Good
@@ -254,14 +249,15 @@ void Piece::createRotationL() // Working Good
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
     _deltaOriginforEachRotation = {
         // down
-        SDL_Point{-1,0},
+        SDL_Point{-1,1},
         // left
-        SDL_Point{0,0},
+        SDL_Point{0,-1},
         // up
         SDL_Point{0,0},
         // right
         SDL_Point{1,0}
     };
+    _deltaY = -1;
 
 }
 
@@ -278,10 +274,11 @@ void Piece::createRotationS() // Working good
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
     _deltaOriginforEachRotation = {
         // horizontal
-        SDL_Point{0,0},
+        SDL_Point{0,1},
         // vertical
-        SDL_Point{0,0},
+        SDL_Point{0,-1},
     };
+    _deltaY = -1;
 }
 
 void Piece::createRotationZ()// Working good
@@ -297,10 +294,11 @@ void Piece::createRotationZ()// Working good
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
     _deltaOriginforEachRotation = {
         // horizontal
-        SDL_Point{0,0},
+        SDL_Point{0,1},
         // vertical
-        SDL_Point{0,0},
+        SDL_Point{0,-1},
     };
+    _deltaY = -1;
 }
 
 void Piece::createRotationT() // Working good
@@ -318,15 +316,17 @@ void Piece::createRotationT() // Working good
     };
     _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
 
+    _deltaY = -1;
+
     _deltaOriginforEachRotation = {
         // down
-        SDL_Point{-1,2},
+        SDL_Point{-1,1},
         // left
-        SDL_Point{0,2},
+        SDL_Point{0,-1},
         // up
-        SDL_Point{0,1},
+        SDL_Point{0,0},
         // right
-        SDL_Point{1,2}
+        SDL_Point{1,0}
     };
     
 }

@@ -43,6 +43,7 @@ public:
     void rotateCCW();  // counter-clockwise
     inline int getRotationIndex() const { return _currentRotationIndex; }
     inline void setRotationIndex(int index) { _currentRotationIndex = index; }
+    inline int getDeltaY() const { return _deltaY; }
 
     PieceShapes getShape() const { return _shape; }
     std::shared_ptr<Block> getBlock() const;
@@ -65,7 +66,7 @@ private:
     std::vector<SDL_Point> _blocksCoord;
     std::vector<SDL_Point> _deltaOriginforEachRotation;
 
-    SDL_Point _pivot;   // pivot for rotation
+    int _deltaY = 0;
     SDL_Point _area;
     int _currentRotationIndex;
     std::shared_ptr<Block> _block;
