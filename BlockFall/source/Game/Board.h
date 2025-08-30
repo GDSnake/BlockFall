@@ -9,6 +9,7 @@ namespace BoardConsts
 {
     static constexpr size_t s_rows = 20;
     static constexpr size_t s_columns = 10;
+    static constexpr int hiddenRows = 2; // Rows that are hidden above the visible play area
 
     static constexpr size_t s_boardSize = s_rows * s_columns;
     static constexpr float s_lineThickness = 3.0f;
@@ -27,7 +28,9 @@ struct Board
         const SDL_Point& deltaOrigin = pieceData.piece->getCurrentDeltaOrigin();
         for (auto& coord : coordList)
         {
-            int index = ((position.y - deltaOrigin.y + coord.y) * BoardConsts::s_columns) + (position.x - deltaOrigin.x + coord.x);
+            SDL_Point targetPosition = { position.x - deltaOrigin.x + coord.x, position.y - deltaOrigin.y + coord.y };
+            int index = convertPieceCoordToArrayIndex(targetPosition);
+            
             assert(index < BoardConsts::s_boardSize && index >= 0);
 
             _boardContent[index] = block;
@@ -50,6 +53,11 @@ struct Board
     inline SDL_FPoint convertGridPointToPixel(const SDL_Point& coord) const
     {
         return { _boardTopLeftOrigin.x + (static_cast<float>(coord.x) * _cellSize - BoardConsts::s_lineThickness) , _boardTopLeftOrigin.y + (static_cast<float>(coord.y) * _cellSize - BoardConsts::s_lineThickness) };
+    }
+
+    inline int convertPieceCoordToArrayIndex(const SDL_Point& position) const
+    {
+        return (position.y * BoardConsts::s_columns) + position.x;
     }
 
 #if DEBUG_BUILD

@@ -95,6 +95,11 @@ void GameScene::handleInput(const float dt)
         {
             movingLeft = true;
             _currentPieceData->position.x -= 1;
+            if (_gameField.willHitBlockOnBoard(_currentPieceData))
+            {
+                // Check if moving left caused a collision, if so revert
+                _currentPieceData->position.x += 1;
+            }
         }
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_D, das, arr))
@@ -103,6 +108,11 @@ void GameScene::handleInput(const float dt)
         {
             movingRight = true;
             _currentPieceData->position.x += 1;
+            if (_gameField.willHitBlockOnBoard(_currentPieceData))
+            {
+                // Check if moving right caused a collision, if so revert
+                _currentPieceData->position.x -= 1;
+            }
         }
     }
     _movingHorizontally = movingLeft || movingRight;
@@ -163,14 +173,21 @@ void GameScene::update(const float dt)
             if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
                 _currentPieceData->position.y++;
-
                 _currentPieceTimeToDrop = 0.0f;
+                if (_gameField.willHitBlockOnBoard(_currentPieceData))
+                {
+                    _currentPieceData->position.y--;
+                    _gameState = GameState::Spawning;
+                }
             }
             else
             {
                 _gameState = GameState::Spawning;
+            }
+
+            if (_gameState == GameState::Spawning)
+            {
                 _lockedSoftDrop = true;
-                savePieceOnBoard();
             }
         }
 
@@ -184,6 +201,11 @@ void GameScene::update(const float dt)
                 if (!_freezeFall) {
 #endif
                     _currentPieceData->position.y++;
+                    if (_gameField.willHitBlockOnBoard(_currentPieceData))
+                    {
+                        _currentPieceData->position.y--;
+                        _gameState = GameState::Spawning;
+                    }
 #if DEBUG_BUILD
                 }
 #endif
@@ -192,9 +214,13 @@ void GameScene::update(const float dt)
             else
             {
                 _gameState = GameState::Spawning;
-                savePieceOnBoard();
             }
         }
+    }
+
+    if (_gameState == GameState::Spawning)
+    {
+        savePieceOnBoard();
     }
 
     render();
