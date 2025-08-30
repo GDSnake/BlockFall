@@ -6,6 +6,5 @@
 struct PieceData
 {
     std::shared_ptr<Piece> piece = nullptr;
-    SDL_Point logicalPosition = { -1, -1};
-    SDL_Point renderingPosition = { -1, -1 };
+    SDL_Point position = { -1, -1};
 };

@@ -1,6 +1,23 @@
 #include "Piece.h"
 #include "SpriteManager.h"
 
+static std::vector<SDL_Point> calculateMinimumValues(const std::vector<SDL_Point>& coordVector)
+{
+    std::vector<SDL_Point> result;
+    result.reserve(coordVector.size()/4);
+    for (int i = 0; i < coordVector.size(); i += 4)
+    {
+        SDL_Point tempPoint = { INT_MAX, INT_MAX };
+        for (int j = i; j < i + 4; ++j)
+        {
+            tempPoint.x = std::min(tempPoint.x, coordVector[j].x);
+            tempPoint.y = std::min(tempPoint.y, coordVector[j].y);
+        }
+        result.emplace_back(tempPoint);
+    }
+    return result;
+}
+
 Piece::Piece(PieceShapes shape)
 {
     _currentRotationIndex = 0;
@@ -194,13 +211,7 @@ void Piece::createRotationI()
         // vertical
         SDL_Point{1,-2}, SDL_Point{1,-1}, SDL_Point{1,0}, SDL_Point{1,1}
     };
-    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
-    _deltaOriginforEachRotation = {
-        // horizontal
-        SDL_Point{-1,2},
-        // vertical
-        SDL_Point{1,-2},
-    };
+    _deltaOriginforEachRotation = calculateMinimumValues(_blocksCoord);
 }
 
 void Piece::createRotationJ() // Working good
@@ -217,17 +228,7 @@ void Piece::createRotationJ() // Working good
         // right
         SDL_Point{1,-1}, SDL_Point{2,-1}, SDL_Point{1,0}, SDL_Point{1,1}
     };
-    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
-    _deltaOriginforEachRotation = {
-        // down
-        SDL_Point{-1,1},
-        // left
-        SDL_Point{0,-1},
-        // up
-        SDL_Point{0,0},
-        // right
-        SDL_Point{1,0}
-    };
+    _deltaOriginforEachRotation = calculateMinimumValues(_blocksCoord);
 }
 
 void Piece::createRotationL() // Working Good
@@ -244,17 +245,8 @@ void Piece::createRotationL() // Working Good
         // right
         SDL_Point{1,-1}, SDL_Point{1,0}, SDL_Point{1,1}, SDL_Point{2,1}
     };
-    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
-    _deltaOriginforEachRotation = {
-        // down
-        SDL_Point{-1,1},
-        // left
-        SDL_Point{0,-1},
-        // up
-        SDL_Point{0,0},
-        // right
-        SDL_Point{1,0}
-    };
+    _deltaOriginforEachRotation = calculateMinimumValues(_blocksCoord);
+
 
 }
 
@@ -268,13 +260,7 @@ void Piece::createRotationS() // Working good
         // vertical
         SDL_Point{0,-1}, SDL_Point{0,0}, SDL_Point{1,0} , SDL_Point{1,1},
     };
-    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
-    _deltaOriginforEachRotation = {
-        // horizontal
-        SDL_Point{0,1},
-        // vertical
-        SDL_Point{0,-1},
-    };
+    _deltaOriginforEachRotation = calculateMinimumValues(_blocksCoord);
 }
 
 void Piece::createRotationZ()// Working good
@@ -287,13 +273,7 @@ void Piece::createRotationZ()// Working good
         // vertical
         SDL_Point{1,-1}, SDL_Point{0,0}, SDL_Point{1,0}, SDL_Point{0,1}
     };
-    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_I_S_Z);
-    _deltaOriginforEachRotation = {
-        // horizontal
-        SDL_Point{0,1},
-        // vertical
-        SDL_Point{0,-1},
-    };
+    _deltaOriginforEachRotation = calculateMinimumValues(_blocksCoord);
 }
 
 void Piece::createRotationT() // Working good
@@ -309,17 +289,6 @@ void Piece::createRotationT() // Working good
         // right
         SDL_Point{1,-1}, SDL_Point{1,0}, SDL_Point{2,0}, SDL_Point{1,1}
     };
-    _deltaOriginforEachRotation.reserve(PieceConsts::rotationsNumber_J_L_T);
 
-    _deltaOriginforEachRotation = {
-        // down
-        SDL_Point{-1,1},
-        // left
-        SDL_Point{0,-1},
-        // up
-        SDL_Point{0,0},
-        // right
-        SDL_Point{1,0}
-    };
-    
+    _deltaOriginforEachRotation = calculateMinimumValues(_blocksCoord);
 }

@@ -20,7 +20,7 @@ struct Board
 {
     inline void savePieceOnBoard(const PieceData& piece )
     {
-        const SDL_Point& position = piece.renderingPosition;
+        const SDL_Point& position = piece.position;
         const auto& block = piece.piece->getBlock();
         auto coordList = piece.piece->getBlocksCoord();
         for (auto& coord : coordList)

@@ -7,6 +7,12 @@
 #include "Piece.h"
 #include "SpriteManager.h"
 
+static void applyOriginDeltaToPosition(std::shared_ptr<PieceData>& pieceData, bool toIncrement)
+{
+    int multiply = toIncrement ? 1 : -1;
+    pieceData->position.x += pieceData->piece->getCurrentDeltaOrigin().x * multiply;
+    pieceData->position.y += pieceData->piece->getCurrentDeltaOrigin().y * multiply;
+}
 
 GameScene::~GameScene()
 {
@@ -68,35 +74,32 @@ void GameScene::handleInput(const float dt)
 
     if (_input->isKeyPressed(SDL_SCANCODE_N))
     {
+        applyOriginDeltaToPosition(_currentPieceData, false);
         _currentPieceData->piece->rotateCW();
-    
-        if (!isValidRotation(*_currentPieceData->piece, _currentPieceData->renderingPosition))
+        applyOriginDeltaToPosition(_currentPieceData, true);
+
+        if (!isValidRotation(*_currentPieceData->piece, _currentPieceData->position))
         {
             // revert
+            applyOriginDeltaToPosition(_currentPieceData, false);
             _currentPieceData->piece->rotateCCW();
-        }
-        else
-        {
-            _currentPieceData->logicalPosition.x += _currentPieceData->piece->getCurrentDeltaOrigin().x;
-            _currentPieceData->logicalPosition.y += _currentPieceData->piece->getCurrentDeltaOrigin().y;
+            applyOriginDeltaToPosition(_currentPieceData, true);
         }
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
     {
-        if (_currentPieceData->logicalPosition.x > 0)
+        if (_currentPieceData->position.x > 0)
         {
             movingLeft = true;
-            _currentPieceData->logicalPosition.x -= 1;
-            _currentPieceData->renderingPosition.x -= 1;
+            _currentPieceData->position.x -= 1;
         }
     }
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_D, das, arr))
     {
-        if (_currentPieceData->logicalPosition.x < BoardConsts::s_columns - _currentPieceData->piece->getPieceArea().x)
+        if (_currentPieceData->position.x < BoardConsts::s_columns - _currentPieceData->piece->getPieceArea().x)
         {
             movingRight = true;
-            _currentPieceData->logicalPosition.x += 1;
-            _currentPieceData->renderingPosition.x += 1;
+            _currentPieceData->position.x += 1;
         }
     }
     _movingHorizontally = movingLeft || movingRight;
@@ -104,10 +107,9 @@ void GameScene::handleInput(const float dt)
 
     if (_input->isSoftDropping(SDL_SCANCODE_S))
     {
-        if (canSoftDrop() && _currentPieceData->logicalPosition.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+        if (canSoftDrop() && _currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
         {
-            _currentPieceData->logicalPosition.y++;
-            _currentPieceData->renderingPosition.y++;
+            _currentPieceData->position.y++;
             _gameState = GameState::SoftDrop;
             _currentPieceTimeToDrop = 0.0f;
         }
@@ -140,7 +142,9 @@ void GameScene::update(const float dt)
         PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
         _previewNextPiece = std::make_shared<Piece>(randomShape);
 
-        _currentPieceData->logicalPosition = _currentPieceData->renderingPosition = BoardConsts::s_spawnGridPosition;
+        _currentPieceData->position = BoardConsts::s_spawnGridPosition;
+        applyOriginDeltaToPosition(_currentPieceData, true);
+
         _currentPieceTimeToDrop = 0.0f;
         _gameState = GameState::Falling;
     }
@@ -153,10 +157,9 @@ void GameScene::update(const float dt)
     {
         if (_currentPieceTimeToDrop >= _configData.softDrop)
         {
-            if (_currentPieceData->logicalPosition.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
-                _currentPieceData->logicalPosition.y++;
-                _currentPieceData->renderingPosition.y++;
+                _currentPieceData->position.y++;
 
                 _currentPieceTimeToDrop = 0.0f;
             }
@@ -172,7 +175,7 @@ void GameScene::update(const float dt)
     else if (_gameState == GameState::Falling){
         if (_currentPieceTimeToDrop >= _configData.speedLevels[currentLevel])
         {
-            if (_currentPieceData->logicalPosition.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
 #if DEBUG_BUILD
                 if (!_freezeFall) {
@@ -210,7 +213,8 @@ void GameScene::render()
     SDL_SetRenderDrawColor(Renderer::getInstance().getRenderer(), 255, 255, 255, 255);
     auto pieceBlocksCoord = _currentPieceData->piece->getBlocksCoord();
 
-    Renderer::getInstance().drawPiece(pieceBlocksCoord, *_currentPieceData->piece, _gameField.board->getCellSize(), _gameField.board->convertGridPointToPixel(_currentPieceData->renderingPosition));
+    SDL_Point position = {_currentPieceData->position.x - _currentPieceData->piece->getCurrentDeltaOrigin().x, _currentPieceData->position.y - _currentPieceData->piece->getCurrentDeltaOrigin().y};
+    Renderer::getInstance().drawPiece(pieceBlocksCoord, *_currentPieceData->piece, _gameField.board->getCellSize(), _gameField.board->convertGridPointToPixel(position));
     Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), *_previewNextPiece, _gameField.previewWindowSize, _gameField.previewZoneOrigin);
 
 
@@ -231,8 +235,8 @@ bool GameScene::isValidRotation(Piece& piece, const SDL_Point& pos) const
     const auto coords = piece.getBlocksCoord();
     for (const auto& block : coords)
     {
-        int x = pos.x + block.x;
-        int y = pos.y + block.y;
+        int x = pos.x + block.x - piece.getCurrentDeltaOrigin().x;
+        int y = pos.y + block.y - piece.getCurrentDeltaOrigin().y;
 
         // Check board bounds
         if (x < 0 || x >= BoardConsts::s_columns ||
