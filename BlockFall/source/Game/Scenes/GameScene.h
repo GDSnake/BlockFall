@@ -55,4 +55,8 @@ private:
     bool _movingHorizontally = false;
     std::random_device _rd;
     std::mt19937 _gen;
+
+#if DEBUG_BUILD
+    bool _freezeFall = false;
+#endif
 };

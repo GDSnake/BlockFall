@@ -54,6 +54,11 @@ void GameScene::handleInput(const float dt)
     }
         
 
+    if (_input->isKeyPressed(SDL_SCANCODE_Q))
+    {
+        _freezeFall = !_freezeFall;
+    }
+
 #endif // DEBUG_BUILD
 
     const float das = _gameField.das;
@@ -169,8 +174,13 @@ void GameScene::update(const float dt)
         {
             if (_currentPieceData->logicalPosition.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
-                _currentPieceData->logicalPosition.y++;
-                _currentPieceData->renderingPosition.y++;
+#if DEBUG_BUILD
+                if (!_freezeFall) {
+#endif
+                    _currentPieceData->position.y++;
+#if DEBUG_BUILD
+                }
+#endif
                 _currentPieceTimeToDrop = 0.0f;
             }
             else
