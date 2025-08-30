@@ -1,9 +1,9 @@
 #pragma once
-
 #include <SDL3/SDL_rect.h>
-#include "Config.h"
+#include <cassert>
 
-#include "EntityStructures.h"
+#include "Config/Config.h"
+#include "Entities/EntityStructures.h"
 
 namespace BoardConsts
 {
@@ -18,15 +18,17 @@ namespace BoardConsts
 
 struct Board
 {
-    inline void savePieceOnBoard(const PieceData& piece )
+    inline void savePieceOnBoard(const PieceData& pieceData)
     {
-        const SDL_Point& position = piece.position;
-        const auto& block = piece.piece->getBlock();
-        auto coordList = piece.piece->getBlocksCoord();
+        const SDL_Point& position = pieceData.position;
+
+        const auto& block = pieceData.piece->getBlock();
+        auto coordList = pieceData.piece->getBlocksCoord();
+        const SDL_Point& deltaOrigin = pieceData.piece->getCurrentDeltaOrigin();
         for (auto& coord : coordList)
         {
-            int index = ((position.y + coord.y) * BoardConsts::s_columns-1) + (position.x + coord.x);
-            index = index > _boardContent.size() - 1 ? _boardContent.size() - 1 : index; // Prevent out of bounds
+            int index = ((position.y - deltaOrigin.y + coord.y) * BoardConsts::s_columns) + (position.x - deltaOrigin.x + coord.x);
+            assert(index < BoardConsts::s_boardSize && index >= 0);
 
             _boardContent[index] = block;
         }
@@ -39,8 +41,6 @@ struct Board
         updateCellSize();
     }
 
-
-
     inline std::array<std::shared_ptr<Block>, BoardConsts::s_boardSize> getBoardContent() const { return _boardContent; }
     inline bool isEmpty() const { return _isEmpty; }
     inline SDL_FPoint getBoardOrigin() const { return _boardTopLeftOrigin; }
@@ -51,6 +51,14 @@ struct Board
     {
         return { _boardTopLeftOrigin.x + (static_cast<float>(coord.x) * _cellSize - BoardConsts::s_lineThickness) , _boardTopLeftOrigin.y + (static_cast<float>(coord.y) * _cellSize - BoardConsts::s_lineThickness) };
     }
+
+#if DEBUG_BUILD
+    inline void clearBoard()
+    {
+        _boardContent.fill(nullptr);
+        _isEmpty = true;
+    }
+#endif
 
 private:
     inline void updateCellSize()
@@ -70,7 +78,5 @@ private:
     bool _isEmpty = true;
     float _cellSize = 20.0f;
     SDL_FPoint _boardTopLeftOrigin = { 0.0f, 0.0f };
-
-
 };
 

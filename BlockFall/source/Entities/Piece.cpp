@@ -1,5 +1,6 @@
 #include "Piece.h"
-#include "SpriteManager.h"
+
+#include "AssetManagers/SpriteManager.h"
 
 static std::vector<SDL_Point> calculateMinimumValues(const std::vector<SDL_Point>& coordVector)
 {

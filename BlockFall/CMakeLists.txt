@@ -34,12 +34,7 @@ add_compile_definitions(
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_SOURCE_DIR}/source/AssetManagers
-    ${CMAKE_SOURCE_DIR}/source/Config
-    ${CMAKE_SOURCE_DIR}/source/Core
-    ${CMAKE_SOURCE_DIR}/source/Input
-    ${CMAKE_SOURCE_DIR}/source/Entities
-    ${CMAKE_SOURCE_DIR}/source/Game
+    ${CMAKE_SOURCE_DIR}/source
 )
 
 target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")

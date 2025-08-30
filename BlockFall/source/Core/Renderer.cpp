@@ -3,9 +3,11 @@
 #include <SDL3/SDL_render.h>
 #include <SDL3_image/SDL_image.h>
 
-#include "Block.h"
-#include "Config.h"
-#include "SpriteManager.h"
+#include "AssetManagers/SpriteManager.h"
+#include "Config/Config.h"
+#include "Entities/Block.h"
+#include "Entities/Piece.h"
+#include "Game/Board.h"
 
 Renderer::Renderer()
 {
@@ -57,7 +59,7 @@ void Renderer::drawBoardContents(const Board& board)
         if (!boardBlocks[i]) {
             continue; // Skip empty blocks
         }
-        const float xx = ((static_cast<float>((i+1) % BoardConsts::s_columns)) * board.getCellSize()) + board.getBoardOrigin().x;
+        const float xx = ((static_cast<float>((i) % BoardConsts::s_columns)) * board.getCellSize()) + board.getBoardOrigin().x;
         const float yy = ((static_cast<float>(i / BoardConsts::s_columns)) * board.getCellSize()) + board.getBoardOrigin().y;
 
         SDL_FRect destinationRectangle{ xx, yy ,board.getCellSize(), board.getCellSize() };

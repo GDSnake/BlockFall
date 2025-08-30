@@ -4,9 +4,7 @@
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_timer.h>
 
-#include "SpriteManager.h"
-#include "Renderer.h"
-#include "Config.h"
+#include "Core/Renderer.h"
 
 Game::~Game()
 {

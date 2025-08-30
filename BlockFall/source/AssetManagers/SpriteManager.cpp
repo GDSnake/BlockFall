@@ -1,8 +1,9 @@
 #include "SpriteManager.h"
-#include "Config.h"
-#include "Block.h"
 
 #include <SDL3_image/SDL_image.h>
+
+#include "Entities/Block.h"
+#include "Config/Config.h"
 
 
 SDL_Surface* SpriteManagerHelpers::loadImage(const std::string& filePath)

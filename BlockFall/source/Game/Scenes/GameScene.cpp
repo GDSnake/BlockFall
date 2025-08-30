@@ -2,10 +2,12 @@
 
 #include <random>
 
-#include "Config.h"
-#include "Renderer.h"
-#include "Piece.h"
-#include "SpriteManager.h"
+#include "Config/Config.h"
+#include "Core/Renderer.h"
+#include "Entities/Piece.h"
+#include "AssetManagers/SpriteManager.h"
+#include "Entities/EntityStructures.h"
+#include "Game/GameField.h"
 
 static void applyOriginDeltaToPosition(std::shared_ptr<PieceData>& pieceData, bool toIncrement)
 {
@@ -58,13 +60,14 @@ void GameScene::handleInput(const float dt)
     {
         _previewNextPiece = std::make_shared<Piece>(PieceShapes::T_shape);
     }
-        
-
     if (_input->isKeyPressed(SDL_SCANCODE_Q))
     {
         _freezeFall = !_freezeFall;
     }
-
+    if (_input->isKeyPressed(SDL_SCANCODE_C))
+    {
+        _gameField.board->clearBoard();
+    }
 #endif // DEBUG_BUILD
 
     const float das = _gameField.das;

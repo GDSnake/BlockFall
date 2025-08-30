@@ -1,9 +1,9 @@
 #pragma once
-#include <memory>
+#include <span>
 #include <SDL3/SDL_render.h>
 
-#include "Board.h"
-#include "Piece.h"
+#include "Entities/Piece.h"
+#include "Game/Board.h"
 
 
 struct SDL_Window;

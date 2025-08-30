@@ -1,8 +1,9 @@
 #include "Block.h"
-#include "Renderer.h"
 
 #include <stdexcept>
 #include <SDL3_image/SDL_image.h>
+
+#include "Core/Renderer.h"
 
 Block::Block(const std::string& filePath) : _sprite(nullptr, SDL_DestroyTexture)
 {

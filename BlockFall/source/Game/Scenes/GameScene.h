@@ -1,12 +1,14 @@
 #pragma once
+#include "Scene.h"
+
 #include <memory>
 #include <random>
 
-#include "Scene.h"
-#include "GameField.h"
-#include "InputManager.h"
-
-#include "EntityStructures.h"
+#include "Config/Config.h"
+#include "Entities/EntityStructures.h"
+#include "Entities/Piece.h"
+#include "Game/GameField.h"
+#include "Input/InputManager.h"
 
 enum class GameState : uint8_t
 {

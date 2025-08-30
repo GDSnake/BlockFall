@@ -3,7 +3,7 @@
 #include <span>
 #include <SDL3/SDL_rect.h>
 
-#include "InputManager.h"
+#include "Input/InputManager.h"
 
 class Block;
 
