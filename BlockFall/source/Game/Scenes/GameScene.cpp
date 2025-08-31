@@ -89,7 +89,7 @@ void GameScene::handleInput()
         _currentPieceData->piece->rotateCW();
         applyOriginDeltaToPosition(_currentPieceData, true);
 
-        if (!isValidRotation(*_currentPieceData->piece, _currentPieceData->position))
+        if (!isValidRotation())
         {
             // revert
             applyOriginDeltaToPosition(_currentPieceData, false);
@@ -186,13 +186,13 @@ void GameScene::savePieceOnBoard() const
 
 }
 
-bool GameScene::isValidRotation(Piece& piece, const SDL_Point& pos) const
+bool GameScene::isValidRotation() const
 {
-    const auto coords = piece.getBlocksCoord();
+    const auto coords = _currentPieceData->piece->getBlocksCoord();
     for (const auto& block : coords)
     {
-        int x = pos.x + block.x - piece.getCurrentDeltaOrigin().x;
-        int y = pos.y + block.y - piece.getCurrentDeltaOrigin().y;
+        int x = _currentPieceData->position.x + block.x - _currentPieceData->piece->getCurrentDeltaOrigin().x;
+        int y = _currentPieceData->position.y + block.y - _currentPieceData->piece->getCurrentDeltaOrigin().y;
 
         // Check board bounds
         if (x < 0 || x >= BoardConsts::s_columns ||
@@ -202,10 +202,10 @@ bool GameScene::isValidRotation(Piece& piece, const SDL_Point& pos) const
         }
 
         // Check collisions with existing blocks on board
-        //if (_gameField->board->isCellOccupied(x, y))
-        //{
-        //    return false;
-        //}
+        if (_gameField.willHitBlockOnBoard(_currentPieceData))
+        {
+            return false;
+        }
     }
     return true;
 }

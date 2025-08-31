@@ -41,7 +41,7 @@ private:
     void render() override;
 
     void savePieceOnBoard() const;
-    bool isValidRotation(Piece& piece, const SDL_Point& position) const;
+    bool isValidRotation() const;
     bool canSoftDrop() const;
     bool canSelectNewPiece() const;
     void gameplayStateLogic(const float deltaTime);
