@@ -12,11 +12,27 @@ namespace ConfigHelpers
     }
 }
 
-namespace FontNames
-{
-    static std::string GameBoyFont = "gameboyFont";
-}
 
+enum class FontNames : uint8_t
+{
+    DefaultFont = 0,
+    GameBoyFont,
+    Total
+};
+
+namespace FontUtils
+{
+    inline const std::string to_string(FontNames name)
+    {
+        switch (name)
+        {
+            case FontNames::DefaultFont: return "defaultFont";
+            case FontNames::GameBoyFont: return "gameboyFont";
+
+            default: return "unknown";
+        }
+    }
+}
 
 struct ConfigData {
     std::string title = "";
@@ -43,7 +59,7 @@ struct ConfigData {
     bool srs = false;
     bool softDropWhileMovingHorizontal = false;
     bool hardDrop = false;
-    std::unordered_map<std::string,std::string> fontsMap;
+    std::unordered_map<std::string,std::string> fontsFileNameMap;
 };
 
 inline std::string getConfigFilePath(const char* path) {
@@ -102,7 +118,13 @@ public:
         cfg.srs = data["game_physics"]["enabled_rules"]["srs"];
         cfg.softDropWhileMovingHorizontal = data["game_physics"]["enabled_rules"]["soft_drop_while_moving_horizontal"];
         cfg.hardDrop = data["game_physics"]["enabled_rules"]["hard_drop"];
-        cfg.fontsMap[FontNames::GameBoyFont] = data["fonts"]["gameboy_font"];
+
+        for (int i = 0; i < static_cast<int>(FontNames::Total); ++i)
+        {
+            std::string fontName = FontUtils::to_string(static_cast<FontNames>(i));
+            cfg.fontsFileNameMap[fontName] = data["fonts"][fontName];
+        }
+
         for (size_t i = 0; i < array.size(); ++i) 
         {
             cfg.speedLevels[i] = array[i].get<float>();

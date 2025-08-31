@@ -57,6 +57,7 @@ private:
     int currentLevel = 0;
     int _score = 0;
     TTF_Font* _scoreFont = nullptr;
+    std::string _scoreText = "Score: 0";
     float _currentPieceTimeToDrop;
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;

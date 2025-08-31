@@ -13,7 +13,8 @@
     "blocks_folder": "Sprites/Blocks/Default"
   },
   "fonts": {
-    "gameboy_font": "Fonts/tetris-gb.otf"
+    "defaultFont": "Fonts/arial.ttf",
+    "gameboyFont": "Fonts/gb-tetris.ttf"
   },
   "game":{
     "draw_grid": true

@@ -3,7 +3,9 @@
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_log.h>
 #include <SDL3/SDL_timer.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
+#include "AssetManagers/FontsManager.h"
 #include "Core/Renderer.h"
 
 Game::~Game()
@@ -18,6 +20,11 @@ bool Game::init()
         SDL_Log("SDL Init Error: %s \n",SDL_GetError());
         return false;
     }
+    if (!TTF_Init()) {
+        std::cerr << std::format("Error Initializing TTF: {} \n", SDL_GetError());
+    }
+
+    FontsManager::getInstance();
     _scene = std::make_unique<GameScene>();
     _scene->init();
     _isRunning = true;
