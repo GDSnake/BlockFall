@@ -70,14 +70,17 @@ void Renderer::drawBoardContents(const Board& board)
     }
 }
 
-void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin)
+void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin, float hiddenRowYPosition/* = 1.0f*/)
 {
     for (const auto& coord : pieceBlocksCoord)
     {
         float xx = (static_cast<float>(coord.x) * squareSize) + origin.x + BoardConsts::s_lineThickness;
         float yy = (static_cast<float>(coord.y) * squareSize) + origin.y + BoardConsts::s_lineThickness;
+        if (yy < hiddenRowYPosition - BoardConsts::s_lineThickness)
+        {
+            continue;
+        }
         SDL_FRect destinationRectangle {xx, yy ,squareSize, squareSize};
-        
 
         drawBlock(*piece.getBlock(), destinationRectangle);
     }

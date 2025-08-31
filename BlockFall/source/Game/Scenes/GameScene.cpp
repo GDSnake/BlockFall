@@ -170,7 +170,7 @@ void GameScene::render()
     auto pieceBlocksCoord = _currentPieceData->piece->getBlocksCoord();
 
     SDL_Point position = {_currentPieceData->position.x - _currentPieceData->piece->getCurrentDeltaOrigin().x, _currentPieceData->position.y - _currentPieceData->piece->getCurrentDeltaOrigin().y};
-    Renderer::getInstance().drawPiece(pieceBlocksCoord, *_currentPieceData->piece, _gameField.board->getCellSize(), _gameField.board->convertGridPointToPixel(position));
+    Renderer::getInstance().drawPiece(pieceBlocksCoord, *_currentPieceData->piece, _gameField.board->getCellSize(), _gameField.board->convertGridPointToPixel(position), _gameField.board->getOriginYPositionWithHiddenRows());
     Renderer::getInstance().drawPreviewWindow(_previewNextPiece->getBlocksCoord(), *_previewNextPiece, _gameField.previewWindowSize, _gameField.previewZoneOrigin);
 
 

@@ -42,6 +42,12 @@ target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAK
 if (WIN32)
 	target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE /UUNICODE /U_UNICODE)
 endif()
+
+if(WIN32)
+    target_sources(${PROJECT_NAME} PRIVATE
+        ${CMAKE_SOURCE_DIR}/assets/app.rc
+    )
+endif()
 # ---------------------------------------------------------
 # Create a default config.json if missing
 # ---------------------------------------------------------
