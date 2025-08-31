@@ -9,6 +9,9 @@
 #include "Entities/Piece.h"
 #include "Game/Board.h"
 
+static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1)> lineArray; // +1 for the border lines
+static bool initializedLineArray = false; // Initialize only once the lineArray
+
 Renderer::Renderer()
 {
     Uint32 flags = Config::getInstance().getConfigData().fullscreen ? SDL_WINDOW_FULLSCREEN : 0;
@@ -72,7 +75,7 @@ void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& pie
     for (const auto& coord : pieceBlocksCoord)
     {
         float xx = (static_cast<float>(coord.x) * squareSize) + origin.x + BoardConsts::s_lineThickness;
-        float yy = (static_cast<float>(coord.y) * squareSize) + +origin.y + BoardConsts::s_lineThickness;
+        float yy = (static_cast<float>(coord.y) * squareSize) + origin.y + BoardConsts::s_lineThickness;
         SDL_FRect destinationRectangle {xx, yy ,squareSize, squareSize};
         
 
@@ -87,9 +90,6 @@ void Renderer::drawBlock(const Block& block, const SDL_FRect& destinationRectang
 
 void Renderer::drawBoard(const Board& board)
 {
-    static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1) > lineArray; // +1 for the border lines
-    static bool initializedLineArray = false; // Initialize only once the lineArray
-
     uint8_t columnsPlusBorder = BoardConsts::s_columns + 1;
     uint8_t rowsPlusBorder = BoardConsts::s_rows + 1;
     uint8_t totalLines = columnsPlusBorder + rowsPlusBorder;
@@ -99,16 +99,20 @@ void Renderer::drawBoard(const Board& board)
         for (uint8_t i = 0; i < totalLines; ++i)
         {
             SDL_FRect rect;
-            if (i < BoardConsts::s_columns + 1)
+            if (i < BoardConsts::s_columns + 1) // Column lines
             {
                 rect = {
                     .x = (static_cast<float>(i) * cellSize) + origin.x,
-                    .y = origin.y,
+                    .y = board.getYPositionWithHiddenRows(),
                     .w = BoardConsts::s_lineThickness,
                     .h = board.getBoardHeight()
                 };
             }
-            else
+            else if (i < BoardConsts::s_columns + 1 + BoardConsts::s_hiddenRows)
+            {
+                continue;
+            }
+            else // Row lines
             {
                 rect = {
                     .x = origin.x,

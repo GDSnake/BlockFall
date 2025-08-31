@@ -9,7 +9,7 @@ namespace BoardConsts
 {
     static constexpr size_t s_rows = 20;
     static constexpr size_t s_columns = 10;
-    static constexpr int hiddenRows = 2; // Rows that are hidden above the visible play area
+    static constexpr int s_hiddenRows = 2; // Rows that are hidden above the visible play area
 
     static constexpr size_t s_boardSize = s_rows * s_columns;
     static constexpr float s_lineThickness = 3.0f;
@@ -49,7 +49,13 @@ struct Board
     inline SDL_FPoint getBoardOrigin() const { return _boardTopLeftOrigin; }
     inline float getCellSize() const { return _cellSize; }
     inline float getBoardWidth() const { return BoardConsts::s_columns * (_cellSize + BoardConsts::s_lineThickness) - _cellSize;}
-    inline float getBoardHeight() const { return BoardConsts::s_rows * (_cellSize + BoardConsts::s_lineThickness) - _cellSize * 2 - BoardConsts::s_lineThickness; }
+    inline float getBoardHeight() const { return (BoardConsts::s_rows - BoardConsts::s_hiddenRows) * (_cellSize + BoardConsts::s_lineThickness) - _cellSize * 2; }
+
+    inline float getYPositionWithHiddenRows() const
+    {
+        return getBoardOrigin().y + (BoardConsts::s_hiddenRows * (_cellSize + BoardConsts::s_lineThickness) - BoardConsts::s_lineThickness);
+    }
+
     inline SDL_FPoint convertGridPointToPixel(const SDL_Point& coord) const
     {
         return { _boardTopLeftOrigin.x + (static_cast<float>(coord.x) * _cellSize - BoardConsts::s_lineThickness) , _boardTopLeftOrigin.y + (static_cast<float>(coord.y) * _cellSize - BoardConsts::s_lineThickness) };
