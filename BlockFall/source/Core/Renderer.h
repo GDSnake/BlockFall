@@ -31,15 +31,8 @@ public:
 	void drawBoard(const Board& board);
 	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
 	void present();
-	
-	/* void clear
-	* Clears the screen
-	*/
 	void clear();
 
-	/* SDL_Renderer* getRenderer
-	* Returns the renderer
-	*/
 	SDL_Renderer* getRenderer() const;
 
 	void shutdown();

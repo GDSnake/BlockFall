@@ -13,7 +13,7 @@ public:
 
 	bool init();
 	void run();
-	void shutdown();
+    static void shutdown();
 
 private:
 	void handleEvents();

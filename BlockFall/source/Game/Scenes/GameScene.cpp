@@ -32,8 +32,11 @@ void GameScene::init()
     _gen = std::mt19937(_rd());
 }
 
-void GameScene::handleInput(const float dt)
+void GameScene::handleInput()
 {
+///////////////////////////////////
+/// Handle Debug Input
+///////////////////////////////////
 #if DEBUG_BUILD
 
     if (_input->isKeyPressed(SDL_SCANCODE_1))
@@ -69,11 +72,16 @@ void GameScene::handleInput(const float dt)
         _gameField.board->clearBoard();
     }
 #endif // DEBUG_BUILD
+// Handle Debug Input
 
     const float das = _gameField.das;
     const float arr = _gameField.arr;
 
     bool movingRight = false, movingLeft = false;
+
+    ///////////////////////////////////
+    /// Handle Input
+    ///////////////////////////////////
 
     if (_input->isKeyPressed(SDL_SCANCODE_N))
     {
@@ -132,96 +140,15 @@ void GameScene::handleInput(const float dt)
         _gameState = GameState::Falling;
         _lockedSoftDrop = false;
     }
+// Handle Input
 }
 
-void GameScene::update(const float dt)
+void GameScene::update(const float deltaTime)
 {
-    handleInput(dt);
-    _input->update(dt);
-    if (canSelectNewPiece())
-    {
-        std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
+    handleInput();
+    _input->update(deltaTime);
 
-        if (_previewNextPiece)
-        {
-            _currentPieceData->piece = std::move(_previewNextPiece);
-        }
-        else
-        {
-            // First run: generate initial piece
-            PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
-            _currentPieceData->piece = std::make_shared<Piece>(randomShape);
-        }
-        PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
-        _previewNextPiece = std::make_shared<Piece>(randomShape);
-
-        _currentPieceData->position = BoardConsts::s_spawnGridPosition;
-        applyOriginDeltaToPosition(_currentPieceData, true);
-
-        _currentPieceTimeToDrop = 0.0f;
-        _gameState = GameState::Falling;
-    }
-    else
-    {
-        _currentPieceTimeToDrop += dt;
-    }
-
-    if (_gameState == GameState::SoftDrop)
-    {
-        if (_currentPieceTimeToDrop >= _configData.softDrop)
-        {
-            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
-            {
-                _currentPieceData->position.y++;
-                _currentPieceTimeToDrop = 0.0f;
-                if (_gameField.willHitBlockOnBoard(_currentPieceData))
-                {
-                    _currentPieceData->position.y--;
-                    _gameState = GameState::Spawning;
-                }
-            }
-            else
-            {
-                _gameState = GameState::Spawning;
-            }
-
-            if (_gameState == GameState::Spawning)
-            {
-                _lockedSoftDrop = true;
-            }
-        }
-
-    }
-    else if (_gameState == GameState::Falling){
-        if (_currentPieceTimeToDrop >= _configData.speedLevels[currentLevel])
-        {
-            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
-            {
-#if DEBUG_BUILD
-                if (!_freezeFall) {
-#endif
-                    _currentPieceData->position.y++;
-                    if (_gameField.willHitBlockOnBoard(_currentPieceData))
-                    {
-                        _currentPieceData->position.y--;
-                        _gameState = GameState::Spawning;
-                    }
-#if DEBUG_BUILD
-                }
-#endif
-                _currentPieceTimeToDrop = 0.0f;
-            }
-            else
-            {
-                _gameState = GameState::Spawning;
-            }
-        }
-    }
-
-    if (_gameState == GameState::Spawning)
-    {
-        savePieceOnBoard();
-    }
+    gameplayStateLogic(deltaTime);
 
     render();
 }
@@ -291,6 +218,94 @@ bool GameScene::canSoftDrop() const
 bool GameScene::canSelectNewPiece() const
 {
     return _gameState == GameState::Starting || _gameState == GameState::Spawning;
+}
+
+void GameScene::gameplayStateLogic(const float deltaTime)
+{
+    if (canSelectNewPiece())
+    {
+        std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
+
+        if (_previewNextPiece)
+        {
+            _currentPieceData->piece = std::move(_previewNextPiece);
+        }
+        else
+        {
+            // First run: generate initial piece
+            PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
+            _currentPieceData->piece = std::make_shared<Piece>(randomShape);
+        }
+        PieceShapes randomShape = static_cast<PieceShapes>(dist(_gen));
+        _previewNextPiece = std::make_shared<Piece>(randomShape);
+
+        _currentPieceData->position = BoardConsts::s_spawnGridPosition;
+        applyOriginDeltaToPosition(_currentPieceData, true);
+
+        _currentPieceTimeToDrop = 0.0f;
+        _gameState = GameState::Falling;
+    }
+    else
+    {
+        _currentPieceTimeToDrop += deltaTime;
+    }
+
+    if (_gameState == GameState::SoftDrop)
+    {
+        if (_currentPieceTimeToDrop >= _configData.softDrop)
+        {
+            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+            {
+                _currentPieceData->position.y++;
+                _currentPieceTimeToDrop = 0.0f;
+                if (_gameField.willHitBlockOnBoard(_currentPieceData))
+                {
+                    _currentPieceData->position.y--;
+                    _gameState = GameState::Spawning;
+                }
+            }
+            else
+            {
+                _gameState = GameState::Spawning;
+            }
+
+            if (_gameState == GameState::Spawning)
+            {
+                _lockedSoftDrop = true;
+            }
+        }
+
+    }
+    else if (_gameState == GameState::Falling) {
+        if (_currentPieceTimeToDrop >= _configData.speedLevels[currentLevel])
+        {
+            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+            {
+#if DEBUG_BUILD
+                if (!_freezeFall) {
+#endif
+                    _currentPieceData->position.y++;
+                    if (_gameField.willHitBlockOnBoard(_currentPieceData))
+                    {
+                        _currentPieceData->position.y--;
+                        _gameState = GameState::Spawning;
+                    }
+#if DEBUG_BUILD
+                }
+#endif
+                _currentPieceTimeToDrop = 0.0f;
+            }
+            else
+            {
+                _gameState = GameState::Spawning;
+            }
+        }
+    }
+
+    if (_gameState == GameState::Spawning)
+    {
+        savePieceOnBoard();
+    }
 }
 
 void GameScene::cleanup()

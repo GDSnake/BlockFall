@@ -8,7 +8,7 @@ public:
 
     virtual void init() = 0;
 
-    virtual void handleInput(float dt) = 0;
+    virtual void handleInput() = 0;
 
     virtual void update(float deltaTime) = 0;
 

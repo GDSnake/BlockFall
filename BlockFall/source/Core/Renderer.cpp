@@ -103,7 +103,7 @@ void Renderer::drawBoard(const Board& board)
             {
                 rect = {
                     .x = (static_cast<float>(i) * cellSize) + origin.x,
-                    .y = board.getYPositionWithHiddenRows(),
+                    .y = board.getOriginYPositionWithHiddenRows(),
                     .w = BoardConsts::s_lineThickness,
                     .h = board.getBoardHeight()
                 };
@@ -158,7 +158,6 @@ void Renderer::present()
 void Renderer::clear()
 {
     SDL_RenderClear(_renderer);
-
 }
 
 SDL_Renderer* Renderer::getRenderer() const

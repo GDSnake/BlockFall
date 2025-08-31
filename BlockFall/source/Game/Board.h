@@ -14,7 +14,7 @@ namespace BoardConsts
     static constexpr size_t s_boardSize = s_rows * s_columns;
     static constexpr float s_lineThickness = 3.0f;
 
-    static constexpr  SDL_Point s_spawnGridPosition = { 4 , 1};
+    static constexpr  SDL_Point s_spawnGridPosition = { 4 , 3};
 }
 
 struct Board
@@ -51,7 +51,7 @@ struct Board
     inline float getBoardWidth() const { return BoardConsts::s_columns * (_cellSize + BoardConsts::s_lineThickness) - _cellSize;}
     inline float getBoardHeight() const { return (BoardConsts::s_rows - BoardConsts::s_hiddenRows) * (_cellSize + BoardConsts::s_lineThickness) - _cellSize * 2; }
 
-    inline float getYPositionWithHiddenRows() const
+    inline float getOriginYPositionWithHiddenRows() const
     {
         return getBoardOrigin().y + (BoardConsts::s_hiddenRows * (_cellSize + BoardConsts::s_lineThickness) - BoardConsts::s_lineThickness);
     }

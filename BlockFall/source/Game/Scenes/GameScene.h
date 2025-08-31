@@ -28,7 +28,7 @@ public:
 
 
     void init() override;
-    void handleInput(const float dt) override;
+    void handleInput() override;
     void update(const float deltaTime) override;
     void cleanup() override;
 
@@ -44,6 +44,7 @@ private:
     bool isValidRotation(Piece& piece, const SDL_Point& position) const;
     bool canSoftDrop() const;
     bool canSelectNewPiece() const;
+    void gameplayStateLogic(const float deltaTime);
 
     GameState _gameState;
     GameField _gameField;

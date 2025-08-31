@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
 
     if (Config::getInstance().getConfigData().hasError)
     {
-        std::cerr << "Configuration file has an error!" << std::endl;
+        std::cerr << "Configuration file has an error!" << '\n';
         return 1;
     }
 
