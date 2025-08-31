@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <SDL3/SDL_rect.h>
 #include <cassert>
 
@@ -36,6 +36,47 @@ struct Board
             _boardContent[index] = block;
         }
         _isEmpty = false;
+        clearCompleteLines();
+    }
+
+    inline void clearCompleteLines()
+    {
+        int writeRow = BoardConsts::s_rows - 1; // where we copy down
+
+        // scan rows from bottom to top
+        for (int y = BoardConsts::s_rows - 1; y >= 0; --y) {
+            bool full = true;
+
+            // check row left-to-right (cache friendly inside row)
+            for (int x = 0; x < BoardConsts::s_columns; ++x) {
+                SDL_Point pos = { x, y };
+                if (!_boardContent[convertPieceCoordToArrayIndex(pos)]) {
+                    full = false;
+                    break;
+                }
+            }
+
+            // if not full → move row down
+            if (!full) {
+                if (writeRow != y) {
+                    // copy row y → writeRow
+                    for (int x = 0; x < BoardConsts::s_columns; ++x) {
+                        SDL_Point positionToBeWritten = { x, writeRow };
+                        SDL_Point positionToBeRead = { x, y };
+                        _boardContent[convertPieceCoordToArrayIndex(positionToBeWritten)] = _boardContent[convertPieceCoordToArrayIndex(positionToBeRead)];
+                    }
+                }
+                --writeRow;
+            }
+        }
+
+        // clear remaining rows at top
+        for (int y = writeRow; y >= 0; --y) {
+            for (int x = 0; x < BoardConsts::s_columns; ++x) {
+                SDL_Point pos = { x, y };
+                _boardContent[convertPieceCoordToArrayIndex(pos)] = nullptr;
+            }
+        }
     }
 
     inline void updateBoardDimensions()

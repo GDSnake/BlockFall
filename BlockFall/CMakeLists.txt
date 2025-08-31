@@ -45,7 +45,7 @@ endif()
 
 if(WIN32)
     target_sources(${PROJECT_NAME} PRIVATE
-        ${CMAKE_SOURCE_DIR}/assets/app.rc
+        ${CMAKE_SOURCE_DIR}/resources/app.rc
     )
 endif()
 # ---------------------------------------------------------
