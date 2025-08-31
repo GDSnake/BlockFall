@@ -1,6 +1,7 @@
 #include "GameScene.h"
 
 #include <random>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "Config/Config.h"
 #include "Core/Renderer.h"
@@ -30,6 +31,7 @@ void GameScene::init()
     _gameField.board->updateBoardDimensions();
     _input = std::make_unique<InputManager>();
     _gen = std::mt19937(_rd());
+    _scoreFont = TTF_OpenFont(std::format("{}{}", RESOURCES_PATH, Config::getInstance().getConfigData().fontsMap.at(FontNames::GameBoyFont)).c_str(), 24);
 }
 
 void GameScene::handleInput()
@@ -83,7 +85,7 @@ void GameScene::handleInput()
     /// Handle Input
     ///////////////////////////////////
 
-    if (_input->isKeyPressed(SDL_SCANCODE_N))
+    if (_input->isKeyPressed(SDL_SCANCODE_SPACE))
     {
         applyOriginDeltaToPosition(_currentPieceData, false);
         _currentPieceData->piece->rotateCW();
@@ -97,6 +99,27 @@ void GameScene::handleInput()
             applyOriginDeltaToPosition(_currentPieceData, true);
         }
     }
+
+    if (_input->isKeyPressed(SDL_SCANCODE_N))
+    {
+        applyOriginDeltaToPosition(_currentPieceData, false);
+        _currentPieceData->piece->rotateCCW();
+        applyOriginDeltaToPosition(_currentPieceData, true);
+
+        if (!isValidRotation())
+        {
+            // revert
+            applyOriginDeltaToPosition(_currentPieceData, false);
+            _currentPieceData->piece->rotateCW();
+            applyOriginDeltaToPosition(_currentPieceData, true);
+        }
+    }
+
+    if (_input->isKeyPressed(SDL_SCANCODE_ESCAPE))
+    {
+        _input->quit();
+    }
+
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
     {
         if (_currentPieceData->position.x > 0)
@@ -306,6 +329,10 @@ void GameScene::gameplayStateLogic(const float deltaTime)
     {
         savePieceOnBoard();
     }
+}
+
+void GameScene::createAndUpdateScore()
+{
 }
 
 void GameScene::cleanup()

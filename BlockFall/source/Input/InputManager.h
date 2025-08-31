@@ -38,10 +38,11 @@ public:
     bool horizontalMovementIfNotOnCooldown(SDL_Scancode key, float das, float arr);
     bool isSoftDropping(SDL_Scancode key);
 
-    bool shouldQuit() const { return _quit; }
+    inline void quit() { _quit = true; }
+    inline bool shouldQuit() const { return _quit; }
 
-    int getMouseX() const { return _mouseX; }
-    int getMouseY() const { return _mouseY; }
+    inline int getMouseX() const { return _mouseX; }
+    inline int getMouseY() const { return _mouseY; }
 
 private:
     void updateKeyState(SDL_Scancode key, bool down);

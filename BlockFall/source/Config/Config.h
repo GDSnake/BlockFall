@@ -12,6 +12,12 @@ namespace ConfigHelpers
     }
 }
 
+namespace FontNames
+{
+    static std::string GameBoyFont = "gameboyFont";
+}
+
+
 struct ConfigData {
     std::string title = "";
     int width = 800;
@@ -37,6 +43,7 @@ struct ConfigData {
     bool srs = false;
     bool softDropWhileMovingHorizontal = false;
     bool hardDrop = false;
+    std::unordered_map<std::string,std::string> fontsMap;
 };
 
 inline std::string getConfigFilePath(const char* path) {
@@ -95,7 +102,7 @@ public:
         cfg.srs = data["game_physics"]["enabled_rules"]["srs"];
         cfg.softDropWhileMovingHorizontal = data["game_physics"]["enabled_rules"]["soft_drop_while_moving_horizontal"];
         cfg.hardDrop = data["game_physics"]["enabled_rules"]["hard_drop"];
-
+        cfg.fontsMap[FontNames::GameBoyFont] = data["fonts"]["gameboy_font"];
         for (size_t i = 0; i < array.size(); ++i) 
         {
             cfg.speedLevels[i] = array[i].get<float>();

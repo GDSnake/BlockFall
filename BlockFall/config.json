@@ -12,6 +12,9 @@
     "logo": "Sprites/logo.png",
     "blocks_folder": "Sprites/Blocks/Default"
   },
+  "fonts": {
+    "gameboy_font": "Fonts/tetris-gb.otf"
+  },
   "game":{
     "draw_grid": true
   },

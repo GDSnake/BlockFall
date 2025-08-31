@@ -9,7 +9,7 @@
 #include "Entities/Piece.h"
 #include "Game/GameField.h"
 #include "Input/InputManager.h"
-
+struct TTF_Font;
 enum class GameState : uint8_t
 {
     Starting = 0,
@@ -46,6 +46,8 @@ private:
     bool canSelectNewPiece() const;
     void gameplayStateLogic(const float deltaTime);
 
+    void createAndUpdateScore();
+
     GameState _gameState;
     GameField _gameField;
     std::shared_ptr<PieceData> _currentPieceData;
@@ -53,6 +55,8 @@ private:
     std::unique_ptr<InputManager> _input;
     const ConfigData& _configData = Config::getInstance().getConfigData();
     int currentLevel = 0;
+    int _score = 0;
+    TTF_Font* _scoreFont = nullptr;
     float _currentPieceTimeToDrop;
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;

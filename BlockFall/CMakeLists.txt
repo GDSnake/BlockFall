@@ -262,6 +262,63 @@ endif()
 # endif()
 
 # ---------------------------------------------------------
+# SDL3_ttf Setup (download if missing)
+# ---------------------------------------------------------
+
+if (WIN32)
+    set(SDL3_TTF_URL https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-devel-3.2.2-VC.zip)
+else()
+    set(SDL3_TTF_URL https://github.com/libsdl-org/SDL_ttf/releases/download/release-3.2.2/SDL3_ttf-3.2.2.tar.gz)
+endif()
+
+set(SDL3_TTF_DIR "${CMAKE_SOURCE_DIR}/libs/SDL3_ttf")
+
+if (EXISTS "${SDL3_TTF_DIR}/include/SDL3/SDL_ttf.h")
+    message(STATUS "Using local SDL3_ttf at ${SDL3_TTF_DIR}")
+else()
+    message(STATUS "Downloading SDL3_ttf precompiled binaries ...")
+
+    FetchContent_Declare(
+        SDL3_ttf
+        URL ${SDL3_TTF_URL}
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    )
+    FetchContent_Populate(SDL3_ttf)
+
+    # Copy includes and libs into project libs folder
+    file(MAKE_DIRECTORY ${SDL3_TTF_DIR})
+    file(COPY "${sdl3_ttf_SOURCE_DIR}/include" DESTINATION "${SDL3_TTF_DIR}")
+    if (EXISTS "${sdl3_ttf_SOURCE_DIR}/lib")
+        file(COPY "${sdl3_ttf_SOURCE_DIR}/lib" DESTINATION "${SDL3_TTF_DIR}")
+    endif()
+    if (EXISTS "${sdl3_ttf_SOURCE_DIR}/bin")
+        file(COPY "${sdl3_ttf_SOURCE_DIR}/bin" DESTINATION "${SDL3_TTF_DIR}")
+    endif()
+endif()
+
+# Include & link SDL3_ttf
+target_include_directories(${PROJECT_NAME} PRIVATE ${SDL3_TTF_DIR}/include)
+
+if (WIN32)
+    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SDL3_TTF_LIB_DIR "${SDL3_TTF_DIR}/lib/x64")
+    else()
+        set(SDL3_TTF_LIB_DIR "${SDL3_TTF_DIR}/lib/x86")
+    endif()
+
+    target_link_directories(${PROJECT_NAME} PRIVATE ${SDL3_TTF_LIB_DIR})
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${SDL3_TTF_LIB_DIR}/SDL3_ttf.dll"
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+else()
+    target_link_libraries(${PROJECT_NAME} PRIVATE SDL3_ttf)
+endif()
+
+# ---------------------------------------------------------
 # SDL3 Linking
 # ---------------------------------------------------------
 if (WIN32)
