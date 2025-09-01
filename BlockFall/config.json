@@ -67,7 +67,7 @@
         1200
       ],
       "soft_drop_points_per_line" : 1,
-      "soft_drop_counts_only_if_hits" : true
+      "soft_drop_points_count_only_if_hits" : true
     }
   }
 }

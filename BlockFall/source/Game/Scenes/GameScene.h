@@ -56,15 +56,16 @@ private:
     std::shared_ptr<Piece> _previewNextPiece;
     std::unique_ptr<InputManager> _input;
     const ConfigData& _configData = Config::getInstance().getConfigData();
-    int currentLevel = 0;
-    int _score = 0;
-    TTF_Font* _scoreFont = nullptr;
-    std::string _scoreText;
     float _currentPieceTimeToDrop = 0;
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;
     std::mt19937 _gen;
 
+    //Score
+    uint64_t _score = 0;
+    TTF_Font* _scoreFont = nullptr;
+    std::string _scoreText;
+    uint64_t _softDropAccumulation = 0;
 #if DEBUG_BUILD
     bool _freezeFall = false;
 #endif

@@ -272,7 +272,7 @@ bool GameScene::canSelectNewPiece() const
 
 void GameScene::gameplayStateLogic(const float deltaTime)
 {
-    const GameRuleset& currentRuleset = _configData.rulesetsMap.at(_gameField.ruleset);
+    const GameRuleset& currentRuleset = _gameField.getGameRulesetData();
     if (canSelectNewPiece())
     {
         std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
@@ -308,6 +308,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
             if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
                 _currentPieceData->position.y++;
+                _softDropAccumulation += _gameField.getGameRulesetData().softDropPointsPerLine;
                 _currentPieceTimeToDrop = 0.0f;
                 if (_gameField.willHitBlockOnBoard(_currentPieceData))
                 {
@@ -322,13 +323,14 @@ void GameScene::gameplayStateLogic(const float deltaTime)
 
             if (_gameState == GameState::Spawning)
             {
+                _score += _softDropAccumulation;
                 _lockedSoftDrop = true;
             }
         }
 
     }
     else if (_gameState == GameState::Falling) {
-        if (_currentPieceTimeToDrop >= currentRuleset.speedLevels[currentLevel])
+        if (_currentPieceTimeToDrop >= _gameField.currentSpeed)
         {
             if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
@@ -336,9 +338,14 @@ void GameScene::gameplayStateLogic(const float deltaTime)
                 if (!_freezeFall) {
 #endif
                     _currentPieceData->position.y++;
+                    _softDropAccumulation = _gameField.getGameRulesetData().softDropPointsPerLine;
                     if (_gameField.willHitBlockOnBoard(_currentPieceData))
                     {
                         _currentPieceData->position.y--;
+                        if (!_gameField.getGameRulesetData().softDropPointsCountOnlyIfHits)
+                        {
+                            _score += _softDropAccumulation;
+                        }
                         _gameState = GameState::Spawning;
                     }
 #if DEBUG_BUILD
@@ -355,6 +362,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
 
     if (_gameState == GameState::Spawning)
     {
+        _softDropAccumulation = 0;
         savePieceOnBoard();
     }
 }

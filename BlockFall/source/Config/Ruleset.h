@@ -22,6 +22,10 @@ struct GameRuleset
     bool softDropEnabled = false; // Enable soft drop scoring
     bool hardDropEnabled = false; // Enable hard drop scoring
     bool softDropWhileMovingHorizontal = false;
+    bool softDropPointsCountOnlyIfHits = false; // Soft drop points are counted only if the piece hits the ground while soft dropping
+
+    uint64_t softDropPointsPerLine = 1; // Points per line when soft dropping
+
 
     std::vector<float> speedLevels; // Falling speed levels
     std::array<float, 4> basePointsForClearedLines;

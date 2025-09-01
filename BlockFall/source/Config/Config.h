@@ -84,7 +84,7 @@ public:
     Config(Config&&) = delete;
     Config& operator=(Config&&) = delete;
 
-    ConfigData getConfigData()
+    const ConfigData& getConfigData()
     {
         return _data;
     }
@@ -150,6 +150,8 @@ private:
         //ruleset.softDropEnabled = rulesetJson["enabled_rules"]["soft_drop"];
         ruleset.hardDropEnabled = data["game_physics"]["enabled_rules"]["hard_drop"];
         ruleset.softDropWhileMovingHorizontal = data["game_physics"]["enabled_rules"]["soft_drop_while_moving_horizontal"];
+        ruleset.softDropPointsCountOnlyIfHits = rulesetJson["soft_drop_points_count_only_if_hits"];
+        ruleset.softDropPointsPerLine = rulesetJson["soft_drop_points_per_line"];
         const auto& array = data["game_physics"]["block_fall_speed_level"];
         ruleset.speedLevels.reserve(array.size());
         for (size_t i = 0; i < array.size(); ++i) 

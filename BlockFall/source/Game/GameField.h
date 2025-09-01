@@ -10,10 +10,14 @@ struct GameField
         ruleset = currentRuleset;
         das = Config::getInstance().getConfigData().rulesetsMap.at(ruleset).das;
         arr = Config::getInstance().getConfigData().rulesetsMap.at(ruleset).arr;
+        currentSpeed = Config::getInstance().getConfigData().rulesetsMap.at(ruleset).speedLevels[currentLevel];
     }
 
+    const GameRuleset& getGameRulesetData() const { return Config::getInstance().getConfigData().rulesetsMap.at(ruleset); }
 
     GameRulesetsEnum ruleset;
+    int currentLevel = 0;
+    float currentSpeed = 0.0f;
     float previewWindowSize = 100.0f;
     float das; // Delay before auto-shift
     float arr; // Auto repeat rate
