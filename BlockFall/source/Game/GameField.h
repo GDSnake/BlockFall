@@ -13,7 +13,15 @@ struct GameField
         currentSpeed = Config::getInstance().getConfigData().rulesetsMap.at(ruleset).speedLevels[currentLevel];
     }
 
-    const GameRuleset& getGameRulesetData() const { return Config::getInstance().getConfigData().rulesetsMap.at(ruleset); }
+    inline const GameRuleset& getGameRulesetData() const { return Config::getInstance().getConfigData().rulesetsMap.at(ruleset); }
+
+    inline const Uint64 getPointsPerClearedLine(const uint8_t clearedLines) const
+    {
+        if (clearedLines == 0 || clearedLines > 4) {
+            return 0;
+        }
+        return getGameRulesetData().basePointsForClearedLines[clearedLines - 1] * (currentLevel + 1);
+    }
 
     GameRulesetsEnum ruleset;
     int currentLevel = 0;

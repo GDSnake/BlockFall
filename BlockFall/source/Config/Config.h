@@ -163,7 +163,7 @@ private:
         const auto& pointsArray = rulesetJson["base_points_per_line_cleared"];
         for (size_t i = 0; i < 4; ++i) 
         {
-            ruleset.basePointsForClearedLines[i] = pointsArray[i].get<float>();
+            ruleset.basePointsForClearedLines[i] = pointsArray[i].get<uint64_t>();
         }
         return ruleset;
     }

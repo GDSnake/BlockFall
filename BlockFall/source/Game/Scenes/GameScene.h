@@ -42,7 +42,7 @@ private:
 
     void generateRandomEngine();
 
-    void savePieceOnBoard() const;
+    void handlePieceHitting();
     bool isValidRotation() const;
     bool canSoftDrop() const;
     bool canSelectNewPiece() const;

@@ -230,9 +230,13 @@ void GameScene::generateRandomEngine()
         }();
 }
 
-void GameScene::savePieceOnBoard() const
+void GameScene::handlePieceHitting()
 {
-    _gameField.board->savePieceOnBoard(*_currentPieceData);
+    uint8_t clearedLines = _gameField.board->processPieceHitAndGetLinePoints(*_currentPieceData);
+    if (clearedLines > 0)
+    {
+        _score += _gameField.getPointsPerClearedLine(clearedLines);
+    }
 
 }
 
@@ -363,7 +367,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
     if (_gameState == GameState::Spawning)
     {
         _softDropAccumulation = 0;
-        savePieceOnBoard();
+        handlePieceHitting();
     }
 }
 

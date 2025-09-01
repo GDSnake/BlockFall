@@ -28,5 +28,5 @@ struct GameRuleset
 
 
     std::vector<float> speedLevels; // Falling speed levels
-    std::array<float, 4> basePointsForClearedLines;
+    std::array<uint64_t, 4> basePointsForClearedLines;
 };

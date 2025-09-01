@@ -19,6 +19,7 @@ namespace BoardConsts
 
 struct Board
 {
+private:
     inline void savePieceOnBoard(const PieceData& pieceData)
     {
         const SDL_Point& position = pieceData.position;
@@ -36,30 +37,30 @@ struct Board
             _boardContent[index] = block;
         }
         _isEmpty = false;
-        clearCompleteLines();
     }
 
-    inline void clearCompleteLines()
+    inline uint8_t getCountOfCompletedLinesAndClear()
     {
+        uint64_t clearedLines = 0;
         int writeRow = BoardConsts::s_rows - 1; // where we copy down
 
         // scan rows from bottom to top
         for (int y = BoardConsts::s_rows - 1; y >= 0; --y) {
-            bool full = true;
+            bool fullRow = true;
 
-            // check row left-to-right (cache friendly inside row)
+            // check if row y is full
             for (int x = 0; x < BoardConsts::s_columns; ++x) {
                 SDL_Point pos = { x, y };
                 if (!_boardContent[convertPieceCoordToArrayIndex(pos)]) {
-                    full = false;
+                    fullRow = false;
                     break;
                 }
             }
 
             // if not full → move row down
-            if (!full) {
+            if (!fullRow) {
                 if (writeRow != y) {
-                    // copy row y → writeRow
+                    // copy row y → writeRow AKA the row 'falls'
                     for (int x = 0; x < BoardConsts::s_columns; ++x) {
                         SDL_Point positionToBeWritten = { x, writeRow };
                         SDL_Point positionToBeRead = { x, y };
@@ -67,6 +68,9 @@ struct Board
                     }
                 }
                 --writeRow;
+            }
+            else {
+                ++clearedLines;
             }
         }
 
@@ -77,8 +81,15 @@ struct Board
                 _boardContent[convertPieceCoordToArrayIndex(pos)] = nullptr;
             }
         }
+        return clearedLines;
     }
+public:
 
+    inline uint8_t processPieceHitAndGetLinePoints(const PieceData& pieceData)
+    {
+        savePieceOnBoard(pieceData);
+        return getCountOfCompletedLinesAndClear();
+    }
     inline void updateBoardDimensions()
     {
         updateBoardTopLeftOrigin();
