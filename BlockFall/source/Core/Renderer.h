@@ -4,13 +4,14 @@
 
 #include "Entities/Piece.h"
 #include "Game/Board.h"
-
+#include "AssetManagers/FontsManager.h"
 
 struct SDL_Window;
 struct SDL_Renderer;
 struct SDL_Surface;
 struct SDL_Texture;
 struct SDL_Rect;
+struct TTF_Font;
 class Scene;
 class Block;
 
@@ -26,18 +27,22 @@ public:
 		return instance;
 	}
 
-	void drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f), float hiddenRowsYPosition = -1.0f);
+	void drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin = {0.0f, 0.0f}, float hiddenRowsYPosition = -1.0f);
 	void drawBlock(const Block& block, const SDL_FRect& destinationRectangle);
 	void drawBoard(const Board& board);
-	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin = SDL_FPoint(0.0f, 0.0f));
+	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin = {0.0f, 0.0f});
+
+	void drawText(TTF_Font* font, const std::string& text, SDL_FPoint origin = {0.0f, 0.0f}, SDL_Color color = FontColor::Black );
+
 	void present();
 	void clear();
 
 	SDL_Renderer* getRenderer() const;
 
 	void shutdown();
-
-
+#if DEBUG_BUILD
+	void writeFPSOnWindowTitle(Uint64 fps);
+#endif
 private:
 	Renderer();
 	~Renderer();

@@ -5,6 +5,8 @@
 #include <SDL3/SDL_timer.h>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include <algorithm>
+
 #include "AssetManagers/FontsManager.h"
 #include "Core/Renderer.h"
 
@@ -39,6 +41,9 @@ bool Game::init()
 
 void Game::run()
 {
+    Uint64 frames = 0;
+    Uint64 fpsResetTick = 0;
+    const float targetFrameTime = 1.0f / static_cast<float>(Config::getInstance().getConfigData().targetFPS);
     while (_isRunning)
     {
         Uint64 current = SDL_GetTicks();
@@ -47,9 +52,28 @@ void Game::run()
 
         handleEvents();
         update(_deltaTime);
+        frames++;
+
+        if (current - fpsResetTick >= 1000) {
+            fpsResetTick = current;
+#if DEBUG_BUILD
+            Renderer::getInstance().writeFPSOnWindowTitle(frames);
+#endif
+            frames = 0;
+        }
+
         if (_scene->shouldQuit())
         {
             _isRunning = false;
+        }
+
+        // Cap frame rate
+        Uint64 frameEnd = SDL_GetTicks();
+        float frameDuration = static_cast<float>(frameEnd - current) / 1000.0f;
+
+        if (frameDuration < targetFrameTime) {
+            Uint32 delayMs = static_cast<Uint32>((targetFrameTime - frameDuration) * 1000.0f);
+            SDL_Delay(delayMs);
         }
     }
 }

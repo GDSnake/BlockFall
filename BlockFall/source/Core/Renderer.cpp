@@ -2,6 +2,7 @@
 
 #include <SDL3/SDL_render.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 #include "AssetManagers/SpriteManager.h"
 #include "Config/Config.h"
@@ -9,8 +10,8 @@
 #include "Entities/Piece.h"
 #include "Game/Board.h"
 
-static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1)> lineArray; // +1 for the border lines
-static bool initializedLineArray = false; // Initialize only once the lineArray
+static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1)> s_lineArray; // +1 for the border lines
+static bool s_initializedLineArray = false; // Initialize only once the s_lineArray
 
 Renderer::Renderer()
 {
@@ -70,7 +71,7 @@ void Renderer::drawBoardContents(const Board& board)
     }
 }
 
-void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin, float hiddenRowYPosition/* = 1.0f*/)
+void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin/* = {0.0f, 0.0f}*/, float hiddenRowYPosition/* = 1.0f*/)
 {
     for (const auto& coord : pieceBlocksCoord)
     {
@@ -97,7 +98,7 @@ void Renderer::drawBoard(const Board& board)
     uint8_t rowsPlusBorder = BoardConsts::s_rows + 1;
     uint8_t totalLines = columnsPlusBorder + rowsPlusBorder;
     SDL_FPoint origin = board.getBoardOrigin();
-    if (!initializedLineArray) {
+    if (!s_initializedLineArray) {
         float cellSize = board.getCellSize();
         for (uint8_t i = 0; i < totalLines; ++i)
         {
@@ -124,23 +125,23 @@ void Renderer::drawBoard(const Board& board)
                     .h = BoardConsts::s_lineThickness
                 };
             }
-            lineArray[i] = rect;
+            s_lineArray[i] = rect;
         }
-        initializedLineArray = true;
+        s_initializedLineArray = true;
     }
     drawBoardContents(board);
 
     if (Config::getInstance().getConfigData().drawGrid)
     {
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-        SDL_RenderFillRects(_renderer, lineArray.data(), totalLines);
+        SDL_RenderFillRects(_renderer, s_lineArray.data(), totalLines);
     }
 
     SDL_SetRenderDrawColor(_renderer, 100, 82, 86, SDL_ALPHA_OPAQUE);
 
 }
 
-void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin)
+void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin/* = {0.0f, 0.0f}*/)
 {
     SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_FRect rect = {
@@ -151,6 +152,17 @@ void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Pi
         };
     SDL_RenderRect(_renderer, &rect);
     drawPiece(pieceBlocksCoord, piece, windowSize * 0.2f, SDL_FPoint(origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
+}
+
+void Renderer::drawText(TTF_Font* font, const std::string& text, SDL_FPoint origin/* = {0.0f, 0.0f}*/, SDL_Color color/* = FontColor::Black*/)
+{
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), text.size(), color);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
+    SDL_FRect textureRectangle = { origin.x, origin.y, static_cast<float>(textSurface->w), static_cast<float>(textSurface->h) };
+
+    SDL_RenderTexture(_renderer, textTexture, nullptr, &textureRectangle);
+    SDL_DestroySurface(textSurface);
+    SDL_DestroyTexture(textTexture);
 }
 
 void Renderer::present()
@@ -182,3 +194,11 @@ void Renderer::shutdown()
     }
 
 }
+
+#if DEBUG_BUILD
+void Renderer::writeFPSOnWindowTitle(Uint64 fps)
+{
+    std::string windowTitle = std::format("{} - FPS: {}", Config::getInstance().getConfigData().title, fps);
+    SDL_SetWindowTitle(_window, windowTitle.c_str());
+}
+#endif

@@ -3,7 +3,8 @@
     "title": "Block Fall",
     "width": 1024,
     "height": 768,
-    "fullscreen": false
+    "fullscreen": false,
+    "target_fps": 165
   },
   "sound": {
     "bgm": "./assets/Sound/BGM.mp3"

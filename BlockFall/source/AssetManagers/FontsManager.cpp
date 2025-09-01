@@ -26,4 +26,12 @@ FontsManager::FontsManager()
 
 FontsManager::~FontsManager()
 {
+    for (auto& font : _fontsTTFMap | std::views::values)
+    {
+        if (font)
+        {
+            TTF_CloseFont(font);
+            font = nullptr;
+        }
+    }
 }

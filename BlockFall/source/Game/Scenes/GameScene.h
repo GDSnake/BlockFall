@@ -46,7 +46,7 @@ private:
     bool canSelectNewPiece() const;
     void gameplayStateLogic(const float deltaTime);
 
-    void createAndUpdateScore();
+    void updateScore();
 
     GameState _gameState;
     GameField _gameField;
@@ -57,7 +57,7 @@ private:
     int currentLevel = 0;
     int _score = 0;
     TTF_Font* _scoreFont = nullptr;
-    std::string _scoreText = "Score: 0";
+    std::string _scoreText;
     float _currentPieceTimeToDrop;
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;

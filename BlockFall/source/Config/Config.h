@@ -39,6 +39,7 @@ struct ConfigData {
     int width = 800;
     int height = 600;
     bool fullscreen = false;
+    int targetFPS = 60;
     bool hasError = false;
     bool drawGrid = false;
     std::string bgmPath = "";
@@ -104,6 +105,7 @@ public:
         cfg.width = data["window"]["width"];
         cfg.height = data["window"]["height"];
         cfg.fullscreen = data["window"]["fullscreen"];
+        cfg.targetFPS = data["window"]["target_fps"];
         cfg.bgmPath = data["sound"]["bgm"];
         cfg.logoPath = data["images"]["logo"];
         cfg.blocksFolder = data["images"]["blocks_folder"];

@@ -32,8 +32,8 @@ void GameScene::init()
     _gameField.board->updateBoardDimensions();
     _input = std::make_unique<InputManager>();
     _gen = std::mt19937(_rd());
-    _scoreFont = FontsManager::getInstance().getFont(FontNames::GameBoyFont);
-    createAndUpdateScore();
+    _scoreText = std::format("{}{}",ScoreFontInfo.baseText, _score);
+    _scoreFont = FontsManager::getInstance().getFont(ScoreFontInfo.fontName);
 }
 
 void GameScene::handleInput()
@@ -175,6 +175,9 @@ void GameScene::update(const float deltaTime)
 
     gameplayStateLogic(deltaTime);
 
+    _scoreText = std::format("{}{}", ScoreFontInfo.baseText, _score);
+
+
     render();
 }
 
@@ -202,7 +205,9 @@ void GameScene::render()
     if (_gameField.board) {
         Renderer::getInstance().drawBoard(*_gameField.board);
     }
-        Renderer::getInstance().present();
+
+    Renderer::getInstance().drawText(_scoreFont, _scoreText, ScoreFontInfo.origin, ScoreFontInfo.color );
+    Renderer::getInstance().present();
 }
 
 void GameScene::savePieceOnBoard() const
@@ -333,18 +338,8 @@ void GameScene::gameplayStateLogic(const float deltaTime)
     }
 }
 
-void GameScene::createAndUpdateScore()
+void GameScene::updateScore()
 {
-    SDL_Color _BlackColor = { 0,0,0,255 };
-    SDL_Texture* _texture = nullptr;
-    SDL_Surface* textSurface = TTF_RenderText_Solid(_scoreFont, _scoreText.c_str(), _scoreText.size(), _BlackColor);
-    SDL_DestroyTexture(_texture);
-    _texture = nullptr;
-    _texture = SDL_CreateTextureFromSurface(Renderer::getInstance().getRenderer(), textSurface);
-    //SDL_QueryTexture(_texture, NULL, NULL, &_textureRectangle.w, &_textureRectangle.h);
-    SDL_DestroySurface(textSurface);
-    SDL_FRect _textureRectangle = { 10.0f, 10.0f, static_cast<float>(textSurface->w), static_cast<float>(textSurface->h) };
-    SDL_RenderTexture(Renderer::getInstance().getRenderer(), _texture, NULL, &_textureRectangle);
 
 }
 
