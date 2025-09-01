@@ -18,6 +18,11 @@ static void applyOriginDeltaToPosition(std::shared_ptr<PieceData>& pieceData, bo
     pieceData->position.y += pieceData->piece->getCurrentDeltaOrigin().y * multiply;
 }
 
+GameScene::GameScene(GameRulesetsEnum ruleset): _gameField(ruleset)
+{
+    generateRandomEngine();
+}
+
 GameScene::~GameScene()
 {
 }
@@ -28,10 +33,9 @@ void GameScene::init()
     _currentPieceData = std::make_shared<PieceData>();
     SpriteManager::getInstance();
     Renderer::getInstance();
-    _gameField = GameField();
     _gameField.board->updateBoardDimensions();
     _input = std::make_unique<InputManager>();
-    _gen = std::mt19937(_rd());
+    
     _scoreText = std::format("{}{}",ScoreFontInfo.baseText, _score);
     _scoreFont = FontsManager::getInstance().getFont(ScoreFontInfo.fontName);
 }
@@ -210,6 +214,22 @@ void GameScene::render()
     Renderer::getInstance().present();
 }
 
+void GameScene::generateRandomEngine()
+{
+    _gen = []{
+            std::random_device rd;
+            std::array<std::uint32_t, 8> seed_data;
+            auto now = static_cast<unsigned>(
+                std::chrono::steady_clock::now().time_since_epoch().count());
+            for (std::size_t i = 0; i < seed_data.size(); ++i)
+            {
+                seed_data[i] = rd() ^ now ^ static_cast<unsigned>(i);
+            }
+            std::seed_seq seq(seed_data.begin(), seed_data.end());
+            return std::mt19937(seq);
+        }();
+}
+
 void GameScene::savePieceOnBoard() const
 {
     _gameField.board->savePieceOnBoard(*_currentPieceData);
@@ -252,6 +272,7 @@ bool GameScene::canSelectNewPiece() const
 
 void GameScene::gameplayStateLogic(const float deltaTime)
 {
+    const GameRuleset& currentRuleset = _configData.rulesetsMap.at(_gameField.ruleset);
     if (canSelectNewPiece())
     {
         std::uniform_int_distribution<int> dist(0, (static_cast<int>(PieceShapes::Total) - 1));
@@ -282,7 +303,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
 
     if (_gameState == GameState::SoftDrop)
     {
-        if (_currentPieceTimeToDrop >= _configData.softDrop)
+        if (_currentPieceTimeToDrop >= currentRuleset.softDropTime)
         {
             if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {
@@ -307,7 +328,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
 
     }
     else if (_gameState == GameState::Falling) {
-        if (_currentPieceTimeToDrop >= _configData.speedLevels[currentLevel])
+        if (_currentPieceTimeToDrop >= currentRuleset.speedLevels[currentLevel])
         {
             if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
             {

@@ -27,7 +27,7 @@ bool Game::init()
     }
 
     FontsManager::getInstance();
-    _scene = std::make_unique<GameScene>();
+    _scene = std::make_unique<GameScene>(GameRulesetsEnum::GameBoy);
     _scene->init();
     _isRunning = true;
     

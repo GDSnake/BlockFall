@@ -23,7 +23,7 @@ enum class GameState : uint8_t
 class GameScene : public Scene
 {
 public:
-    GameScene() = default;
+    GameScene(GameRulesetsEnum ruleset);
     ~GameScene() override;
 
 
@@ -40,6 +40,8 @@ public:
 private:
     void render() override;
 
+    void generateRandomEngine();
+
     void savePieceOnBoard() const;
     bool isValidRotation() const;
     bool canSoftDrop() const;
@@ -48,7 +50,7 @@ private:
 
     void updateScore();
 
-    GameState _gameState;
+    GameState _gameState = GameState::Starting;
     GameField _gameField;
     std::shared_ptr<PieceData> _currentPieceData;
     std::shared_ptr<Piece> _previewNextPiece;
@@ -58,10 +60,9 @@ private:
     int _score = 0;
     TTF_Font* _scoreFont = nullptr;
     std::string _scoreText;
-    float _currentPieceTimeToDrop;
+    float _currentPieceTimeToDrop = 0;
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;
-    std::random_device _rd;
     std::mt19937 _gen;
 
 #if DEBUG_BUILD
