@@ -154,11 +154,11 @@ void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Pi
     drawPiece(pieceBlocksCoord, piece, windowSize * 0.2f, SDL_FPoint(origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
 }
 
-void Renderer::drawText(TTF_Font* font, const std::string& text, SDL_FPoint origin/* = {0.0f, 0.0f}*/, SDL_Color color/* = FontColor::Black*/)
+void Renderer::drawText(TTF_Font* font, const std::string& text, const FontData& fontData)
 {
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), text.size(), color);
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), text.size(), fontData.color);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
-    SDL_FRect textureRectangle = { origin.x, origin.y, static_cast<float>(textSurface->w), static_cast<float>(textSurface->h) };
+    SDL_FRect textureRectangle = { fontData.origin.x, fontData.origin.y, static_cast<float>(textSurface->w), static_cast<float>(textSurface->h) };
 
     SDL_RenderTexture(_renderer, textTexture, nullptr, &textureRectangle);
     SDL_DestroySurface(textSurface);

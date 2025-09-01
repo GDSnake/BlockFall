@@ -115,7 +115,7 @@ public:
         for (int i = 0; i < ruleSetsArray.size(); ++i)
         {
             nlohmann::basic_json<> rulesetJson = data["game_rules"][ruleSetsArray[i]];
-            cfg.rulesetsMap[toGameRulesetEnum(ruleSetsArray[i])] = processRuleset(cfg, rulesetJson,data);
+            cfg.rulesetsMap[toGameRulesetEnum(ruleSetsArray[i])] = processRuleset(cfg, rulesetJson);
         }
 
 
@@ -134,25 +134,25 @@ private:
 
     ConfigData _data;
 
-    inline GameRuleset processRuleset(ConfigData& cfg, const json& rulesetJson, const json& data) {
+    inline GameRuleset processRuleset(ConfigData& cfg, const json& rulesetJson) {
         GameRuleset ruleset;
-        ruleset.das = data["game_physics"]["das"];
-        ruleset.arr = data["game_physics"]["arr"];
-        ruleset.are = data["game_physics"]["are"];
-        ruleset.lineClear = data["game_physics"]["clear_line"];
-        ruleset.softDropTime = data["game_physics"]["soft_drop"];
-        ruleset.srs = data["game_physics"]["enabled_rules"]["srs"];
+        ruleset.das = rulesetJson["game_physics"]["das"];
+        ruleset.arr = rulesetJson["game_physics"]["arr"];
+        ruleset.are = rulesetJson["game_physics"]["are"];
+        ruleset.lineClear = rulesetJson["game_physics"]["clear_line"];
+        ruleset.softDropTime = rulesetJson["game_physics"]["soft_drop"];
+        ruleset.srs = rulesetJson["game_physics"]["enabled_rules"]["srs"];
         //ruleset.holdPiece = rulesetJson["enabled_rules"]["hold_piece"];
         //ruleset.ghostPiece = rulesetJson["enabled_rules"]["ghost_piece"];
         //ruleset.comboSystem = rulesetJson["enabled_rules"]["combo_system"];
         //ruleset.backToBack = rulesetJson["enabled_rules"]["back_to_back"];
         //ruleset.tSpin = rulesetJson["enabled_rules"]["t_spin"];
         //ruleset.softDropEnabled = rulesetJson["enabled_rules"]["soft_drop"];
-        ruleset.hardDropEnabled = data["game_physics"]["enabled_rules"]["hard_drop"];
-        ruleset.softDropWhileMovingHorizontal = data["game_physics"]["enabled_rules"]["soft_drop_while_moving_horizontal"];
+        ruleset.hardDropEnabled = rulesetJson["game_physics"]["enabled_rules"]["hard_drop"];
+        ruleset.softDropWhileMovingHorizontal = rulesetJson["game_physics"]["enabled_rules"]["soft_drop_while_moving_horizontal"];
         ruleset.softDropPointsCountOnlyIfHits = rulesetJson["soft_drop_points_count_only_if_hits"];
         ruleset.softDropPointsPerLine = rulesetJson["soft_drop_points_per_line"];
-        const auto& array = data["game_physics"]["block_fall_speed_level"];
+        const auto& array = rulesetJson["game_physics"]["block_fall_speed_level"];
         ruleset.speedLevels.reserve(array.size());
         for (size_t i = 0; i < array.size(); ++i) 
         {
@@ -164,6 +164,14 @@ private:
         for (size_t i = 0; i < 4; ++i) 
         {
             ruleset.basePointsForClearedLines[i] = pointsArray[i].get<uint64_t>();
+        }
+        const auto& linesToLevelUpArray = rulesetJson["lines_to_level_up"];
+        ruleset.linesToLevelUp.reserve(linesToLevelUpArray.size());
+        for (size_t i = 0; i < linesToLevelUpArray.size(); ++i) 
+        {
+            if (i < linesToLevelUpArray.size()) {
+                ruleset.linesToLevelUp.emplace_back(linesToLevelUpArray[i].get<uint8_t>());
+            }
         }
         return ruleset;
     }

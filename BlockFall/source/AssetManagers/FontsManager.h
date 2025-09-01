@@ -23,6 +23,9 @@ namespace FontSize
 namespace FontText
 {
     static std::string ScoreText = "Score: ";
+    static std::string LevelText = "Level: ";
+    static std::string LinesText = "Lines: ";
+
 }
 
 struct FontData
@@ -35,6 +38,8 @@ struct FontData
 };
 
 static const FontData ScoreFontInfo = {.baseText = FontText::ScoreText, .origin = {20.0f, 10.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score};
+static const FontData LevelFontInfo = { .baseText = FontText::LevelText, .origin = {Config::getInstance().getConfigData().width - 100.0f, 10.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score };
+static const FontData LinesFontInfo = { .baseText = FontText::LinesText, .origin = {Config::getInstance().getConfigData().width - 100.0f, 50.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score };
 
 class FontsManager {
 

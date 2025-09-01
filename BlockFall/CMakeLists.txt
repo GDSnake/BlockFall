@@ -6,6 +6,11 @@ project(BlockFall)
 
 set(CMAKE_CXX_STANDARD 23)
 
+# Enable parallel compilation with MSVC
+if (MSVC)
+    add_compile_options(/MP)
+endif()
+
 file(GLOB_RECURSE PROJECT_SOURCES
     source/*.cpp
     source/AssetManagers/*.cpp

@@ -36,7 +36,10 @@ void GameScene::init()
     _gameField.board->updateBoardDimensions();
     _input = std::make_unique<InputManager>();
     
-    _scoreText = std::format("{}{}",ScoreFontInfo.baseText, _score);
+    _scoreText = std::format("{}{}",ScoreFontInfo.baseText, _gameField.score);
+    _levelText = std::format("{}{}", FontText::LevelText, _gameField.currentLevel);
+    _linesText = std::format("{}{}", FontText::LinesText, _gameField.totalClearedLines);
+
     _scoreFont = FontsManager::getInstance().getFont(ScoreFontInfo.fontName);
 }
 
@@ -179,8 +182,9 @@ void GameScene::update(const float deltaTime)
 
     gameplayStateLogic(deltaTime);
 
-    _scoreText = std::format("{}{}", ScoreFontInfo.baseText, _score);
-
+    _scoreText = std::format("{}{}", ScoreFontInfo.baseText, _gameField.score);
+    _levelText = std::format("{}{}", FontText::LevelText, _gameField.currentLevel);
+    _linesText = std::format("{}{}", FontText::LinesText, _gameField.totalClearedLines);
 
     render();
 }
@@ -210,7 +214,9 @@ void GameScene::render()
         Renderer::getInstance().drawBoard(*_gameField.board);
     }
 
-    Renderer::getInstance().drawText(_scoreFont, _scoreText, ScoreFontInfo.origin, ScoreFontInfo.color );
+    Renderer::getInstance().drawText(_scoreFont, _scoreText, ScoreFontInfo);
+    Renderer::getInstance().drawText(_scoreFont, _levelText,  LevelFontInfo);
+    Renderer::getInstance().drawText(_scoreFont, _linesText, LinesFontInfo);
     Renderer::getInstance().present();
 }
 
@@ -235,7 +241,13 @@ void GameScene::handlePieceHitting()
     uint8_t clearedLines = _gameField.board->processPieceHitAndGetLinePoints(*_currentPieceData);
     if (clearedLines > 0)
     {
-        _score += _gameField.getPointsPerClearedLine(clearedLines);
+        _gameField.score += _gameField.getPointsPerClearedLine(clearedLines);
+        _gameField.currentClearedLines += clearedLines;
+        _gameField.totalClearedLines += clearedLines;
+    }
+    if (_gameField.currentClearedLines >= _gameField.getLinesToLevelUp())
+    {
+        _gameField.levelUp();
     }
 
 }
@@ -327,7 +339,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
 
             if (_gameState == GameState::Spawning)
             {
-                _score += _softDropAccumulation;
+                _gameField.score += _softDropAccumulation;
                 _lockedSoftDrop = true;
             }
         }
@@ -348,7 +360,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
                         _currentPieceData->position.y--;
                         if (!_gameField.getGameRulesetData().softDropPointsCountOnlyIfHits)
                         {
-                            _score += _softDropAccumulation;
+                            _gameField.score += _softDropAccumulation;
                         }
                         _gameState = GameState::Spawning;
                     }

@@ -62,9 +62,11 @@ private:
     std::mt19937 _gen;
 
     //Score
-    uint64_t _score = 0;
     TTF_Font* _scoreFont = nullptr;
     std::string _scoreText;
+    std::string _linesText;
+    std::string _levelText;
+
     uint64_t _softDropAccumulation = 0;
 #if DEBUG_BUILD
     bool _freezeFall = false;

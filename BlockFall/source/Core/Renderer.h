@@ -32,7 +32,7 @@ public:
 	void drawBoard(const Board& board);
 	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin = {0.0f, 0.0f});
 
-	void drawText(TTF_Font* font, const std::string& text, SDL_FPoint origin = {0.0f, 0.0f}, SDL_Color color = FontColor::Black );
+	void drawText(TTF_Font* font, const std::string& text, const FontData& fontData);
 
 	void present();
 	void clear();

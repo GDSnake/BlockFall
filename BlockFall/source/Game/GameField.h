@@ -23,15 +23,13 @@ struct GameField
         return getGameRulesetData().basePointsForClearedLines[clearedLines - 1] * (currentLevel + 1);
     }
 
-    GameRulesetsEnum ruleset;
-    int currentLevel = 0;
-    float currentSpeed = 0.0f;
-    float previewWindowSize = 100.0f;
-    float das; // Delay before auto-shift
-    float arr; // Auto repeat rate
-    SDL_FPoint scoreOrigin = { static_cast<float>(Config::getInstance().getConfigData().width) - 200.0f, 50.0f }; // hardcoded for now
-    std::shared_ptr<Board> board = std::make_shared<Board>();
-    SDL_FPoint previewZoneOrigin = { static_cast<float>(Config::getInstance().getConfigData().width) - 200.0f, static_cast<float>(Config::getInstance().getConfigData().height) - 200.0f }; // hardcoded for now
+    inline const uint8_t getLinesToLevelUp() const
+    {
+        if (currentLevel < getGameRulesetData().linesToLevelUp.size()) {
+            return getGameRulesetData().linesToLevelUp[currentLevel];
+        }
+        return getGameRulesetData().linesToLevelUp.back();
+    }
 
     inline bool willHitBlockOnBoard(const std::shared_ptr<PieceData>& pieceData) const
     {
@@ -49,4 +47,23 @@ struct GameField
         }
         return false;
     }
+
+    inline void levelUp()
+    {
+        currentLevel++;
+        currentClearedLines -= getLinesToLevelUp();
+    }
+
+    GameRulesetsEnum ruleset;
+    int currentLevel = 0;
+    float currentSpeed = 0.0f;
+    float previewWindowSize = 100.0f;
+    float das; // Delay before auto-shift
+    float arr; // Auto repeat rate
+    SDL_FPoint scoreOrigin = { static_cast<float>(Config::getInstance().getConfigData().width) - 200.0f, 50.0f }; // hardcoded for now
+    std::shared_ptr<Board> board = std::make_shared<Board>();
+    SDL_FPoint previewZoneOrigin = { static_cast<float>(Config::getInstance().getConfigData().width) - 200.0f, static_cast<float>(Config::getInstance().getConfigData().height) - 200.0f }; // hardcoded for now
+    uint64_t score = 0;
+    uint64_t currentClearedLines = 0;
+    uint64_t totalClearedLines = 0;
 };
