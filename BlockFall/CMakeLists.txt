@@ -35,7 +35,18 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 add_compile_definitions(
     $<$<CONFIG:Debug>:DEBUG_BUILD>
 )
+# --- Windows specific subsystem settings ---
+if (WIN32)
+    # Console for Debug
+    set_target_properties(BlockFall PROPERTIES
+        LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
+    )
 
+    # Windowed app for Release
+    set_target_properties(BlockFall PROPERTIES
+        LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
+    )
+endif()
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 target_include_directories(${PROJECT_NAME} PRIVATE
