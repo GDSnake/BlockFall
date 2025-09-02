@@ -10,8 +10,9 @@
 #include "Entities/Piece.h"
 #include "Game/Board.h"
 
-static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1)> s_lineArray; // +1 for the border lines
-static bool s_initializedLineArray = false; // Initialize only once the s_lineArray
+static std::array<SDL_FRect, (BoardConsts::s_columns + 1) + (BoardConsts::s_rows + 1)> s_gridLinesArray; // +1 for the border lines
+static std::array<SDL_FRect, 4> s_gridlessBoardLineArray; // +1 for the border lines
+static bool s_initializedLineArray = false; // Initialize only once the s_gridLinesArray
 
 Renderer::Renderer()
 {
@@ -92,7 +93,7 @@ void Renderer::drawBlock(const Block& block, const SDL_FRect& destinationRectang
     blitSurface(block.getSprite().get(), &block.getSourceRect(), &destinationRectangle);
 }
 
-void Renderer::drawBoard(const Board& board)
+void Renderer::drawBoard(const Board& board, bool drawGrid)
 {
     uint8_t columnsPlusBorder = BoardConsts::s_columns + 1;
     uint8_t rowsPlusBorder = BoardConsts::s_rows + 1;
@@ -100,6 +101,7 @@ void Renderer::drawBoard(const Board& board)
     SDL_FPoint origin = board.getBoardOrigin();
     if (!s_initializedLineArray) {
         float cellSize = board.getCellSize();
+        int j = 0;
         for (uint8_t i = 0; i < totalLines; ++i)
         {
             SDL_FRect rect;
@@ -125,16 +127,26 @@ void Renderer::drawBoard(const Board& board)
                     .h = BoardConsts::s_lineThickness
                 };
             }
-            s_lineArray[i] = rect;
+
+            if (i == 0 || i == BoardConsts::s_columns || i == BoardConsts::s_columns + 1 + BoardConsts::s_hiddenRows || i == totalLines - 1) {
+                s_gridlessBoardLineArray[j] = rect;
+                ++j;
+            }
+            s_gridLinesArray[i] = rect;
         }
         s_initializedLineArray = true;
     }
     drawBoardContents(board);
 
-    if (Config::getInstance().getConfigData().drawGrid)
+    if (drawGrid)
     {
         SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-        SDL_RenderFillRects(_renderer, s_lineArray.data(), totalLines);
+        SDL_RenderFillRects(_renderer, s_gridLinesArray.data(), totalLines);
+    }
+    else
+    {
+        SDL_SetRenderDrawColor(_renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_RenderFillRects(_renderer, s_gridlessBoardLineArray.data(), 4);
     }
 
     SDL_SetRenderDrawColor(_renderer, 100, 82, 86, SDL_ALPHA_OPAQUE);

@@ -38,6 +38,7 @@ namespace FontText
     S - Soft Drop
     Space - Rotate Clockwise
     N - Rotate Counter Clockwise
+    G - While in Pause, Toggle Grid Drawing
     Esc - Exit Game)";
 
 }

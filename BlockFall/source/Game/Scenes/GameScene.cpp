@@ -101,10 +101,6 @@ void GameScene::handleInput()
     ///////////////////////////////////
     /// Handle Input
     ///////////////////////////////////
-    if (_input->isKeyPressed(SDL_SCANCODE_P))
-    {
-        _gameField.isPaused = !_gameField.isPaused;
-    }
 
     if (_input->isKeyPressed(SDL_SCANCODE_T))
     {
@@ -116,6 +112,16 @@ void GameScene::handleInput()
     if (_gameState == GameState::GameOver)
     {
         return;
+    }
+
+    if (_input->isKeyPressed(SDL_SCANCODE_G) && _gameField.isPaused)
+    {
+        _gameField.drawGrid = !_gameField.drawGrid;
+    }
+
+    if (_input->isKeyPressed(SDL_SCANCODE_P))
+    {
+        _gameField.isPaused = !_gameField.isPaused;
     }
 
     if (_input->isKeyPressed(SDL_SCANCODE_SPACE))
@@ -246,7 +252,7 @@ void GameScene::render()
 
 
     if (_gameField.board) {
-        Renderer::getInstance().drawBoard(*_gameField.board);
+        Renderer::getInstance().drawBoard(*_gameField.board, _gameField.drawGrid);
     }
 
     renderTexts();

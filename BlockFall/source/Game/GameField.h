@@ -61,6 +61,7 @@ struct GameField
     }
 
     GameRulesetsEnum ruleset;
+    bool drawGrid = Config::getInstance().getConfigData().drawGrid;
     uint64_t currentLevel = 0;
     float currentSpeed = 0.0f;
     float previewWindowSize = 100.0f;

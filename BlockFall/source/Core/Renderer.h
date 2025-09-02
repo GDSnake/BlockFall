@@ -29,7 +29,7 @@ public:
 
 	void drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin = {0.0f, 0.0f}, float hiddenRowsYPosition = -1.0f);
 	void drawBlock(const Block& block, const SDL_FRect& destinationRectangle);
-	void drawBoard(const Board& board);
+	void drawBoard(const Board& board, bool drawGrid);
 	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin = {0.0f, 0.0f});
 
 	void drawText(TTF_Font* font, const std::string& text, const FontData& fontData, bool updateTexture = false);
