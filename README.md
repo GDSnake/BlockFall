@@ -32,6 +32,10 @@ Everything except the SDL3_mixer that it's not officially released, and needs to
  - SDL3_mixer.dll and SDL3_mixer.lib - ./ProjectFolder/BlockFall/libs/SDL3/lib/x64
  - SDL3_mixer.h - ./ProjectFolder/BlockFall/libs/SDL3/include/SDL3
 
+### GIF of the Game
+
+![ShareX_2UnIYYXwuE](https://github.com/user-attachments/assets/d4d1e6f9-fa29-44bf-b37c-03b79ba11b79)
+
 ### Controls
  - A/D - Move Left/Right
  - S - Soft Drop
