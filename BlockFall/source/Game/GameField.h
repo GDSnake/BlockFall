@@ -61,7 +61,7 @@ struct GameField
     }
 
     GameRulesetsEnum ruleset;
-    int currentLevel = 0;
+    uint64_t currentLevel = 0;
     float currentSpeed = 0.0f;
     float previewWindowSize = 100.0f;
     float das; // Delay before auto-shift

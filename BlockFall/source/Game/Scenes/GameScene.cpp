@@ -1,6 +1,7 @@
 #include "GameScene.h"
 
 #include <random>
+#include <utility>
 #include <SDL3_ttf/SDL_ttf.h>
 
 #include "AssetManagers/FontsManager.h"
@@ -177,8 +178,19 @@ void GameScene::handleInput()
         if (canSoftDrop() && _currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
         {
             _currentPieceData->position.y++;
-            _gameState = GameState::SoftDrop;
-            _currentPieceTimeToDrop = 0.0f;
+            if (_gameField.willHitBlockOnBoard(_currentPieceData))
+            {
+                // Check if moving down caused a collision, if so revert
+                _currentPieceData->position.y--;
+                _lockedSoftDrop = true;
+                _gameState = GameState::PieceHitting;
+            }
+            else
+            {
+                _softDropAccumulation++;
+                _gameState = GameState::SoftDrop;
+                _currentPieceTimeToDrop = 0.0f;
+            }
         }
     }
     else if (_gameState != GameState::Starting && _gameState != GameState::Spawning)
@@ -195,10 +207,7 @@ void GameScene::update(const float deltaTime)
     _input->update(deltaTime);
 
     gameplayStateLogic(deltaTime);
-
-    _scoreText = std::format("{}{}", ScoreFontInfo.baseText, _gameField.score);
-    _levelText = std::format("{}{}", FontText::LevelText, _gameField.currentLevel);
-    _linesText = std::format("{}{}", FontText::LinesText, _gameField.totalClearedLines);
+    updateStrings();
 
     render();
 }
@@ -228,14 +237,23 @@ void GameScene::render()
         Renderer::getInstance().drawBoard(*_gameField.board);
     }
 
-    Renderer::getInstance().drawText(_scoreFont, _scoreText, ScoreFontInfo);
-    Renderer::getInstance().drawText(_scoreFont, _levelText,  LevelFontInfo);
-    Renderer::getInstance().drawText(_scoreFont, _linesText, LinesFontInfo);
+    renderTexts();
+
     if (_gameState == GameState::GameOver)
     {
+        Renderer::getInstance().drawTransparentOverlay();
         Renderer::getInstance().drawText(_gameOverFont, _gameOverText, GameOverFontInfo);
     }
     Renderer::getInstance().present();
+}
+
+void GameScene::renderTexts()
+{
+    Renderer::getInstance().drawText(_scoreFont, _scoreText, ScoreFontInfo, _updateScoreText);
+    Renderer::getInstance().drawText(_scoreFont, _levelText, LevelFontInfo, _updateLevelText);
+    Renderer::getInstance().drawText(_scoreFont, _linesText, LinesFontInfo, _updateLinesText);
+
+    _updateLevelText = _updateLinesText = _updateScoreText = false;
 }
 
 void GameScene::generateRandomEngine()
@@ -262,6 +280,8 @@ void GameScene::restartGame()
     _lockedSoftDrop = false;
     _movingHorizontally = false;
     _softDropAccumulation = 0;
+
+    _updateLevelText = _updateLinesText = _updateScoreText = true;
 }
 
 void GameScene::handlePieceHitting()
@@ -277,6 +297,7 @@ void GameScene::handlePieceHitting()
     {
         _gameField.levelUp();
     }
+    _gameState = GameState::Spawning;
 
 }
 
@@ -289,8 +310,8 @@ bool GameScene::isValidRotation() const
         int y = _currentPieceData->position.y + block.y - _currentPieceData->piece->getCurrentDeltaOrigin().y;
 
         // Check board bounds
-        if (x < 0 || x >= BoardConsts::s_columns ||
-            y < 0 || y >= BoardConsts::s_rows)
+        if (x < 0 || std::cmp_greater_equal(x, BoardConsts::s_columns) ||
+            y < 0 || std::cmp_greater_equal(y, BoardConsts::s_rows))
         {
             return false;
         }
@@ -306,7 +327,7 @@ bool GameScene::isValidRotation() const
 
 bool GameScene::canSoftDrop() const
 {
-    return !_movingHorizontally && !_lockedSoftDrop && _gameState != GameState::SoftDrop && _gameState != GameState::Starting;
+    return !_movingHorizontally && !_lockedSoftDrop && _gameState != GameState::SoftDrop && _gameState != GameState::Starting && _gameState != GameState::PieceHitting;
 }
 
 bool GameScene::canSelectNewPiece() const
@@ -355,33 +376,26 @@ void GameScene::gameplayStateLogic(const float deltaTime)
         _currentPieceTimeToDrop += deltaTime;
     }
 
-    if (_gameState == GameState::SoftDrop)
+    if (_gameState == GameState::SoftDrop && _currentPieceTimeToDrop >= currentRuleset.softDropTime)
     {
-        if (_currentPieceTimeToDrop >= currentRuleset.softDropTime)
+        _currentPieceData->position.y++;
+        _softDropAccumulation += currentRuleset.softDropPointsPerLine;
+        _currentPieceTimeToDrop = 0.0f;
+
+        bool hitBlockOrBottom =
+            _currentPieceData->position.y >= BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y
+            || _gameField.willHitBlockOnBoard(_currentPieceData);
+
+        if (hitBlockOrBottom)
         {
-            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
-            {
-                _currentPieceData->position.y++;
-                _softDropAccumulation += _gameField.getGameRulesetData().softDropPointsPerLine;
-                _currentPieceTimeToDrop = 0.0f;
-                if (_gameField.willHitBlockOnBoard(_currentPieceData))
-                {
-                    _currentPieceData->position.y--;
-                    _gameState = GameState::Spawning;
-                }
-            }
-            else
-            {
-                _gameState = GameState::Spawning;
-            }
+            // Revert if we hit a block
+            if (_gameField.willHitBlockOnBoard(_currentPieceData))
+                _currentPieceData->position.y--;
 
-            if (_gameState == GameState::Spawning)
-            {
-                _gameField.score += _softDropAccumulation;
-                _lockedSoftDrop = true;
-            }
+            _gameState = GameState::PieceHitting;
+            _gameField.score += _softDropAccumulation;
+            _lockedSoftDrop = true;
         }
-
     }
     else if (_gameState == GameState::Falling) {
         if (_currentPieceTimeToDrop >= _gameField.currentSpeed)
@@ -400,7 +414,7 @@ void GameScene::gameplayStateLogic(const float deltaTime)
                         {
                             _gameField.score += _softDropAccumulation;
                         }
-                        _gameState = GameState::Spawning;
+                        _gameState = GameState::PieceHitting;
                     }
 #if DEBUG_BUILD
                 }
@@ -409,21 +423,37 @@ void GameScene::gameplayStateLogic(const float deltaTime)
             }
             else
             {
-                _gameState = GameState::Spawning;
+                _gameState = GameState::PieceHitting;
             }
         }
     }
 
-    if (_gameState == GameState::Spawning)
+    if (_gameState == GameState::PieceHitting)
     {
         _softDropAccumulation = 0;
         handlePieceHitting();
     }
 }
 
-void GameScene::updateScore()
+void GameScene::updateStrings()
 {
+    if (_oldScore != _gameField.score) {
+        _oldScore = static_cast<int>(_gameField.score);
+        _scoreText = std::format("{}{}", ScoreFontInfo.baseText, _gameField.score);
+        _updateScoreText = true;
+    }
 
+    if (_oldLevel != _gameField.currentLevel) {
+        _oldLevel = _gameField.currentLevel;
+        _levelText = std::format("{}{}", FontText::LevelText, _gameField.currentLevel);
+        _updateLevelText = true;
+    }
+
+    if (_oldClearedLines != _gameField.totalClearedLines) {
+        _oldClearedLines = _gameField.totalClearedLines;
+        _linesText = std::format("{}{}", FontText::LinesText, _gameField.totalClearedLines);
+        _updateLinesText = true;
+    }
 }
 
 void GameScene::cleanup()

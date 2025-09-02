@@ -32,7 +32,9 @@ public:
 	void drawBoard(const Board& board);
 	void drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float windowSize, SDL_FPoint origin = {0.0f, 0.0f});
 
-	void drawText(TTF_Font* font, const std::string& text, const FontData& fontData);
+	void drawText(TTF_Font* font, const std::string& text, const FontData& fontData, bool updateTexture = false);
+
+	void drawTransparentOverlay() const;
 
 	void present();
 	void clear();
@@ -44,6 +46,7 @@ public:
 	void writeFPSOnWindowTitle(Uint64 fps);
 #endif
 private:
+	using TexturePtr = std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)>;
 	Renderer();
 	~Renderer();
 
@@ -56,4 +59,5 @@ private:
 	SDL_Window* _window = nullptr;
 	SDL_Renderer* _renderer = nullptr;
 
+	std::unordered_map<std::string, TexturePtr> _textTextureMap;
 };

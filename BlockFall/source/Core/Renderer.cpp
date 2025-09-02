@@ -43,12 +43,12 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+
 }
 
 void Renderer::blitSurface(SDL_Texture* texture, const SDL_FRect* sourceRectangle, const SDL_FRect* destinationRectangle)
 {
     SDL_RenderTexture(_renderer, texture, sourceRectangle, destinationRectangle);
-
 }
 
 void Renderer::drawBoardContents(const Board& board)
@@ -71,13 +71,13 @@ void Renderer::drawBoardContents(const Board& board)
     }
 }
 
-void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin/* = {0.0f, 0.0f}*/, float hiddenRowYPosition/* = 1.0f*/)
+void Renderer::drawPiece(std::span<SDL_Point> pieceBlocksCoord, const Piece& piece, float squareSize, SDL_FPoint origin/* = {0.0f, 0.0f}*/, float hiddenRowsYPosition/* = 1.0f*/)
 {
     for (const auto& coord : pieceBlocksCoord)
     {
         float xx = (static_cast<float>(coord.x) * squareSize) + origin.x + BoardConsts::s_lineThickness;
         float yy = (static_cast<float>(coord.y) * squareSize) + origin.y + BoardConsts::s_lineThickness;
-        if (yy < hiddenRowYPosition - BoardConsts::s_lineThickness)
+        if (yy < hiddenRowsYPosition - BoardConsts::s_lineThickness)
         {
             continue;
         }
@@ -154,15 +154,39 @@ void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Pi
     drawPiece(pieceBlocksCoord, piece, windowSize * 0.2f, SDL_FPoint(origin.x + windowSize * 0.1f, origin.y + windowSize * 0.4f));
 }
 
-void Renderer::drawText(TTF_Font* font, const std::string& text, const FontData& fontData)
+void Renderer::drawText(TTF_Font* font, const std::string& text, const FontData& fontData, bool updateTexture/* = false*/)
 {
-    SDL_Surface* textSurface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), text.size(), fontData.color,0);
-    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
-    SDL_FRect textureRectangle = { fontData.origin.x, fontData.origin.y, static_cast<float>(textSurface->w), static_cast<float>(textSurface->h) };
+    if (updateTexture || !_textTextureMap.contains(fontData.baseText))
+    {
+        SDL_Surface* textSurface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), text.size(), fontData.color, 0);
+        if (!textSurface) return;
+
+        SDL_Texture* rawTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
+        SDL_DestroySurface(textSurface);
+
+        if (!rawTexture) return;
+
+        TexturePtr texture(rawTexture, SDL_DestroyTexture);
+        _textTextureMap.insert_or_assign(fontData.baseText, std::move(texture));
+    }
+
+    SDL_Texture* textTexture = _textTextureMap.at(fontData.baseText).get();
+
+    float w, h;
+    SDL_GetTextureSize(textTexture, &w, &h);
+
+    SDL_FRect textureRectangle = { fontData.origin.x, fontData.origin.y,
+                                   w, h };
 
     SDL_RenderTexture(_renderer, textTexture, nullptr, &textureRectangle);
-    SDL_DestroySurface(textSurface);
-    SDL_DestroyTexture(textTexture);
+}
+
+void Renderer::drawTransparentOverlay() const
+{
+    SDL_SetRenderDrawBlendMode(_renderer, SDL_BLENDMODE_BLEND);
+    SDL_SetRenderDrawColor(_renderer, 120, 120, 120, 128);
+    SDL_FRect rect = { 0.0f, 0.0f, static_cast<float>(Config::getInstance().getConfigData().width), static_cast<float>(Config::getInstance().getConfigData().height) };
+    SDL_RenderFillRect(_renderer, &rect);
 }
 
 void Renderer::present()

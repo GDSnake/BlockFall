@@ -16,6 +16,7 @@ enum class GameState : uint8_t
     Falling,
     SoftDrop,
     Spawning,
+    PieceHitting,
     Clearing,
     GameOver
 };
@@ -39,6 +40,7 @@ public:
 
 private:
     void render() override;
+    void renderTexts();
 
     void generateRandomEngine();
     void restartGame();
@@ -49,7 +51,7 @@ private:
     bool canSelectNewPiece() const;
     void gameplayStateLogic(const float deltaTime);
 
-    void updateScore();
+    void updateStrings();
 
     GameState _gameState = GameState::Starting;
     GameField _gameField;
@@ -61,6 +63,8 @@ private:
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;
     std::mt19937 _gen;
+    uint64_t _oldLevel, _oldClearedLines, _oldScore = 0;
+    bool _updateLevelText, _updateLinesText, _updateScoreText = true;
 
     // Text
     TTF_Font* _scoreFont = nullptr;

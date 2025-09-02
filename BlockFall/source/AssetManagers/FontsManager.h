@@ -19,7 +19,9 @@ namespace FontColor
 
 namespace FontSize
 {
-   static constexpr int Score = 32; 
+   static constexpr int Score = 32;
+   static constexpr int GameOver = 50;
+
 }
 
 namespace FontText
@@ -27,7 +29,7 @@ namespace FontText
     static std::string ScoreText = "Score: ";
     static std::string LevelText = "Level: ";
     static std::string LinesText = "Lines: ";
-    static std::string GameOverText = "Game Over!\nPress T to Start again";
+    static std::string GameOverText = "     Game Over!\nPress T to Start again";
 
 }
 
@@ -41,9 +43,18 @@ struct FontData
 };
 
 static const FontData ScoreFontInfo = {.baseText = FontText::ScoreText, .origin = {20.0f, 10.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score};
-static const FontData LevelFontInfo = { .baseText = FontText::LevelText, .origin = {Config::getInstance().getConfigData().width - 100.0f, 10.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score };
-static const FontData LinesFontInfo = { .baseText = FontText::LinesText, .origin = {Config::getInstance().getConfigData().width - 100.0f, 50.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score };
-static const FontData GameOverFontInfo = { .baseText = FontText::GameOverText, .origin = {Config::getInstance().getConfigData().width * 0.5f, Config::getInstance().getConfigData().height * 0.5f }, .color = FontColor::Red, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score };
+
+static const FontData LevelFontInfo = { .baseText = FontText::LevelText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) - 100.0f, 10.0f },
+                                                                                         .color = FontColor::Black,
+                                                                                         .fontName = FontNames::GameBoyFont,
+                                                                                         .fontSize = FontSize::Score };
+static const FontData LinesFontInfo = { .baseText = FontText::LinesText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) - 100.0f, 50.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score };
+
+static const FontData GameOverFontInfo = { .baseText = FontText::GameOverText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) * 0.5f,
+                                                                                               static_cast<float>(Config::getInstance().getConfigData().height) * 0.5f },
+                                                                                                .color = FontColor::Red,
+                                                                                                .fontName = FontNames::GameBoyFont,
+                                                                                                .fontSize = FontSize::GameOver };
 
 class FontsManager {
 
