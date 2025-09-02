@@ -41,6 +41,7 @@ private:
     void render() override;
 
     void generateRandomEngine();
+    void restartGame();
 
     void handlePieceHitting();
     bool isValidRotation() const;
@@ -61,11 +62,13 @@ private:
     bool _movingHorizontally = false;
     std::mt19937 _gen;
 
-    //Score
+    // Text
     TTF_Font* _scoreFont = nullptr;
+    TTF_Font* _gameOverFont = nullptr;
     std::string _scoreText;
     std::string _linesText;
     std::string _levelText;
+    std::string _gameOverText;
 
     uint64_t _softDropAccumulation = 0;
 #if DEBUG_BUILD

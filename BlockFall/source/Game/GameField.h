@@ -54,6 +54,12 @@ struct GameField
         currentClearedLines -= getLinesToLevelUp();
     }
 
+    inline void restartGame()
+    {
+        currentLevel = currentClearedLines = totalClearedLines = score = 0u;
+        board->clearBoard();
+    }
+
     GameRulesetsEnum ruleset;
     int currentLevel = 0;
     float currentSpeed = 0.0f;

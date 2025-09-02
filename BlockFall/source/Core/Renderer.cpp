@@ -156,7 +156,7 @@ void Renderer::drawPreviewWindow(std::span<SDL_Point> pieceBlocksCoord, const Pi
 
 void Renderer::drawText(TTF_Font* font, const std::string& text, const FontData& fontData)
 {
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), text.size(), fontData.color);
+    SDL_Surface* textSurface = TTF_RenderText_Blended_Wrapped(font, text.c_str(), text.size(), fontData.color,0);
     SDL_Texture* textTexture = SDL_CreateTextureFromSurface(_renderer, textSurface);
     SDL_FRect textureRectangle = { fontData.origin.x, fontData.origin.y, static_cast<float>(textSurface->w), static_cast<float>(textSurface->h) };
 

@@ -39,8 +39,10 @@ void GameScene::init()
     _scoreText = std::format("{}{}",ScoreFontInfo.baseText, _gameField.score);
     _levelText = std::format("{}{}", FontText::LevelText, _gameField.currentLevel);
     _linesText = std::format("{}{}", FontText::LinesText, _gameField.totalClearedLines);
+    _gameOverText = FontText::GameOverText;
 
     _scoreFont = FontsManager::getInstance().getFont(ScoreFontInfo.fontName);
+    _gameOverFont = FontsManager::getInstance().getFont(GameOverFontInfo.fontName);
 }
 
 void GameScene::handleInput()
@@ -93,6 +95,18 @@ void GameScene::handleInput()
     ///////////////////////////////////
     /// Handle Input
     ///////////////////////////////////
+
+    if (_input->isKeyPressed(SDL_SCANCODE_T))
+    {
+        if (_gameState == GameState::GameOver)
+        {
+            restartGame();
+        }
+    }
+    if (_gameState == GameState::GameOver)
+    {
+        return;
+    }
 
     if (_input->isKeyPressed(SDL_SCANCODE_SPACE))
     {
@@ -217,6 +231,10 @@ void GameScene::render()
     Renderer::getInstance().drawText(_scoreFont, _scoreText, ScoreFontInfo);
     Renderer::getInstance().drawText(_scoreFont, _levelText,  LevelFontInfo);
     Renderer::getInstance().drawText(_scoreFont, _linesText, LinesFontInfo);
+    if (_gameState == GameState::GameOver)
+    {
+        Renderer::getInstance().drawText(_gameOverFont, _gameOverText, GameOverFontInfo);
+    }
     Renderer::getInstance().present();
 }
 
@@ -234,6 +252,16 @@ void GameScene::generateRandomEngine()
             std::seed_seq seq(seed_data.begin(), seed_data.end());
             return std::mt19937(seq);
         }();
+}
+
+void GameScene::restartGame()
+{
+    _gameField.restartGame();
+    _gameState = GameState::Starting;
+    _currentPieceTimeToDrop = 0.0f;
+    _lockedSoftDrop = false;
+    _movingHorizontally = false;
+    _softDropAccumulation = 0;
 }
 
 void GameScene::handlePieceHitting()
@@ -288,6 +316,11 @@ bool GameScene::canSelectNewPiece() const
 
 void GameScene::gameplayStateLogic(const float deltaTime)
 {
+    if (_gameState == GameState::GameOver)
+    {
+        return;
+    }
+
     const GameRuleset& currentRuleset = _gameField.getGameRulesetData();
     if (canSelectNewPiece())
     {
@@ -308,6 +341,11 @@ void GameScene::gameplayStateLogic(const float deltaTime)
 
         _currentPieceData->position = BoardConsts::s_spawnGridPosition;
         applyOriginDeltaToPosition(_currentPieceData, true);
+
+        if (_gameField.willHitBlockOnBoard(_currentPieceData)) {
+            _gameState = GameState::GameOver;
+            return;
+        }
 
         _currentPieceTimeToDrop = 0.0f;
         _gameState = GameState::Falling;

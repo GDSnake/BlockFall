@@ -118,13 +118,11 @@ public:
         return (position.y * BoardConsts::s_columns) + position.x;
     }
 
-#if DEBUG_BUILD
     inline void clearBoard()
     {
         _boardContent.fill(nullptr);
         _isEmpty = true;
     }
-#endif
 
 private:
     inline void updateCellSize()
