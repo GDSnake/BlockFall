@@ -40,14 +40,19 @@ void GameScene::init()
     _scoreText = std::format("{}{}",ScoreFontInfo.baseText, _gameField.score);
     _levelText = std::format("{}{}", FontText::LevelText, _gameField.currentLevel);
     _linesText = std::format("{}{}", FontText::LinesText, _gameField.totalClearedLines);
-    _gameOverText = FontText::GameOverText;
 
     _scoreFont = FontsManager::getInstance().getFont(ScoreFontInfo.fontName);
     _gameOverFont = FontsManager::getInstance().getFont(GameOverFontInfo.fontName);
+    _pauseFont = FontsManager::getInstance().getFont(FontNames::DefaultFont);
+    _helpFont = FontsManager::getInstance().getFont(FontNames::DefaultFont);
 }
 
 void GameScene::handleInput()
 {
+    if (_input->isKeyPressed(SDL_SCANCODE_ESCAPE))
+    {
+        _input->quit();
+    }
 ///////////////////////////////////
 /// Handle Debug Input
 ///////////////////////////////////
@@ -96,6 +101,10 @@ void GameScene::handleInput()
     ///////////////////////////////////
     /// Handle Input
     ///////////////////////////////////
+    if (_input->isKeyPressed(SDL_SCANCODE_P))
+    {
+        _gameField.isPaused = !_gameField.isPaused;
+    }
 
     if (_input->isKeyPressed(SDL_SCANCODE_T))
     {
@@ -137,11 +146,6 @@ void GameScene::handleInput()
             _currentPieceData->piece->rotateCW();
             applyOriginDeltaToPosition(_currentPieceData, true);
         }
-    }
-
-    if (_input->isKeyPressed(SDL_SCANCODE_ESCAPE))
-    {
-        _input->quit();
     }
 
     if (_input->horizontalMovementIfNotOnCooldown(SDL_SCANCODE_A, das, arr))
@@ -226,6 +230,14 @@ void GameScene::render()
 {
     Renderer::getInstance().clear();
     SDL_SetRenderDrawColor(Renderer::getInstance().getRenderer(), 255, 255, 255, 255);
+
+    if (_gameField.isPaused)
+    {
+        renderPauseScreen();
+        Renderer::getInstance().present();
+        return;
+    }
+
     auto pieceBlocksCoord = _currentPieceData->piece->getBlocksCoord();
 
     SDL_Point position = {_currentPieceData->position.x - _currentPieceData->piece->getCurrentDeltaOrigin().x, _currentPieceData->position.y - _currentPieceData->piece->getCurrentDeltaOrigin().y};
@@ -242,7 +254,7 @@ void GameScene::render()
     if (_gameState == GameState::GameOver)
     {
         Renderer::getInstance().drawTransparentOverlay();
-        Renderer::getInstance().drawText(_gameOverFont, _gameOverText, GameOverFontInfo);
+        Renderer::getInstance().drawText(_gameOverFont, GameOverFontInfo.baseText, GameOverFontInfo);
     }
     Renderer::getInstance().present();
 }
@@ -254,6 +266,13 @@ void GameScene::renderTexts()
     Renderer::getInstance().drawText(_scoreFont, _linesText, LinesFontInfo, _updateLinesText);
 
     _updateLevelText = _updateLinesText = _updateScoreText = false;
+}
+
+void GameScene::renderPauseScreen() const
+{
+    Renderer::getInstance().drawTransparentOverlay();
+    Renderer::getInstance().drawText(_pauseFont, PauseFontInfo.baseText, PauseFontInfo);
+    Renderer::getInstance().drawText(_helpFont, HelpFontInfo.baseText, HelpFontInfo);
 }
 
 void GameScene::generateRandomEngine()
@@ -337,6 +356,11 @@ bool GameScene::canSelectNewPiece() const
 
 void GameScene::gameplayStateLogic(const float deltaTime)
 {
+    if (_gameField.isPaused)
+    {
+        return;
+    }
+
     if (_gameState == GameState::GameOver)
     {
         return;
@@ -376,26 +400,33 @@ void GameScene::gameplayStateLogic(const float deltaTime)
         _currentPieceTimeToDrop += deltaTime;
     }
 
-    if (_gameState == GameState::SoftDrop && _currentPieceTimeToDrop >= currentRuleset.softDropTime)
+    if (_gameState == GameState::SoftDrop)
     {
-        _currentPieceData->position.y++;
-        _softDropAccumulation += currentRuleset.softDropPointsPerLine;
-        _currentPieceTimeToDrop = 0.0f;
-
-        bool hitBlockOrBottom =
-            _currentPieceData->position.y >= BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y
-            || _gameField.willHitBlockOnBoard(_currentPieceData);
-
-        if (hitBlockOrBottom)
+        if (_currentPieceTimeToDrop >= currentRuleset.softDropTime)
         {
-            // Revert if we hit a block
-            if (_gameField.willHitBlockOnBoard(_currentPieceData))
-                _currentPieceData->position.y--;
+            if (_currentPieceData->position.y < BoardConsts::s_rows - _currentPieceData->piece->getPieceArea().y)
+            {
+                _currentPieceData->position.y++;
+                _softDropAccumulation += _gameField.getGameRulesetData().softDropPointsPerLine;
+                _currentPieceTimeToDrop = 0.0f;
+                if (_gameField.willHitBlockOnBoard(_currentPieceData))
+                {
+                    _currentPieceData->position.y--;
+                    _gameState = GameState::PieceHitting;
+                }
+            }
+            else
+            {
+                _gameState = GameState::PieceHitting;
+            }
 
-            _gameState = GameState::PieceHitting;
-            _gameField.score += _softDropAccumulation;
-            _lockedSoftDrop = true;
+            if (_gameState == GameState::PieceHitting)
+            {
+                _gameField.score += _softDropAccumulation;
+                _lockedSoftDrop = true;
+            }
         }
+
     }
     else if (_gameState == GameState::Falling) {
         if (_currentPieceTimeToDrop >= _gameField.currentSpeed)

@@ -14,6 +14,7 @@ namespace FontColor
 {
     static constexpr SDL_Color Black = { 0,0,0,255 };
     static constexpr SDL_Color Red = { 255,0,0,255 };
+    static constexpr SDL_Color Orange = { 255,50,0,255 };
 
 }
 
@@ -21,6 +22,7 @@ namespace FontSize
 {
    static constexpr int Score = 32;
    static constexpr int GameOver = 50;
+   static constexpr int Help = 60;
 
 }
 
@@ -30,6 +32,13 @@ namespace FontText
     static std::string LevelText = "Level: ";
     static std::string LinesText = "Lines: ";
     static std::string GameOverText = "     Game Over!\nPress T to Start again";
+    static std::string PauseText = "  Game Paused\nPress P to Resume";
+    static std::string HelptText = R"(Controls:
+    A/D - Move Left/Right
+    S - Soft Drop
+    Space - Rotate Clockwise
+    N - Rotate Counter Clockwise
+    Esc - Exit Game)";
 
 }
 
@@ -55,6 +64,12 @@ static const FontData GameOverFontInfo = { .baseText = FontText::GameOverText, .
                                                                                                 .color = FontColor::Red,
                                                                                                 .fontName = FontNames::GameBoyFont,
                                                                                                 .fontSize = FontSize::GameOver };
+static const FontData PauseFontInfo = { .baseText = FontText::PauseText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) * 0.5f,
+                                                                                               static_cast<float>(Config::getInstance().getConfigData().height) * 0.5f },
+                                                                                                .color = FontColor::Orange,
+                                                                                                .fontName = FontNames::GameBoyFont,
+                                                                                                .fontSize = FontSize::GameOver };
+static const FontData HelpFontInfo = { .baseText = FontText::HelptText, .origin = {20.0f, 10.0f }, .color = FontColor::Black, .fontName = FontNames::DefaultFont, .fontSize = FontSize::Help };
 
 class FontsManager {
 

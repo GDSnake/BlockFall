@@ -41,6 +41,7 @@ public:
 private:
     void render() override;
     void renderTexts();
+    void renderPauseScreen() const;
 
     void generateRandomEngine();
     void restartGame();
@@ -69,10 +70,12 @@ private:
     // Text
     TTF_Font* _scoreFont = nullptr;
     TTF_Font* _gameOverFont = nullptr;
+    TTF_Font* _pauseFont = nullptr;
+    TTF_Font* _helpFont = nullptr;
+
     std::string _scoreText;
     std::string _linesText;
     std::string _levelText;
-    std::string _gameOverText;
 
     uint64_t _softDropAccumulation = 0;
 #if DEBUG_BUILD
