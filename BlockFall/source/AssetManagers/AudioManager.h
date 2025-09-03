@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <SDL3/SDL_mixer.h>
+#include <SDL3_mixer//SDL_mixer.h>
 
 class AudioManager
 {
@@ -11,7 +11,11 @@ public:
         return instance;
     }
 
+    void toggleMusic() const;
+
     void playMusic() const;
+    void stopMusic() const;
+    void resumeMusic() const;
     void pauseMusic() const;
 
 private:

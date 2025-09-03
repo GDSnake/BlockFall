@@ -39,6 +39,7 @@ namespace FontText
     Space - Rotate Clockwise
     N - Rotate Counter Clockwise
     G - While in Pause, Toggle Grid Drawing
+    M - While in Pause, Mute/Unmute Music
     Esc - Exit Game)";
 
 }
@@ -66,7 +67,7 @@ static const FontData GameOverFontInfo = { .baseText = FontText::GameOverText, .
                                                                                                 .fontName = FontNames::GameBoyFont,
                                                                                                 .fontSize = FontSize::GameOver };
 static const FontData PauseFontInfo = { .baseText = FontText::PauseText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) * 0.5f,
-                                                                                               static_cast<float>(Config::getInstance().getConfigData().height) * 0.5f },
+                                                                                               static_cast<float>(Config::getInstance().getConfigData().height) * 0.6f },
                                                                                                 .color = FontColor::Orange,
                                                                                                 .fontName = FontNames::GameBoyFont,
                                                                                                 .fontSize = FontSize::GameOver };

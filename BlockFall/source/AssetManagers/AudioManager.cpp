@@ -8,14 +8,16 @@ AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
                               _bgm(nullptr, MIX_DestroyAudio),
                               _track(nullptr, MIX_DestroyTrack)
 {   
-    const std::string& filePath = Config::getInstance().getConfigData().bgmPath;
+    const std::string& filePath = std::format("{}{}", RESOURCES_PATH, Config::getInstance().getConfigData().bgmPath);
     if (filePath.empty())
     {
         std::cerr << "Empty music file path" << '\n';
         return;
     }
-
-    SDL_AudioSpec audioSpec = {SDL_AUDIO_S16, -1, 44100};
+    if (!MIX_Init()) {
+        std::cerr << "MIX_Init failed: " << SDL_GetError() << '\n';
+    }
+    SDL_AudioSpec audioSpec = {SDL_AUDIO_S16, 2, 44100};
     _mixer.reset(MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audioSpec));
     if (!_mixer)
     {
@@ -44,19 +46,46 @@ AudioManager::~AudioManager()
 	MIX_Quit();
 }
 
+void AudioManager::toggleMusic() const
+{
+    if (MIX_TrackPlaying(_track.get()))
+    {
+        stopMusic();
+    }
+    else
+    {
+        playMusic();
+    }
+}
+
 void AudioManager::playMusic() const
 {
     if(!MIX_TrackPlaying(_track.get()))
     {
-        MIX_PlayTrack(_track.get(), 0);
+        SDL_PropertiesID properties = SDL_CreateProperties();
+        SDL_SetNumberProperty(properties, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
+        MIX_PlayTrack(_track.get(), properties);
+    }
+}
+
+void AudioManager::stopMusic() const
+{
+    MIX_StopTrack(_track.get(), 0);
+}
+
+void AudioManager::resumeMusic() const
+{
+    if (MIX_TrackPaused(_track.get()))
+    {
+        MIX_ResumeTrack(_track.get());
+    }
+    else
+    {
+        playMusic();
     }
 }
 
 void AudioManager::pauseMusic() const
 {
-    if (MIX_TrackPlaying(_track.get()))
-    {
-        MIX_PauseTrack(_track.get());
-    }
-
+    MIX_PauseTrack(_track.get());
 }

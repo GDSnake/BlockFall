@@ -4,6 +4,7 @@
 #include <utility>
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include "AssetManagers/AudioManager.h"
 #include "AssetManagers/FontsManager.h"
 #include "Config/Config.h"
 #include "Core/Renderer.h"
@@ -119,9 +120,29 @@ void GameScene::handleInput()
         _gameField.drawGrid = !_gameField.drawGrid;
     }
 
+    if (_input->isKeyPressed(SDL_SCANCODE_M) && _gameField.isPaused)
+    {
+        _gameField.playMusic = !_gameField.playMusic;
+    }
+
     if (_input->isKeyPressed(SDL_SCANCODE_P))
     {
         _gameField.isPaused = !_gameField.isPaused;
+        if (_gameField.isPaused)
+        {
+            AudioManager::getInstance().pauseMusic();
+        }
+        else
+        {
+            if (_gameField.playMusic)
+            {
+                AudioManager::getInstance().resumeMusic();
+            }
+            else
+            {
+                AudioManager::getInstance().stopMusic();
+            }
+        }
     }
 
     if (_input->isKeyPressed(SDL_SCANCODE_SPACE))

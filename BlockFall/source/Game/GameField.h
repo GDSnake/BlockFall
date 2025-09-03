@@ -74,4 +74,5 @@ struct GameField
     uint64_t currentClearedLines = 0;
     uint64_t totalClearedLines = 0;
     bool isPaused = false;
+    bool playMusic = true;
 };
