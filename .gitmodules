@@ -1,0 +1,12 @@
+[submodule "3rdParty/SDL"]
+	path = Blockfall/3rdParty/SDL
+	url = https://github.com/libsdl-org/SDL
+[submodule "3rdParty/SDL_image"]
+	path = Blockfall/3rdParty/SDL_image
+	url = https://github.com/libsdl-org/SDL_image
+[submodule "3rdParty/SDL_mixer"]
+	path = Blockfall/3rdParty/SDL_mixer
+	url = https://github.com/libsdl-org/SDL_mixer
+[submodule "3rdParty/SDL_ttf"]
+	path = Blockfall/3rdParty/SDL_ttf
+	url = https://github.com/libsdl-org/SDL_ttf
