@@ -1,28 +1,24 @@
 #pragma once
-#include <string>
-
-class MIX_Mixer;
-class MIX_Audio;
-class MIX_Track;
+#include <memory>
+#include <SDL3/SDL_mixer.h>
 
 class AudioManager
 {
 public:
-	AudioManager() = delete;
-	AudioManager(const std::string& filePath);
-	~AudioManager();
+    static AudioManager& getInstance()
+    {
+        static AudioManager instance;
+        return instance;
+    }
 
-	/*
-	 * Resumes music play
-	 */
     void playMusic() const;
-	/*
-	 * Pauses music
-	 */
     void pauseMusic() const;
 
 private:
-	MIX_Mixer* _mixer = nullptr;
-	MIX_Audio* _bgm = nullptr;
-	MIX_Track* _track = nullptr;
+    AudioManager();
+
+    ~AudioManager();
+	std::unique_ptr<MIX_Mixer, decltype(&MIX_DestroyMixer)> _mixer;
+	std::unique_ptr<MIX_Audio, decltype(& MIX_DestroyAudio)> _bgm;
+	std::unique_ptr <MIX_Track, decltype(&MIX_DestroyTrack)> _track;
 };

@@ -9,6 +9,7 @@
 
 #include "AssetManagers/FontsManager.h"
 #include "Core/Renderer.h"
+#include "AssetManagers/AudioManager.h"
 
 Game::~Game()
 {
@@ -33,7 +34,7 @@ bool Game::init()
     
 
     // Initialize AudioManager
-    _audioManager = std::make_unique<AudioManager>(Config::getInstance().getConfigData().bgmPath); // Maybe also be a Singleton
+    AudioManager::getInstance().playMusic();
 
     _lastTime = SDL_GetTicks();
     return true;

@@ -1,53 +1,62 @@
 #include "AudioManager.h"
-//#include <SDL3/SDL_mixer.h>
 
 #include <iostream>
 
-AudioManager::AudioManager(const std::string& filePath)
-{
+#include "Config/Config.h"
 
-	//if (filePath.empty())
-	//{
-	//	std::cerr << "Empty music file path" << std::endl;
-	//	return;
-	//}
+AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
+                              _bgm(nullptr, MIX_DestroyAudio),
+                              _track(nullptr, MIX_DestroyTrack)
+{   
+    const std::string& filePath = Config::getInstance().getConfigData().bgmPath;
+    if (filePath.empty())
+    {
+        std::cerr << "Empty music file path" << '\n';
+        return;
+    }
 
-	//const SDL_AudioSpec* audioSpec = new SDL_AudioSpec(SDL_AUDIO_S16, -1, 44100);
+    SDL_AudioSpec audioSpec = {SDL_AUDIO_S16, -1, 44100};
+    _mixer.reset(MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audioSpec));
+    if (!_mixer)
+    {
+        std::cerr << "Audio Manager Init Error: " << SDL_GetError() << '\n';
+    }
 
-	//if (!MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK ,audioSpec)) {
-	//	std::cerr << "Audio Manager Init Error: " << SDL_GetError() << std::endl;
-	//}
+    _bgm.reset(MIX_LoadAudio(_mixer.get(), filePath.c_str(), true));
+    if (!_bgm)
+    {
+        std::cerr << "Audio Manager Init Error: " << SDL_GetError() << '\n';
+    }
 
-	//_bgm = MIX_LoadAudio(_mixer, filePath.c_str(), true);
-	//if (!_bgm)
-	//{
-	//	std::cerr << "Audio Manager Init Error: " << SDL_GetError() << std::endl;
-	//}
+    _track.reset(MIX_CreateTrack(_mixer.get()));
+    MIX_SetTrackAudio(_track.get(), _bgm.get());
 
-	//_track = MIX_CreateTrack(_mixer);
-	//MIX_SetTrackAudio(_track, _bgm);
+    if (!_track)
+    {
+        SDL_PropertiesID properties;
 
-	//if (!_track) {
-	//	//SDL_PropertiesID properties;
-	//	
-	//	MIX_PlayTrack(_track, 0);
-	//}
+        MIX_PlayTrack(_track.get(), 0);
+    }
 }
 
 AudioManager::~AudioManager()
 {
-	//MIX_DestroyAudio(_bgm);
-	//MIX_DestroyMixer(_mixer);
-	//
-	//MIX_Quit();
+	MIX_Quit();
 }
 
 void AudioManager::playMusic() const
 {
-	//MIX_PlayTrack(_track, 0);
+    if(!MIX_TrackPlaying(_track.get()))
+    {
+        MIX_PlayTrack(_track.get(), 0);
+    }
 }
 
 void AudioManager::pauseMusic() const
 {
-    //MIX_PauseAllTracks(_mixer);
+    if (MIX_TrackPlaying(_track.get()))
+    {
+        MIX_PauseTrack(_track.get());
+    }
+
 }
