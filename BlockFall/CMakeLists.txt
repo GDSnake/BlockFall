@@ -6,32 +6,39 @@ project(BlockFall)
 
 # Macro to run SDL setup scripts
 macro(run_sdl3_setup external_dir)
-    if(WIN32)
-        set(SCRIPT "${external_dir}/Get-GitModules.ps1")
-        if(EXISTS ${SCRIPT})
-            message(STATUS "Running ${SCRIPT} ...")
-            execute_process(
-                COMMAND powershell -ExecutionPolicy Bypass -File "${SCRIPT}"
-                WORKING_DIRECTORY ${external_dir}
-                RESULT_VARIABLE result
-            )
-            if(NOT result EQUAL 0)
-                message(FATAL_ERROR "Failed to run ${SCRIPT}")
+    # Only run setup if directory is empty
+    file(GLOB CHILDREN "${external_dir}/*")
+    list(LENGTH CHILDREN child_count)
+    if(child_count EQUAL 0)
+        if(WIN32)
+            set(SCRIPT "${external_dir}/Get-GitModules.ps1")
+            if(EXISTS ${SCRIPT})
+                message(STATUS "Running ${SCRIPT} ...")
+                execute_process(
+                    COMMAND powershell -ExecutionPolicy Bypass -File "${SCRIPT}"
+                    WORKING_DIRECTORY ${external_dir}
+                    RESULT_VARIABLE result
+                )
+                if(NOT result EQUAL 0)
+                    message(FATAL_ERROR "Failed to run ${SCRIPT}")
+                endif()
+            endif()
+        else()
+            set(SCRIPT "${external_dir}/download.sh")
+            if(EXISTS ${SCRIPT})
+                message(STATUS "Running ${SCRIPT} ...")
+                execute_process(
+                    COMMAND /bin/sh "${SCRIPT}"
+                    WORKING_DIRECTORY ${external_dir}
+                    RESULT_VARIABLE result
+                )
+                if(NOT result EQUAL 0)
+                    message(FATAL_ERROR "Failed to run ${SCRIPT}")
+                endif()
             endif()
         endif()
     else()
-        set(SCRIPT "${external_dir}/download.sh")
-        if(EXISTS ${SCRIPT})
-            message(STATUS "Running ${SCRIPT} ...")
-            execute_process(
-                COMMAND /bin/sh "${SCRIPT}"
-                WORKING_DIRECTORY ${external_dir}
-                RESULT_VARIABLE result
-            )
-            if(NOT result EQUAL 0)
-                message(FATAL_ERROR "Failed to run ${SCRIPT}")
-            endif()
-        endif()
+        message(STATUS "Skipping SDL setup for ${external_dir}, already populated")
     endif()
 endmacro()
 
@@ -72,8 +79,6 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/source
 )
-
-target_compile_definitions("${CMAKE_PROJECT_NAME}" PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/assets/")
 
 if (WIN32)
 	target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE /UUNICODE /U_UNICODE)

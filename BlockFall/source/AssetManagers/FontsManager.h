@@ -39,8 +39,8 @@ namespace FontText
     Space - Rotate Clockwise
     N - Rotate Counter Clockwise
     G - While in Pause, Toggle Grid Drawing
-    M - While in Pause, Mute/Unmute Music
     Esc - Exit Game)";
+    //    M - While in Pause, Mute/Unmute Music
 
 }
 

@@ -130,17 +130,17 @@ void GameScene::handleInput()
         _gameField.isPaused = !_gameField.isPaused;
         if (_gameField.isPaused)
         {
-            AudioManager::getInstance().pauseMusic();
+            //AudioManager::getInstance().pauseMusic();
         }
         else
         {
             if (_gameField.playMusic)
             {
-                AudioManager::getInstance().resumeMusic();
+                //AudioManager::getInstance().resumeMusic();
             }
             else
             {
-                AudioManager::getInstance().stopMusic();
+                //AudioManager::getInstance().stopMusic();
             }
         }
     }

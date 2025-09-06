@@ -5,10 +5,10 @@
 #include "Config/Config.h"
 
 AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
-                              _bgm(nullptr, MIX_DestroyAudio),
+                              //_bgm(nullptr, MIX_DestroyAudio),
                               _track(nullptr, MIX_DestroyTrack)
 {   
-    const std::string& filePath = std::format("{}{}", RESOURCES_PATH, Config::getInstance().getConfigData().bgmPath);
+    const std::string& filePath = std::format("{}{}", Config::getInstance().getAssetsFolder(), Config::getInstance().getConfigData().bgmPath);
     if (filePath.empty())
     {
         std::cerr << "Empty music file path" << '\n';
@@ -24,14 +24,14 @@ AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
         std::cerr << "Audio Manager Init Error: " << SDL_GetError() << '\n';
     }
 
-    _bgm.reset(MIX_LoadAudio(_mixer.get(), filePath.c_str(), true));
-    if (!_bgm)
-    {
-        std::cerr << "Audio Manager Init Error: " << SDL_GetError() << '\n';
-    }
+    //_bgm.reset(MIX_LoadAudio(_mixer.get(), filePath.c_str(), true));
+    //if (!_bgm)
+    //{
+    //    std::cerr << "Audio Manager Init Error: " << SDL_GetError() << '\n';
+    //}
 
-    _track.reset(MIX_CreateTrack(_mixer.get()));
-    MIX_SetTrackAudio(_track.get(), _bgm.get());
+    //_track.reset(MIX_CreateTrack(_mixer.get()));
+    //MIX_SetTrackAudio(_track.get(), _bgm.get());
 
     if (!_track)
     {
@@ -60,6 +60,7 @@ void AudioManager::toggleMusic() const
 
 void AudioManager::playMusic() const
 {
+    return;
     if(!MIX_TrackPlaying(_track.get()))
     {
         SDL_PropertiesID properties = SDL_CreateProperties();

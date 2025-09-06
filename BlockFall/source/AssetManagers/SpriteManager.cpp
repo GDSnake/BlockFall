@@ -27,7 +27,7 @@ SpriteManager::~SpriteManager()
 
 void SpriteManager::loadSprites()
 {
-    const std::string blocksSpritePath = ConfigHelpers::getFullPath(Config::getInstance().getConfigData().blocksFolder);
+    const std::string blocksSpritePath = std::format("{}{}",Config::getInstance().getAssetsFolder(), Config::getInstance().getConfigData().blocksFolder);
     for (uint8_t i = 0; i < static_cast<uint8_t>(BlockTypes::Total); ++i)
     {
        _spritePtrArray[i] = std::make_shared<Block>(std::format("{}/Block{}.png", blocksSpritePath, BlockType::to_string(static_cast<BlockTypes>(i))));

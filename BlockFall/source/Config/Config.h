@@ -7,12 +7,6 @@
 
 using json = nlohmann::json;
 constexpr int speedLevelsNumber = 21;
-namespace ConfigHelpers
-{
-    static std::string getFullPath(const std::string& filePath) {
-        return (std::filesystem::path(RESOURCES_PATH) / filePath).string();
-    }
-}
 
 
 enum class FontNames : uint8_t
@@ -69,6 +63,11 @@ inline std::string getConfigFilePath(const char* path) {
     return (exePath.parent_path() / "config.json").string();
 }
 
+inline std::string getAssetsFolderPath(const char* path) {
+    std::filesystem::path exePath = std::filesystem::absolute(path);
+    return (exePath.parent_path() / "assets").string();
+}
+
 
 class Config
 {
@@ -89,7 +88,13 @@ public:
         return _data;
     }
 
+    std::string getAssetsFolder() const
+    {
+        return _assetsFolderPath;
+    }
+
     inline void loadConfig(const char* path) {
+        _assetsFolderPath = getAssetsFolderPath(path);
         std::string filePath = getConfigFilePath(path);
         std::ifstream file(filePath);
         if (!file)
@@ -133,6 +138,7 @@ private:
     ~Config() = default;
 
     ConfigData _data;
+    std::string _assetsFolderPath;
 
     inline GameRuleset processRuleset(ConfigData& cfg, const json& rulesetJson) {
         GameRuleset ruleset;

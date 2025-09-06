@@ -34,7 +34,7 @@ bool Game::init()
     
 
     // Initialize AudioManager
-    AudioManager::getInstance().playMusic();
+    //AudioManager::getInstance().playMusic();
 
     _lastTime = SDL_GetTicks();
     return true;
