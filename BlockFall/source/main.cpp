@@ -3,13 +3,15 @@
 #include "Config/Config.h"
 #include "Game/Game.h"
 
-int main(int argc, char* argv[]) {
+int main() {
 
-    Config::getInstance().loadConfig(argv[0]);
+    Config::getInstance().loadConfig();
 
     if (Config::getInstance().getConfigData().hasError)
     {
         std::cerr << "Configuration file has an error!" << '\n';
+        std::cerr << "Press Enter to exit...";
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         return 1;
     }
 

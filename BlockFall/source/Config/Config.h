@@ -2,6 +2,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <SDL3/SDL_filesystem.h>
 
 #include "Ruleset.h"
 
@@ -58,12 +59,19 @@ struct ConfigData {
     std::unordered_map<GameRulesetsEnum, GameRuleset> rulesetsMap;
 };
 
-inline std::string getConfigFilePath(const char* path) {
-    std::filesystem::path exePath = std::filesystem::absolute(path);
-    return (exePath.parent_path() / "config.json").string();
+inline std::string getConfigFilePath()
+{
+    const char* basePath = SDL_GetBasePath();
+    if (!basePath) {
+        throw std::runtime_error("Failed to get base path");
+    }
+    std::filesystem::path path(basePath);
+
+    return path.string();
+
 }
 
-inline std::string getAssetsFolderPath(const char* path) {
+inline std::string getAssetsFolderPath(const std::string& path) {
     std::filesystem::path exePath = std::filesystem::absolute(path);
     return (exePath.parent_path() / "assets").string();
 }
@@ -93,10 +101,11 @@ public:
         return _assetsFolderPath;
     }
 
-    inline void loadConfig(const char* path) {
-        _assetsFolderPath = getAssetsFolderPath(path);
-        std::string filePath = getConfigFilePath(path);
-        std::ifstream file(filePath);
+inline void loadConfig() {
+        std::string filePath = getConfigFilePath();
+        _assetsFolderPath = getAssetsFolderPath(filePath);
+
+        std::ifstream file(std::format("{}config.json",filePath));
         if (!file)
         {
             std::cerr << "Cannot load Config File.\n";
