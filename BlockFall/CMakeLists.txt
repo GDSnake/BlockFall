@@ -178,6 +178,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
  )
 
 # ---------------------------------------------------------
+# Set working directory in Visual Studio
+# ---------------------------------------------------------
+if (WIN32)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        VS_DEBUGGER_WORKING_DIRECTORY
+        "${CMAKE_BINARY_DIR}/$<CONFIG>"
+    )
+endif()
+
+# ---------------------------------------------------------
 # Copy config.json after build
 # ---------------------------------------------------------
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

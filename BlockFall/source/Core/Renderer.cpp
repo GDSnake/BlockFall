@@ -25,7 +25,7 @@ Renderer::Renderer()
                                 &_window, 
                                 &_renderer);
 
-    if (SDL_Surface* surface = SpriteManagerHelpers::loadImage(std::format("{}{}", Config::getInstance().getAssetsFolder(), Config::getInstance().getConfigData().logoPath))) {
+    if (SDL_Surface* surface = SpriteManagerHelpers::loadImage(Config::getInstance().getConfigData().logoPath)) {
         SDL_SetWindowIcon(_window, surface);
         SDL_DestroySurface(surface);
     }

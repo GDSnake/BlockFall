@@ -7,15 +7,15 @@
     "target_fps": 165
   },
   "sound": {
-    "bgm": "/Sound/BGM.mp3"
+    "bgm": "assets/Sound/BGM.mp3"
   },
   "images": {
-    "logo": "/Sprites/logo.png",
-    "blocks_folder": "/Sprites/Blocks/Default"
+    "logo": "assets/Sprites/logo.png",
+    "blocks_folder": "assets/Sprites/Blocks/Default"
   },
   "fonts": {
-    "defaultFont": "/Fonts/arial.ttf",
-    "gameboyFont": "/Fonts/gb-tetris.ttf"
+    "defaultFont": "assets/Fonts/arial.ttf",
+    "gameboyFont": "assets/Fonts/gb-tetris.ttf"
   },
   "game":{
     "draw_grid": true

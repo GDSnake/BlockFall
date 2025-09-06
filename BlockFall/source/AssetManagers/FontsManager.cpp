@@ -16,7 +16,7 @@ FontsManager::FontsManager()
     {
         std::string fontName = FontUtils::to_string(static_cast<FontNames>(i));
         std::string font = Config::getInstance().getConfigData().fontsFileNameMap.at(fontName);
-        _fontsTTFMap[fontName] = TTF_OpenFont(std::filesystem::absolute(Config::getInstance().getAssetsFolder() + "/" + font).string().c_str(), 40);
+        _fontsTTFMap[fontName] = TTF_OpenFont(font.c_str(), 40);
         if (!_fontsTTFMap.at(fontName))
         {
             std::cerr << "Failed to load font: " << SDL_GetError() << '\n';

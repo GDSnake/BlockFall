@@ -59,24 +59,6 @@ struct ConfigData {
     std::unordered_map<GameRulesetsEnum, GameRuleset> rulesetsMap;
 };
 
-inline std::string getConfigFilePath()
-{
-    const char* basePath = SDL_GetBasePath();
-    if (!basePath) {
-        throw std::runtime_error("Failed to get base path");
-    }
-    std::filesystem::path path(basePath);
-
-    return path.string();
-
-}
-
-inline std::string getAssetsFolderPath(const std::string& path) {
-    std::filesystem::path exePath = std::filesystem::absolute(path);
-    return (exePath.parent_path() / "assets").string();
-}
-
-
 class Config
 {
 public:
@@ -96,16 +78,10 @@ public:
         return _data;
     }
 
-    std::string getAssetsFolder() const
-    {
-        return _assetsFolderPath;
-    }
-
 inline void loadConfig() {
-        std::string filePath = getConfigFilePath();
-        _assetsFolderPath = getAssetsFolderPath(filePath);
+        std::string filePath = std::filesystem::current_path().generic_string();
 
-        std::ifstream file(std::format("{}config.json",filePath));
+        std::ifstream file(std::format("{}/config.json",filePath));
         if (!file)
         {
             std::cerr << "Cannot load Config File.\n";
@@ -147,7 +123,6 @@ private:
     ~Config() = default;
 
     ConfigData _data;
-    std::string _assetsFolderPath;
 
     inline GameRuleset processRuleset(ConfigData& cfg, const json& rulesetJson) {
         GameRuleset ruleset;
