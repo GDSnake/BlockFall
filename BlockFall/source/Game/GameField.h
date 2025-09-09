@@ -50,9 +50,26 @@ struct GameField
 
     inline void levelUp()
     {
+        if (currentLevel + 1 >= getGameRulesetData().speedLevels.size()) {
+            return;
+        }
         currentLevel++;
-        currentClearedLines -= getLinesToLevelUp();
+        currentClearedLines = currentClearedLines >= getLinesToLevelUp() ? currentClearedLines - getLinesToLevelUp() : 0;
+        currentSpeed = Config::getInstance().getConfigData().rulesetsMap.at(ruleset).speedLevels[currentLevel];
     }
+
+#if DEBUG_BUILD
+    inline void levelDown()
+    {
+        if (currentLevel == 0) {
+            return;
+        }
+
+        currentLevel --;
+        currentSpeed = Config::getInstance().getConfigData().rulesetsMap.at(ruleset).speedLevels[currentLevel];
+    }
+
+#endif
 
     inline void restartGame()
     {

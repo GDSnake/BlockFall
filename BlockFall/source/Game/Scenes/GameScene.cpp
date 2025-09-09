@@ -91,6 +91,16 @@ void GameScene::handleInput()
     {
         _gameField.board->clearBoard();
     }
+    if (_input->isKeyPressed(SDL_SCANCODE_KP_PLUS))
+    {
+        _gameField.levelUp();
+        _updateLevelText = true;
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_KP_MINUS))
+    {
+        _gameField.levelDown();
+        _updateLevelText = true;
+    }
 #endif // DEBUG_BUILD
 // Handle Debug Input
 
