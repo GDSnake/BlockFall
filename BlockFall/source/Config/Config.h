@@ -102,10 +102,11 @@ inline void loadConfig() {
         cfg.blocksFolder = data["images"]["blocks_folder"];
         cfg.drawGrid = data["game"]["draw_grid"];
         auto ruleSetsArray = data["game_rules"]["ruleset_list"];
-        for (int i = 0; i < ruleSetsArray.size(); ++i)
+        for (size_t i = 0; i < ruleSetsArray.size(); ++i)
         {
-            nlohmann::basic_json<> rulesetJson = data["game_rules"][ruleSetsArray[i]];
-            cfg.rulesetsMap[toGameRulesetEnum(ruleSetsArray[i])] = processRuleset(cfg, rulesetJson);
+            std::string ruleName = ruleSetsArray[i].get<std::string>();
+            nlohmann::basic_json<> rulesetJson = data["game_rules"][ruleName];
+            cfg.rulesetsMap[toGameRulesetEnum(ruleName)] = processRuleset(cfg, rulesetJson);
         }
 
 

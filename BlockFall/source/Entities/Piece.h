@@ -2,6 +2,7 @@
 #include <memory>
 #include <span>
 #include <SDL3/SDL_rect.h>
+#include <vector>
 
 #include "Input/InputManager.h"
 

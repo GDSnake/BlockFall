@@ -168,6 +168,7 @@ run_sdl3_setup("${CMAKE_SOURCE_DIR}/3rdParty/SDL_mixer/external")
 add_subdirectory(3rdParty/SDL)
 add_subdirectory(3rdParty/SDL_image)
 add_subdirectory(3rdParty/SDL_mixer)
+set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
 add_subdirectory(3rdParty/SDL_ttf)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
