@@ -5,7 +5,7 @@
 #include "Config/Config.h"
 
 AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
-                              //_bgm(nullptr, MIX_DestroyAudio),
+                              _bgm(nullptr, MIX_DestroyAudio),
                               _track(nullptr, MIX_DestroyTrack)
 {   
     if (!MIX_Init()) {
@@ -18,20 +18,17 @@ AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
         std::cerr << "Audio Manager Init Error: " << SDL_GetError() << '\n';
     }
 
-    //_bgm.reset(MIX_LoadAudio(_mixer.get(), Config::getInstance().getConfigData().bgmPath.c_str(), true));
-    //if (!_bgm)
-    //{
-    //    std::cerr << "Audio Manager Init Error: " << SDL_GetError() << '\n';
-    //}
-
-    //_track.reset(MIX_CreateTrack(_mixer.get()));
-    //MIX_SetTrackAudio(_track.get(), _bgm.get());
-
-    if (!_track)
+    _bgm.reset(MIX_LoadAudio(_mixer.get(), Config::getInstance().getConfigData().bgmPath.c_str(), true));
+    if (!_bgm)
     {
-        SDL_PropertiesID properties;
+        std::cerr << "Audio Manager BGM Error: " << SDL_GetError() << '\n';
+        return;
+    }
 
-        MIX_PlayTrack(_track.get(), 0);
+    _track.reset(MIX_CreateTrack(_mixer.get()));
+    if (!_track || !MIX_SetTrackAudio(_track.get(), _bgm.get()))
+    {
+        std::cerr << "Audio Manager Track Error: " << SDL_GetError() << '\n';
     }
 }
 
@@ -42,6 +39,11 @@ AudioManager::~AudioManager()
 
 void AudioManager::toggleMusic() const
 {
+    if (!_track)
+    {
+        return;
+    }
+
     if (MIX_TrackPlaying(_track.get()))
     {
         stopMusic();
@@ -54,23 +56,31 @@ void AudioManager::toggleMusic() const
 
 void AudioManager::playMusic() const
 {
-    return;
-    if(!MIX_TrackPlaying(_track.get()))
+    if (_track && !MIX_TrackPlaying(_track.get()))
     {
         SDL_PropertiesID properties = SDL_CreateProperties();
+        if (!properties)
+        {
+            std::cerr << "Audio Manager Properties Error: " << SDL_GetError() << '\n';
+            return;
+        }
         SDL_SetNumberProperty(properties, MIX_PROP_PLAY_LOOPS_NUMBER, -1);
         MIX_PlayTrack(_track.get(), properties);
+        SDL_DestroyProperties(properties);
     }
 }
 
 void AudioManager::stopMusic() const
 {
-    MIX_StopTrack(_track.get(), 0);
+    if (_track)
+    {
+        MIX_StopTrack(_track.get(), 0);
+    }
 }
 
 void AudioManager::resumeMusic() const
 {
-    if (MIX_TrackPaused(_track.get()))
+    if (_track && MIX_TrackPaused(_track.get()))
     {
         MIX_ResumeTrack(_track.get());
     }
@@ -82,5 +92,8 @@ void AudioManager::resumeMusic() const
 
 void AudioManager::pauseMusic() const
 {
-    MIX_PauseTrack(_track.get());
+    if (_track)
+    {
+        MIX_PauseTrack(_track.get());
+    }
 }

@@ -33,8 +33,7 @@ bool Game::init()
     _isRunning = true;
     
 
-    // Initialize AudioManager
-    //AudioManager::getInstance().playMusic();
+    AudioManager::getInstance().playMusic();
 
     _lastTime = SDL_GetTicks();
     return true;
@@ -81,6 +80,7 @@ void Game::run()
 
 void Game::shutdown()
 {
+    AudioManager::getInstance().stopMusic();
     // Reset Scene
     Renderer::getInstance().shutdown();
 

@@ -2,7 +2,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <SDL3_mixer//SDL_mixer.h>
+#include <SDL3_mixer/SDL_mixer.h>
 
 enum class AudioTrack : uint8_t
 {
@@ -54,6 +54,7 @@ private:
 
     ~AudioManager();
 	std::unique_ptr<MIX_Mixer, decltype(&MIX_DestroyMixer)> _mixer;
-	std::unordered_map<std::string, std::unique_ptr<MIX_Audio, decltype(&MIX_DestroyAudio)>> _soundsMap;
+	//std::unordered_map<std::string, std::unique_ptr<MIX_Audio, decltype(&MIX_DestroyAudio)>> _soundsMap;
+    std::unique_ptr<MIX_Audio, decltype(&MIX_DestroyAudio)> _bgm;
 	std::unique_ptr <MIX_Track, decltype(&MIX_DestroyTrack)> _track;
 };
