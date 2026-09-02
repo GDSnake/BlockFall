@@ -100,12 +100,12 @@ public:
     inline bool isEmpty() const { return _isEmpty; }
     inline SDL_FPoint getBoardOrigin() const { return _boardTopLeftOrigin; }
     inline float getCellSize() const { return _cellSize; }
-    inline float getBoardWidth() const { return BoardConsts::s_columns * (_cellSize + BoardConsts::s_lineThickness) - _cellSize;}
-    inline float getBoardHeight() const { return (BoardConsts::s_rows - BoardConsts::s_hiddenRows) * (_cellSize + BoardConsts::s_lineThickness) - _cellSize * 2; }
+    inline float getBoardWidth() const { return BoardConsts::s_columns * _cellSize + BoardConsts::s_lineThickness;}
+    inline float getBoardHeight() const { return (BoardConsts::s_rows - BoardConsts::s_hiddenRows) * _cellSize + BoardConsts::s_lineThickness; }
 
     inline float getOriginYPositionWithHiddenRows() const
     {
-        return getBoardOrigin().y + (BoardConsts::s_hiddenRows * (_cellSize + BoardConsts::s_lineThickness) - BoardConsts::s_lineThickness);
+        return getBoardOrigin().y + (BoardConsts::s_hiddenRows * _cellSize);
     }
 
     inline SDL_FPoint convertGridPointToPixel(const SDL_Point& coord) const

@@ -165,13 +165,15 @@ if (WIN32)
 endif()
 
 # ---------------------------------------------------------
-# Copy config.json after build
+# Copy config.json to the runtime directory
 # ---------------------------------------------------------
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+add_custom_target(BlockFallConfig ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/config.json"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        "${CMAKE_BINARY_DIR}/$<CONFIG>"
+    DEPENDS "${CMAKE_SOURCE_DIR}/config.json"
 )
+add_dependencies(${PROJECT_NAME} BlockFallConfig)
 
 # ---------------------------------------------------------
 # Copy assets folder after build
