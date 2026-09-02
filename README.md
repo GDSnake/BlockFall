@@ -15,22 +15,25 @@ The similarities to a certain game are real, again this is PURELY to learn and n
 ## Build
 ### Requirements
  - CMake
- - Visual Studio 2022 (using C++ 23, but maybe 20 is enough)
+ - Visual Studio Code
+ - Internet access on the first CMake configure (to download the prebuilt packages)
+ - Prebuilt SDL3 development packages (downloaded automatically when absent):
+   - SDL 3.4.14
+	  - SDL_image 3.4.4
+   - SDL_mixer 3.2.4
+   - SDL_ttf 3.2.2
 
 ### Build info
 I used CMake for the first time with (a big) help of ChatGPT to configure, if you have suggestions to improve feel free.
-Everything except the SDL3_mixer that it's not officially released, and needs to be build from source or find somewhere where it's build and put manually on the correct folder, should download automatically and be put on the correct folder.
+The SDL libraries are not built by this project. On Windows x64, CMake downloads the matching prebuilt VC development packages when they are absent and extracts them under `BlockFall/libs/SDL3`, `BlockFall/libs/SDL3_image`, `BlockFall/libs/SDL3_mixer`, and `BlockFall/libs/SDL3_ttf`. Custom package roots can be passed with `SDL3_ROOT`, `SDL3_image_ROOT`, `SDL3_mixer_ROOT`, and `SDL3_ttf_ROOT`.
 
 ### Build steps
  - Clone the repo
- - Create a 'build' folder on the 'BlockFall' folder (alonside source, asset etc folders)
- - On the Powershell run these commands
-  - cd /path/to/the/Project/BlockFall/build
-  - CMake .. -G "Visual Studio 17 2022" -A x64
-- Wait for the project to generate
-- Manually download/build SDL3_mixer and put the files on the correct folders:
- - SDL3_mixer.dll and SDL3_mixer.lib - ./ProjectFolder/BlockFall/libs/SDL3/lib/x64
- - SDL3_mixer.h - ./ProjectFolder/BlockFall/libs/SDL3/include/SDL3
+   - From the `BlockFall` project directory, run these PowerShell commands:
+  - `cd BlockFall`
+  - `cmake --preset windows-ninja`
+  - `cmake --build --preset windows-ninja-debug`
+  - Wait for CMake to download and verify all four exact SDL package versions when needed.
 
 ### GIF of the Game
 

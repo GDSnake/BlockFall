@@ -1,47 +1,11 @@
 cmake_minimum_required(VERSION 3.15)
+if(POLICY CMP0144)
+    cmake_policy(SET CMP0144 NEW)
+endif()
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 project(BlockFall)
-
-# Macro to run SDL setup scripts
-macro(run_sdl3_setup external_dir)
-    # Only run setup if directory is empty
-    file(GLOB CHILDREN "${external_dir}/*")
-    list(LENGTH CHILDREN child_count)
-    if(child_count EQUAL 0)
-        if(WIN32)
-            set(SCRIPT "${external_dir}/Get-GitModules.ps1")
-            if(EXISTS ${SCRIPT})
-                message(STATUS "Running ${SCRIPT} ...")
-                execute_process(
-                    COMMAND powershell -ExecutionPolicy Bypass -File "${SCRIPT}"
-                    WORKING_DIRECTORY ${external_dir}
-                    RESULT_VARIABLE result
-                )
-                if(NOT result EQUAL 0)
-                    message(FATAL_ERROR "Failed to run ${SCRIPT}")
-                endif()
-            endif()
-        else()
-            set(SCRIPT "${external_dir}/download.sh")
-            if(EXISTS ${SCRIPT})
-                message(STATUS "Running ${SCRIPT} ...")
-                execute_process(
-                    COMMAND /bin/sh "${SCRIPT}"
-                    WORKING_DIRECTORY ${external_dir}
-                    RESULT_VARIABLE result
-                )
-                if(NOT result EQUAL 0)
-                    message(FATAL_ERROR "Failed to run ${SCRIPT}")
-                endif()
-            endif()
-        endif()
-    else()
-        message(STATUS "Skipping SDL setup for ${external_dir}, already populated")
-    endif()
-endmacro()
-
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -128,48 +92,60 @@ else()
 endif()
 
 # ---------------------------------------------------------
-# Ensure NASM is available for SDL_mixer assembly code
+# SDL3 stack (prebuilt packages)
 # ---------------------------------------------------------
-if(WIN32)
-    find_program(NASM_EXECUTABLE nasm)
-
-    if(NOT NASM_EXECUTABLE)
-        message(STATUS "NASM not found, downloading prebuilt NASM...")
-
-        include(FetchContent)
-        set(NASM_URL "https://www.nasm.us/pub/nasm/releasebuilds/2.16.02/win64/nasm-2.16.02-win64.zip")
-        set(NASM_ZIP "${CMAKE_BINARY_DIR}/nasm.zip")
-        set(NASM_DIR "${CMAKE_BINARY_DIR}/nasm")
-
-        file(DOWNLOAD ${NASM_URL} ${NASM_ZIP} SHOW_PROGRESS)
-        file(MAKE_DIRECTORY ${NASM_DIR})
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf ${NASM_ZIP} WORKING_DIRECTORY ${NASM_DIR})
-
-        # NASM executable path inside extracted folder
-        set(NASM_EXECUTABLE "${NASM_DIR}/nasm-2.16.02/nasm.exe")
-        if(EXISTS ${NASM_EXECUTABLE})
-            message(STATUS "NASM downloaded to ${NASM_EXECUTABLE}")
-        else()
-            message(FATAL_ERROR "Failed to download NASM")
-        endif()
-    endif()
-
-    # Tell CMake to use this NASM
-    set(CMAKE_ASM_NASM_COMPILER "${NASM_EXECUTABLE}" CACHE FILEPATH "NASM assembler")
+if(NOT WIN32)
+    message(FATAL_ERROR "Automatic SDL package downloads currently support Windows only")
 endif()
 
-# SDL3 stack (via submodules)
-set(SDLIMAGE_VENDORED OFF CACHE BOOL "" FORCE)
+function(download_sdl_package package version archive_prefix root config_file)
+    if(EXISTS "${root}/cmake/${config_file}")
+        message(STATUS "Using prebuilt ${package} ${version} from ${root}")
+        return()
+    endif()
 
-# Run setup scripts for SDL_image and SDL_mixer
-run_sdl3_setup("${CMAKE_SOURCE_DIR}/3rdParty/SDL_image/external")
-run_sdl3_setup("${CMAKE_SOURCE_DIR}/3rdParty/SDL_mixer/external")
+    set(archive "${CMAKE_BINARY_DIR}/${archive_prefix}-${version}-VC.zip")
+    set(url "https://github.com/libsdl-org/${package}/releases/download/release-${version}/${archive_prefix}-devel-${version}-VC.zip")
+    set(extract_dir "${CMAKE_BINARY_DIR}/${package}-${version}-extract")
 
-add_subdirectory(3rdParty/SDL)
-add_subdirectory(3rdParty/SDL_image)
-add_subdirectory(3rdParty/SDL_mixer)
-set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
-add_subdirectory(3rdParty/SDL_ttf)
+    message(STATUS "Downloading prebuilt ${package} ${version} ...")
+    file(DOWNLOAD "${url}" "${archive}" SHOW_PROGRESS STATUS download_status)
+    list(GET download_status 0 download_code)
+    list(GET download_status 1 download_message)
+    if(NOT download_code EQUAL 0)
+        message(FATAL_ERROR "Failed to download ${package} ${version}: ${download_message}")
+    endif()
+
+    file(REMOVE_RECURSE "${extract_dir}")
+    file(MAKE_DIRECTORY "${extract_dir}" "${root}")
+    file(ARCHIVE_EXTRACT INPUT "${archive}" DESTINATION "${extract_dir}")
+    file(GLOB extracted_roots LIST_DIRECTORIES true "${extract_dir}/*")
+    list(LENGTH extracted_roots extracted_root_count)
+    if(NOT extracted_root_count EQUAL 1)
+        message(FATAL_ERROR "Unexpected ${package} archive layout")
+    endif()
+    list(GET extracted_roots 0 extracted_root)
+    file(COPY "${extracted_root}/" DESTINATION "${root}")
+
+    if(NOT EXISTS "${root}/cmake/${config_file}")
+        message(FATAL_ERROR "Downloaded ${package} ${version} but ${config_file} was not found")
+    endif()
+endfunction()
+
+set(SDL3_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3" CACHE PATH "SDL3 package root")
+set(SDL3_image_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3_image" CACHE PATH "SDL3_image package root")
+set(SDL3_mixer_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3_mixer" CACHE PATH "SDL3_mixer package root")
+set(SDL3_ttf_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3_ttf" CACHE PATH "SDL3_ttf package root")
+
+download_sdl_package(SDL 3.4.14 SDL3 "${SDL3_ROOT}" SDL3Config.cmake)
+download_sdl_package(SDL_image 3.4.4 SDL3_image "${SDL3_image_ROOT}" SDL3_imageConfig.cmake)
+download_sdl_package(SDL_mixer 3.2.4 SDL3_mixer "${SDL3_mixer_ROOT}" SDL3_mixerConfig.cmake)
+download_sdl_package(SDL_ttf 3.2.2 SDL3_ttf "${SDL3_ttf_ROOT}" SDL3_ttfConfig.cmake)
+
+find_package(SDL3 3.4.14 EXACT CONFIG REQUIRED HINTS "${SDL3_ROOT}")
+find_package(SDL3_image 3.4.4 EXACT CONFIG REQUIRED HINTS "${SDL3_image_ROOT}")
+find_package(SDL3_mixer 3.2.4 EXACT CONFIG REQUIRED HINTS "${SDL3_mixer_ROOT}")
+find_package(SDL3_ttf 3.2.2 EXACT CONFIG REQUIRED HINTS "${SDL3_ttf_ROOT}")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
      SDL3::SDL3
