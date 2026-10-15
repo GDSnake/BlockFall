@@ -8,8 +8,10 @@ AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
                               _bgm(nullptr, MIX_DestroyAudio),
                               _track(nullptr, MIX_DestroyTrack)
 {   
-    if (!MIX_Init()) {
+    _mixInitialized = MIX_Init();
+    if (!_mixInitialized) {
         std::cerr << "MIX_Init failed: " << SDL_GetError() << '\n';
+        return;
     }
     SDL_AudioSpec audioSpec = {SDL_AUDIO_S16, 2, 44100};
     _mixer.reset(MIX_CreateMixerDevice(SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK, &audioSpec));
@@ -34,10 +36,20 @@ AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
 
 AudioManager::~AudioManager()
 {
+    shutdown();
+}
+
+void AudioManager::shutdown()
+{
+    stopMusic();
     _track.reset();
     _bgm.reset();
     _mixer.reset();
-	MIX_Quit();
+    if (_mixInitialized)
+    {
+        MIX_Quit();
+        _mixInitialized = false;
+    }
 }
 
 void AudioManager::toggleMusic() const

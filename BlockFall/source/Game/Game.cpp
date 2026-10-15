@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "AssetManagers/FontsManager.h"
+#include "AssetManagers/SpriteManager.h"
 #include "Core/Renderer.h"
 #include "AssetManagers/AudioManager.h"
 
@@ -26,6 +27,9 @@ bool Game::init()
     _initialized = true;
     if (!TTF_Init()) {
         std::cerr << std::format("Error Initializing TTF: {} \n", SDL_GetError());
+        SDL_Quit();
+        _initialized = false;
+        return false;
     }
 
     FontsManager::getInstance();
@@ -86,8 +90,10 @@ void Game::shutdown()
         return;
     }
 
-    AudioManager::getInstance().stopMusic();
+    AudioManager::getInstance().shutdown();
     _scene.reset();
+    SpriteManager::getInstance().shutdown();
+    FontsManager::getInstance().shutdown();
     Renderer::getInstance().shutdown();
 
     TTF_Quit();

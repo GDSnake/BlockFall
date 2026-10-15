@@ -73,6 +73,7 @@ public:
     }
 
     TTF_Font* getFont(FontNames font) const;
+    void shutdown();
 
 private:
     FontsManager();

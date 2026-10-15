@@ -57,6 +57,7 @@ public:
     }
 
     std::shared_ptr<Block> getBlock(BlockTypes block);
+    void shutdown();
 private:
     SpriteManager();
     ~SpriteManager();

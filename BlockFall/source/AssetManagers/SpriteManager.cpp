@@ -23,6 +23,12 @@ SpriteManager::SpriteManager()
 
 SpriteManager::~SpriteManager()
 {
+    shutdown();
+}
+
+void SpriteManager::shutdown()
+{
+    _spritePtrArray.fill(nullptr);
 }
 
 void SpriteManager::loadSprites()

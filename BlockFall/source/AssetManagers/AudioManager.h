@@ -48,6 +48,7 @@ public:
     void stopMusic() const;
     void resumeMusic() const;
     void pauseMusic() const;
+    void shutdown();
 
 private:
     AudioManager();
@@ -57,4 +58,5 @@ private:
 	//std::unordered_map<std::string, std::unique_ptr<MIX_Audio, decltype(&MIX_DestroyAudio)>> _soundsMap;
     std::unique_ptr<MIX_Audio, decltype(&MIX_DestroyAudio)> _bgm;
 	std::unique_ptr <MIX_Track, decltype(&MIX_DestroyTrack)> _track;
+    bool _mixInitialized = false;
 };

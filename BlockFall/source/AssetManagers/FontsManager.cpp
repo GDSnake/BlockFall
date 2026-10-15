@@ -64,6 +64,11 @@ FontsManager::FontsManager()
 
 FontsManager::~FontsManager()
 {
+    shutdown();
+}
+
+void FontsManager::shutdown()
+{
     for (auto& font : _fontsTTFMap | std::views::values)
     {
         if (font)
@@ -72,4 +77,5 @@ FontsManager::~FontsManager()
             font = nullptr;
         }
     }
+    _fontsTTFMap.clear();
 }

@@ -45,7 +45,7 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-
+    shutdown();
 }
 
 void Renderer::blitSurface(SDL_Texture* texture, const SDL_FRect* sourceRectangle, const SDL_FRect* destinationRectangle)
@@ -220,6 +220,8 @@ SDL_Renderer* Renderer::getRenderer() const
 
 void Renderer::shutdown()
 {
+    _textTextureMap.clear();
+
     if (_renderer)
     {
         SDL_DestroyRenderer(_renderer);
