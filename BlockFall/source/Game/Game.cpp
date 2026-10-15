@@ -23,6 +23,7 @@ bool Game::init()
         SDL_Log("SDL Init Error: %s \n",SDL_GetError());
         return false;
     }
+    _initialized = true;
     if (!TTF_Init()) {
         std::cerr << std::format("Error Initializing TTF: {} \n", SDL_GetError());
     }
@@ -80,11 +81,18 @@ void Game::run()
 
 void Game::shutdown()
 {
+    if (!_initialized)
+    {
+        return;
+    }
+
     AudioManager::getInstance().stopMusic();
-    // Reset Scene
+    _scene.reset();
     Renderer::getInstance().shutdown();
 
+    TTF_Quit();
     SDL_Quit();
+    _initialized = false;
 }
 
 void Game::handleEvents()

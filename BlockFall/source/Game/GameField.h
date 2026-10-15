@@ -38,8 +38,11 @@ struct GameField
         for (auto& coord : coordList)
         {
             SDL_Point targetPosition = { pieceData->position.x - deltaOrigin.x + coord.x, pieceData->position.y - deltaOrigin.y + coord.y };
+            if (!board->isInsideBoard(targetPosition))
+            {
+                return true;
+            }
             int index = board->convertPieceCoordToArrayIndex(targetPosition);
-            assert(index < BoardConsts::s_boardSize && index >= 0);
             if (board->getBoardContent()[index])
             {
                 return true;

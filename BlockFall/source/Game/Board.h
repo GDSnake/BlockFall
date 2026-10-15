@@ -30,9 +30,11 @@ private:
         for (auto& coord : coordList)
         {
             SDL_Point targetPosition = { position.x - deltaOrigin.x + coord.x, position.y - deltaOrigin.y + coord.y };
+            if (!isInsideBoard(targetPosition))
+            {
+                return;
+            }
             int index = convertPieceCoordToArrayIndex(targetPosition);
-            
-            assert(index < BoardConsts::s_boardSize && index >= 0);
 
             _boardContent[index] = block;
         }
@@ -100,6 +102,11 @@ public:
     inline bool isEmpty() const { return _isEmpty; }
     inline SDL_FPoint getBoardOrigin() const { return _boardTopLeftOrigin; }
     inline float getCellSize() const { return _cellSize; }
+    inline bool isInsideBoard(const SDL_Point& position) const
+    {
+        return position.x >= 0 && position.x < BoardConsts::s_columns &&
+               position.y >= 0 && position.y < BoardConsts::s_rows;
+    }
     inline float getBoardWidth() const { return BoardConsts::s_columns * _cellSize + BoardConsts::s_lineThickness;}
     inline float getBoardHeight() const { return (BoardConsts::s_rows - BoardConsts::s_hiddenRows) * _cellSize + BoardConsts::s_lineThickness; }
 

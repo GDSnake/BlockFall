@@ -20,7 +20,5 @@ int main() {
     {
         game.run();
     }
-    game.shutdown();
- 
     return 0;
 }

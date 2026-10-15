@@ -60,7 +60,8 @@ void Renderer::drawBoardContents(const Board& board)
         return;
     }
     const auto& boardBlocks = board.getBoardContent();
-    for (uint64_t i = 0; i < boardBlocks.size(); ++i)
+    const uint64_t firstVisibleBlock = BoardConsts::s_hiddenRows * BoardConsts::s_columns;
+    for (uint64_t i = firstVisibleBlock; i < boardBlocks.size(); ++i)
     {
         if (!boardBlocks[i]) {
             continue; // Skip empty blocks

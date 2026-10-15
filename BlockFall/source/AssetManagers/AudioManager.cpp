@@ -34,6 +34,9 @@ AudioManager::AudioManager(): _mixer(nullptr, MIX_DestroyMixer),
 
 AudioManager::~AudioManager()
 {
+    _track.reset();
+    _bgm.reset();
+    _mixer.reset();
 	MIX_Quit();
 }
 

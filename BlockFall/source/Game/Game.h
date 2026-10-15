@@ -26,4 +26,5 @@ private:
 	float _deltaTime = 0.0f;
     Uint32 _delayTimer = 0;
 	std::unique_ptr<GameScene> _scene;
+	bool _initialized = false;
 };
