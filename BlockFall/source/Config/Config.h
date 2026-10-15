@@ -2,6 +2,8 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <stdexcept>
+#include <unordered_map>
 #include <SDL3/SDL_filesystem.h>
 
 #include "Ruleset.h"
@@ -78,46 +80,86 @@ public:
         return _data;
     }
 
-inline void loadConfig() {
-        std::string filePath = std::filesystem::current_path().generic_string();
-
-        std::ifstream file(std::format("{}/config.json",filePath));
+inline void loadConfig()
+{
+    try
+    {
+        const std::string filePath = std::filesystem::current_path().generic_string();
+        std::ifstream file(std::format("{}/config.json", filePath));
         if (!file)
         {
-            std::cerr << "Cannot load Config File.\n";
-            ConfigData errorConfig;
-            errorConfig.hasError = true;
-            _data = errorConfig;
-            return;
+            throw std::runtime_error(std::format("Cannot open {}/config.json", filePath));
         }
-        json data = json::parse(file);
+
+        const json data = json::parse(file);
         ConfigData cfg;
-        cfg.title = data["window"]["title"];
-        cfg.width = data["window"]["width"];
-        cfg.height = data["window"]["height"];
-        cfg.fullscreen = data["window"]["fullscreen"];
-        cfg.targetFPS = data["window"]["target_fps"];
-        cfg.bgmPath = data["sound"]["bgm"];
-        cfg.logoPath = data["images"]["logo"];
-        cfg.blocksFolder = data["images"]["blocks_folder"];
-        cfg.drawGrid = data["game"]["draw_grid"];
-        auto ruleSetsArray = data["game_rules"]["ruleset_list"];
-        for (size_t i = 0; i < ruleSetsArray.size(); ++i)
+
+        const json& window = data.at("window");
+        cfg.title = window.at("title").get<std::string>();
+        cfg.width = window.at("width").get<int>();
+        cfg.height = window.at("height").get<int>();
+        cfg.fullscreen = window.at("fullscreen").get<bool>();
+        cfg.targetFPS = window.value("target_fps", cfg.targetFPS);
+
+        const json& sound = data.at("sound");
+        cfg.bgmPath = sound.at("bgm").get<std::string>();
+
+        const json& images = data.at("images");
+        cfg.logoPath = images.at("logo").get<std::string>();
+        cfg.blocksFolder = images.at("blocks_folder").get<std::string>();
+
+        const json& game = data.at("game");
+        cfg.drawGrid = game.value("draw_grid", cfg.drawGrid);
+
+        const json& gameRules = data.at("game_rules");
+        const auto& ruleSetsArray = gameRules.at("ruleset_list");
+        if (!ruleSetsArray.is_array() || ruleSetsArray.empty())
         {
-            std::string ruleName = ruleSetsArray[i].get<std::string>();
-            nlohmann::basic_json<> rulesetJson = data["game_rules"][ruleName];
-            cfg.rulesetsMap[toGameRulesetEnum(ruleName)] = processRuleset(cfg, rulesetJson);
+            throw std::runtime_error("game_rules.ruleset_list must contain at least one ruleset");
         }
 
+        for (const auto& ruleNameValue : ruleSetsArray)
+        {
+            const std::string ruleName = ruleNameValue.get<std::string>();
+            const GameRulesetsEnum ruleset = toGameRulesetEnum(ruleName);
+            if (ruleset == GameRulesetsEnum::Total)
+            {
+                throw std::runtime_error(std::format("Unsupported ruleset '{}'", ruleName));
+            }
+            cfg.rulesetsMap[ruleset] = processRuleset(cfg, gameRules.at(ruleName));
+        }
 
+        const auto gameBoyRuleset = cfg.rulesetsMap.find(GameRulesetsEnum::GameBoy);
+        if (gameBoyRuleset == cfg.rulesetsMap.end())
+        {
+            throw std::runtime_error("game_rules.ruleset_list must include game_boy_ruleset");
+        }
+        if (gameBoyRuleset->second.speedLevels.empty() || gameBoyRuleset->second.linesToLevelUp.empty())
+        {
+            throw std::runtime_error("game_boy_ruleset must define speed and level thresholds");
+        }
+
+        const json& fonts = data.at("fonts");
         for (int i = 0; i < static_cast<int>(FontNames::Total); ++i)
         {
-            std::string fontName = FontUtils::to_string(static_cast<FontNames>(i));
-            cfg.fontsFileNameMap[fontName] = data["fonts"][fontName];
+            const std::string fontName = FontUtils::to_string(static_cast<FontNames>(i));
+            const auto font = fonts.find(fontName);
+            if (font == fonts.end())
+            {
+                throw std::runtime_error(std::format("Missing required font '{}'", fontName));
+            }
+            cfg.fontsFileNameMap[fontName] = font->get<std::string>();
         }
 
         _data = cfg;
     }
+    catch (const std::exception& error)
+    {
+        std::cerr << "Configuration load failed: " << error.what() << '\n';
+        _data = ConfigData{};
+        _data.hasError = true;
+    }
+}
 private:
     Config() = default;
 

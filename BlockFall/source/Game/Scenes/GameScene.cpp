@@ -43,7 +43,7 @@ void GameScene::init()
     _linesText = std::format("{}{}", FontText::LinesText, _gameField.totalClearedLines);
 
     _scoreFont = FontsManager::getInstance().getFont(ScoreFontInfo.fontName);
-    _gameOverFont = FontsManager::getInstance().getFont(GameOverFontInfo.fontName);
+    _gameOverFont = FontsManager::getInstance().getFont(getGameOverFontInfo().fontName);
     _pauseFont = FontsManager::getInstance().getFont(FontNames::DefaultFont);
     _helpFont = FontsManager::getInstance().getFont(FontNames::DefaultFont);
 }
@@ -54,55 +54,7 @@ void GameScene::handleInput()
     {
         _input->quit();
     }
-///////////////////////////////////
-/// Handle Debug Input
-///////////////////////////////////
-#if DEBUG_BUILD
-
-    if (_input->isKeyPressed(SDL_SCANCODE_1))
-    {
-        _previewNextPiece = std::make_shared<Piece>(PieceShapes::I_shape);
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_2))
-    {
-        _previewNextPiece = std::make_shared<Piece>(PieceShapes::J_shape);
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_3))
-    {
-        _previewNextPiece = std::make_shared<Piece>(PieceShapes::L_shape);
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_4))
-    {
-        _previewNextPiece = std::make_shared<Piece>(PieceShapes::S_shape);
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_5))
-    {
-        _previewNextPiece = std::make_shared<Piece>(PieceShapes::Z_shape);
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_6))
-    {
-        _previewNextPiece = std::make_shared<Piece>(PieceShapes::T_shape);
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_Q))
-    {
-        _freezeFall = !_freezeFall;
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_C))
-    {
-        _gameField.board->clearBoard();
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_KP_PLUS))
-    {
-        _gameField.levelUp();
-        _updateLevelText = true;
-    }
-    if (_input->isKeyPressed(SDL_SCANCODE_KP_MINUS))
-    {
-        _gameField.levelDown();
-        _updateLevelText = true;
-    }
-#endif // DEBUG_BUILD
-// Handle Debug Input
+    const bool wasPaused = _gameField.isPaused;
 
     const float das = _gameField.das;
     const float arr = _gameField.arr;
@@ -154,6 +106,62 @@ void GameScene::handleInput()
             }
         }
     }
+
+    /// Pause Guard
+    if (wasPaused || _gameField.isPaused)
+    {
+        return;
+    }
+
+///////////////////////////////////
+/// Handle Debug Input
+///////////////////////////////////
+#if DEBUG_BUILD
+
+    if (_input->isKeyPressed(SDL_SCANCODE_1))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::I_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_2))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::J_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_3))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::L_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_4))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::S_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_5))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::Z_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_6))
+    {
+        _previewNextPiece = std::make_shared<Piece>(PieceShapes::T_shape);
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_Q))
+    {
+        _freezeFall = !_freezeFall;
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_C))
+    {
+        _gameField.board->clearBoard();
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_KP_PLUS))
+    {
+        _gameField.levelUp();
+        _updateLevelText = true;
+    }
+    if (_input->isKeyPressed(SDL_SCANCODE_KP_MINUS))
+    {
+        _gameField.levelDown();
+        _updateLevelText = true;
+    }
+#endif // DEBUG_BUILD
+// Handle Debug Input
 
     if (_input->isKeyPressed(SDL_SCANCODE_SPACE))
     {
@@ -291,7 +299,8 @@ void GameScene::render()
     if (_gameState == GameState::GameOver)
     {
         Renderer::getInstance().drawTransparentOverlay();
-        Renderer::getInstance().drawText(_gameOverFont, GameOverFontInfo.baseText, GameOverFontInfo);
+        const auto& gameOverFontInfo = getGameOverFontInfo();
+        Renderer::getInstance().drawText(_gameOverFont, gameOverFontInfo.baseText, gameOverFontInfo);
     }
     Renderer::getInstance().present();
 }
@@ -299,8 +308,8 @@ void GameScene::render()
 void GameScene::renderTexts()
 {
     Renderer::getInstance().drawText(_scoreFont, _scoreText, ScoreFontInfo, _updateScoreText);
-    Renderer::getInstance().drawText(_scoreFont, _levelText, LevelFontInfo, _updateLevelText);
-    Renderer::getInstance().drawText(_scoreFont, _linesText, LinesFontInfo, _updateLinesText);
+    Renderer::getInstance().drawText(_scoreFont, _levelText, getLevelFontInfo(), _updateLevelText);
+    Renderer::getInstance().drawText(_scoreFont, _linesText, getLinesFontInfo(), _updateLinesText);
 
     _updateLevelText = _updateLinesText = _updateScoreText = false;
 }
@@ -308,7 +317,8 @@ void GameScene::renderTexts()
 void GameScene::renderPauseScreen() const
 {
     Renderer::getInstance().drawTransparentOverlay();
-    Renderer::getInstance().drawText(_pauseFont, PauseFontInfo.baseText, PauseFontInfo);
+    const auto& pauseFontInfo = getPauseFontInfo();
+    Renderer::getInstance().drawText(_pauseFont, pauseFontInfo.baseText, pauseFontInfo);
     Renderer::getInstance().drawText(_helpFont, HelpFontInfo.baseText, HelpFontInfo);
 }
 
@@ -383,7 +393,8 @@ bool GameScene::isValidRotation() const
 
 bool GameScene::canSoftDrop() const
 {
-    return !_movingHorizontally && !_lockedSoftDrop && _gameState != GameState::SoftDrop && _gameState != GameState::Starting && _gameState != GameState::PieceHitting;
+    const bool movementAllowsSoftDrop = !_movingHorizontally || _gameField.getGameRulesetData().softDropWhileMovingHorizontal;
+    return movementAllowsSoftDrop && !_lockedSoftDrop && _gameState != GameState::SoftDrop && _gameState != GameState::Starting && _gameState != GameState::PieceHitting;
 }
 
 bool GameScene::canSelectNewPiece() const

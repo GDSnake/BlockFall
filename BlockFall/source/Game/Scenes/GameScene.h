@@ -64,8 +64,8 @@ private:
     bool _lockedSoftDrop = false;
     bool _movingHorizontally = false;
     std::mt19937 _gen;
-    uint64_t _oldLevel, _oldClearedLines, _oldScore = 0;
-    bool _updateLevelText, _updateLinesText, _updateScoreText = true;
+    uint64_t _oldLevel{}, _oldClearedLines{}, _oldScore{};
+    bool _updateLevelText{true}, _updateLinesText{true}, _updateScoreText{true};
 
     // Text
     TTF_Font* _scoreFont = nullptr;

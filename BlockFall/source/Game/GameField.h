@@ -74,6 +74,7 @@ struct GameField
     inline void restartGame()
     {
         currentLevel = currentClearedLines = totalClearedLines = score = 0u;
+        currentSpeed = Config::getInstance().getConfigData().rulesetsMap.at(ruleset).speedLevels[0];
         board->clearBoard();
     }
 

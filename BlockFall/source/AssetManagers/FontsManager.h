@@ -55,22 +55,11 @@ struct FontData
 
 static const FontData ScoreFontInfo = {.baseText = FontText::ScoreText, .origin = {20.0f, 10.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score};
 
-static const FontData LevelFontInfo = { .baseText = FontText::LevelText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) - 100.0f, 10.0f },
-                                                                                         .color = FontColor::Black,
-                                                                                         .fontName = FontNames::GameBoyFont,
-                                                                                         .fontSize = FontSize::Score };
-static const FontData LinesFontInfo = { .baseText = FontText::LinesText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) - 100.0f, 50.0f }, .color = FontColor::Black, .fontName = FontNames::GameBoyFont, .fontSize = FontSize::Score };
+const FontData& getLevelFontInfo();
+const FontData& getLinesFontInfo();
+const FontData& getGameOverFontInfo();
+const FontData& getPauseFontInfo();
 
-static const FontData GameOverFontInfo = { .baseText = FontText::GameOverText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) * 0.5f,
-                                                                                               static_cast<float>(Config::getInstance().getConfigData().height) * 0.5f },
-                                                                                                .color = FontColor::Red,
-                                                                                                .fontName = FontNames::GameBoyFont,
-                                                                                                .fontSize = FontSize::GameOver };
-static const FontData PauseFontInfo = { .baseText = FontText::PauseText, .origin = {static_cast<float>(Config::getInstance().getConfigData().width) * 0.5f,
-                                                                                               static_cast<float>(Config::getInstance().getConfigData().height) * 0.6f },
-                                                                                                .color = FontColor::Orange,
-                                                                                                .fontName = FontNames::GameBoyFont,
-                                                                                                .fontSize = FontSize::GameOver };
 static const FontData HelpFontInfo = { .baseText = FontText::HelptText, .origin = {20.0f, 10.0f }, .color = FontColor::Black, .fontName = FontNames::DefaultFont, .fontSize = FontSize::Help };
 
 class FontsManager {

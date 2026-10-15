@@ -76,13 +76,17 @@ endif()
 # Create a default config.json if missing
 # ---------------------------------------------------------
 set(CONFIG_FILE "${CMAKE_SOURCE_DIR}/config.json")
-if (NOT EXISTS ${CONFIG_FILE})
-    file(WRITE ${CONFIG_FILE} "{\n")
-    file(APPEND ${CONFIG_FILE} "    \"title\": \"Default Game Name\",\n")
-    file(APPEND ${CONFIG_FILE} "    \"window_width\": 1280,\n")
-    file(APPEND ${CONFIG_FILE} "    \"window_height\": 720,\n")
-    file(APPEND ${CONFIG_FILE} "    \"fullscreen\": false\n")
-    file(APPEND ${CONFIG_FILE} "}\n")
+if (NOT EXISTS "${CONFIG_FILE}")
+        file(WRITE "${CONFIG_FILE}" [=[
+{
+    "window": {
+        "title": "Default Game Name",
+        "width": 1280,
+        "height": 720,
+        "fullscreen": false
+    }
+}
+]=])
     message(STATUS "Created default config.json")
 endif()
 

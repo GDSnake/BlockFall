@@ -26,7 +26,7 @@ struct GameRuleset
 
     uint64_t softDropPointsPerLine = 1; // Points per line when soft dropping
 
-    std::vector<float> speedLevels; // Falling speed levels
-    std::vector<uint8_t> linesToLevelUp;
-    std::array<uint64_t, 4> basePointsForClearedLines;
+    std::vector<float> speedLevels = {1.0f}; // Falling speed levels
+    std::vector<uint8_t> linesToLevelUp = {10};
+    std::array<uint64_t, 4> basePointsForClearedLines{};
 };
