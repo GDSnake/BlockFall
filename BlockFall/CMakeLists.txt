@@ -2,18 +2,26 @@ cmake_minimum_required(VERSION 3.15)
 if(POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif()
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
-project(BlockFall)
+project(BlockFall LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(MSVC OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+    set(SDL_PACKAGE_FLAVOR "VC")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang)$")
+    set(SDL_PACKAGE_FLAVOR "mingw")
+else()
+    message(FATAL_ERROR "Unsupported Windows compiler: ${CMAKE_CXX_COMPILER_ID}")
+endif()
 
 # Force CMake to build DLLs (shared libs)
 #set(BUILD_SHARED_LIBS ON)
 
 # Enable parallel compilation with MSVC
-if (MSVC)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     add_compile_options(/MP)
 endif()
 
@@ -28,15 +36,24 @@ add_compile_definitions(
 )
 # --- Windows specific subsystem settings ---
 if (WIN32)
-    # Console for Debug
-    set_target_properties(BlockFall PROPERTIES
-        LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE"
-    )
-
-    # Windowed app for Release
-    set_target_properties(BlockFall PROPERTIES
-        LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
-    )
+    if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+        target_link_options(${PROJECT_NAME} PRIVATE
+            "$<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>"
+            "$<$<CONFIG:Release>:/ENTRY:mainCRTStartup>"
+        )
+    elseif(CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+        target_link_options(${PROJECT_NAME} PRIVATE
+            "$<$<CONFIG:Release>:-Xlinker>"
+            "$<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>"
+            "$<$<CONFIG:Release>:-Xlinker>"
+            "$<$<CONFIG:Release>:/ENTRY:mainCRTStartup>"
+        )
+    else()
+        target_link_options(${PROJECT_NAME} PRIVATE
+            "$<$<CONFIG:Release>:-mwindows>"
+            "$<$<CONFIG:Release>:-Wl,-e,mainCRTStartup>"
+        )
+    endif()
 endif()
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
@@ -44,8 +61,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/source
 )
 
-if (WIN32)
-	target_compile_options("${CMAKE_PROJECT_NAME}" PRIVATE /UUNICODE /U_UNICODE)
+if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    target_compile_options(${PROJECT_NAME} PRIVATE /UUNICODE /U_UNICODE)
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE -UUNICODE -U_UNICODE)
 endif()
 
 if(WIN32)
@@ -92,7 +111,7 @@ else()
 endif()
 
 # ---------------------------------------------------------
-# SDL3 stack (prebuilt packages)
+# SDL3 stack (prebuilt packages for the active compiler ABI)
 # ---------------------------------------------------------
 if(NOT WIN32)
     message(FATAL_ERROR "Automatic SDL package downloads currently support Windows only")
@@ -104,8 +123,9 @@ function(download_sdl_package package version archive_prefix root config_file)
         return()
     endif()
 
-    set(archive "${CMAKE_BINARY_DIR}/${archive_prefix}-${version}-VC.zip")
-    set(url "https://github.com/libsdl-org/${package}/releases/download/release-${version}/${archive_prefix}-devel-${version}-VC.zip")
+    set(archive_name "${archive_prefix}-devel-${version}-${SDL_PACKAGE_FLAVOR}.zip")
+    set(archive "${CMAKE_BINARY_DIR}/${archive_name}")
+    set(url "https://github.com/libsdl-org/${package}/releases/download/release-${version}/${archive_name}")
     set(extract_dir "${CMAKE_BINARY_DIR}/${package}-${version}-extract")
 
     message(STATUS "Downloading prebuilt ${package} ${version} ...")
@@ -132,10 +152,10 @@ function(download_sdl_package package version archive_prefix root config_file)
     endif()
 endfunction()
 
-set(SDL3_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3" CACHE PATH "SDL3 package root")
-set(SDL3_image_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3_image" CACHE PATH "SDL3_image package root")
-set(SDL3_mixer_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3_mixer" CACHE PATH "SDL3_mixer package root")
-set(SDL3_ttf_ROOT "${CMAKE_SOURCE_DIR}/libs/SDL3_ttf" CACHE PATH "SDL3_ttf package root")
+set(SDL3_ROOT "${CMAKE_SOURCE_DIR}/libs/${SDL_PACKAGE_FLAVOR}/SDL3" CACHE PATH "SDL3 package root for ${SDL_PACKAGE_FLAVOR}")
+set(SDL3_image_ROOT "${CMAKE_SOURCE_DIR}/libs/${SDL_PACKAGE_FLAVOR}/SDL3_image" CACHE PATH "SDL3_image package root for ${SDL_PACKAGE_FLAVOR}")
+set(SDL3_mixer_ROOT "${CMAKE_SOURCE_DIR}/libs/${SDL_PACKAGE_FLAVOR}/SDL3_mixer" CACHE PATH "SDL3_mixer package root for ${SDL_PACKAGE_FLAVOR}")
+set(SDL3_ttf_ROOT "${CMAKE_SOURCE_DIR}/libs/${SDL_PACKAGE_FLAVOR}/SDL3_ttf" CACHE PATH "SDL3_ttf package root for ${SDL_PACKAGE_FLAVOR}")
 
 download_sdl_package(SDL 3.4.14 SDL3 "${SDL3_ROOT}" SDL3Config.cmake)
 download_sdl_package(SDL_image 3.4.4 SDL3_image "${SDL3_image_ROOT}" SDL3_imageConfig.cmake)

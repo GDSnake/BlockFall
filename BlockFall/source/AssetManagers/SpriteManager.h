@@ -1,5 +1,7 @@
 #pragma once
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -11,7 +13,7 @@ namespace SpriteManagerHelpers
     SDL_Surface* loadImage(const std::string& filePath);
 }
 
-enum class BlockTypes : uint8_t
+enum class BlockTypes : std::uint8_t
 {
     Purple = 0,
     Cyan,
@@ -61,5 +63,5 @@ private:
 
     void loadSprites();
 
-    std::array<std::shared_ptr<Block>, static_cast<size_t>(BlockTypes::Total)> _spritePtrArray;
+    std::array<std::shared_ptr<Block>, static_cast<std::size_t>(BlockTypes::Total)> _spritePtrArray;
 };
